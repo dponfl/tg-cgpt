@@ -2,8 +2,6 @@
   "name": "tg_chatgpt",
   "version": "1.0.0",
   "description": "ChatGPT TG Bot",
-  "type": "module",
-  "main": "index.js",
   "scripts": {
     "build": "rm -rf ./dist && tsc",
     "start": "node ./dist/main.js",
