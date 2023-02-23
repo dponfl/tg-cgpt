@@ -1,58 +1,58 @@
-// import fetch from 'node-fetch';
+import fetch from 'node-fetch';
 
-// const test = async () => {
-// 	console.log('Run test func');
+const test = async () => {
+	console.log('Run test func');
 
-// 	const body = { a: 1 };
+	const body = { a: 1 };
 
-// 	const response = await fetch('https://httpbin.org/post', {
-// 		method: 'post',
-// 		body: JSON.stringify(body),
-// 		headers: { 'Content-Type': 'application/json' }
-// 	});
-// 	const data = await response.json();
+	const response = await fetch('https://httpbin.org/post', {
+		method: 'post',
+		body: JSON.stringify(body),
+		headers: { 'Content-Type': 'application/json' }
+	});
+	const data = await response.json();
 
-// 	console.log(data);
+	console.log(data);
 
-// };
+};
 
-// test();
+test();
 
-import express, { Request, Response } from 'express';
+// import express, { Request, Response } from 'express';
 
-const app = express();
+// const app = express();
 
-const port = process.env.PORT || 3000;
+// const port = process.env.PORT || 3000;
 
-const html = `
-<div>
-	<ul>
-		<li>
-			<a href='/'>Home</a>
-		</li>
-		<li>
-			<a href='/about'>About</a>
-		</li>
-	</ul>
-</div>
-`;
+// const html = `
+// <div>
+// 	<ul>
+// 		<li>
+// 			<a href='/'>Home</a>
+// 		</li>
+// 		<li>
+// 			<a href='/about'>About</a>
+// 		</li>
+// 	</ul>
+// </div>
+// `;
 
-app.get('/', (req: Request, res: Response) => {
-	res.end(`
-${html}
+// app.get('/', (req: Request, res: Response) => {
+// 	res.end(`
+// ${html}
 
-<h1>Home page</h1>
-	`);
-});
+// <h1>Home page</h1>
+// 	`);
+// });
 
-app.get('/about', (req: Request, res: Response) => {
-	res.end(`
-${html}
+// app.get('/about', (req: Request, res: Response) => {
+// 	res.end(`
+// ${html}
 
-<h1>About page</h1>
-	`);
-});
+// <h1>About page</h1>
+// 	`);
+// });
 
-app.listen(port, () => {
-	console.log('App started');
-});
+// app.listen(port, () => {
+// 	console.log('App started');
+// });
