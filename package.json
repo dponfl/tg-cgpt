@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "build": "rm -rf ./dist && tsc",
-    "start": "node ./dist/main2.js",
+    "start": "node ./dist/main.js",
     "lint": "tslint --fix --project .",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
