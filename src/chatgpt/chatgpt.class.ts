@@ -89,8 +89,8 @@ export class ChatGptCommunication implements IChatGpt {
 					const parsed: CreateCompletionResponse = JSON.parse(message);
 
 					if (typeof parsed.choices[0].text === 'string') {
-						this.textResponse.push(`${parsed.choices[0].text} `);
-						this.logger.info(`data: ${parsed.choices[0].text}`);
+						this.textResponse.push(parsed.choices[0].text);
+						this.logger.info(`data: [${parsed.choices[0].text}]`);
 					} else {
 						this.logger.error('Received text is not string');
 					}
