@@ -6,9 +6,11 @@ const hostname: string = process.env.PAPERTRAIL_HOSTNAME as string;
 const program: string = process.env.PAPERTRAIL_PROGRAM as string;
 const prompt: string = process.env.PROMPT as string;
 
+const logger = new UseLogger();
+
 const app = new App(
-	new UseLogger(),
-	new ChatGptCommunication()
+	logger,
+	new ChatGptCommunication(logger)
 );
 
 app.init();

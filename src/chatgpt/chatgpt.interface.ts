@@ -1,3 +1,4 @@
 export interface IChatGpt {
-	sendTextRequest(prompt: string): string;
+	checkCredentials(): void;
+	sendTextRequest(prompt: string): Promise<string | void>;
 }

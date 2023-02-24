@@ -10,13 +10,13 @@ export class App {
 		private readonly chatGpt: IChatGpt
 	) { }
 
-	init(): void {
+	public async init(): Promise<void> {
 
 		this.prompt = process.env.PROMPT as string;
 
 		this.logger.info('App.init() started');
 		this.logger.warn(`The prompt is "${this.prompt}"`);
 
-		// const res = this.chatGpt.sendTextRequest(this.prompt);
+		const res = await this.chatGpt.sendTextRequest(this.prompt);
 	}
 }
