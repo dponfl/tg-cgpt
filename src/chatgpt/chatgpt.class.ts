@@ -76,7 +76,7 @@ export class ChatGptCommunication implements IChatGpt {
 				const lines: string[] = data.toString().split('\n').filter((line: string) => line.trim() !== '');
 
 				for (const line of lines) {
-					const message: string = line.replace(/^data: /, '').replace('\n', ' ');
+					const message: string = line.replace(/^data: /, '').replace('\n', '');
 					if (message === '[DONE]') {
 
 						this.textResponseStr = this.textResponse.join('');

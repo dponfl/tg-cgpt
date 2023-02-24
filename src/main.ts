@@ -1,3 +1,4 @@
+import { exit } from 'process';
 import { App } from './app.class.js';
 import { ChatGptCommunication } from './chatgpt/chatgpt.class.js';
 import { UseLogger } from './logger/logger.class.js';
@@ -14,3 +15,4 @@ const app = new App(
 );
 
 app.init();
+exit(0);
