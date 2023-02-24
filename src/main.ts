@@ -110,45 +110,53 @@ app.get('/', (req: Request, res: Response) => {
 
 app.get('/completion', async (req: Request, res: Response) => {
 
-	console.log('app.get(completion)');
+	try {
 
-	res.setHeader('Cache-Control', 'no-cache');
-	res.setHeader('Content-Type', 'text/event-stream');
-	res.setHeader('Access-Control-Allow-Origin', '*');
-	res.setHeader('Connection', 'keep-alive');
-	res.flushHeaders(); // flush the headers to establish SSE with client
+		console.log('app.get(completion)');
 
-	const prompt: string = process.env.PROMPT || 'Capital of France';
+		res.setHeader('Cache-Control', 'no-cache');
+		res.setHeader('Content-Type', 'text/event-stream');
+		res.setHeader('Access-Control-Allow-Origin', '*');
+		res.setHeader('Connection', 'keep-alive');
+		res.flushHeaders(); // flush the headers to establish SSE with client
 
-	const createCompletionRequest: CreateCompletionRequest = {
-		model: 'text-davinci-003',
-		prompt,
-		max_tokens: 4000 - prompt.length,
-		stream: true
-	};
+		const prompt: string = process.env.PROMPT || 'Capital of France';
 
-	const options: AxiosRequestConfig = {
-		responseType: 'stream'
-	};
+		const createCompletionRequest: CreateCompletionRequest = {
+			model: 'text-davinci-003',
+			prompt,
+			max_tokens: 4000 - prompt.length,
+			stream: true
+		};
 
-	const response: AxiosResponse = await openai.createCompletion(createCompletionRequest, options);
+		const options: AxiosRequestConfig = {
+			responseType: 'stream'
+		};
 
-	response.data.on('data', (data: string): void => {
+		const response: AxiosResponse = await openai.createCompletion(createCompletionRequest, options);
 
-		console.log(`Data received: ${data}`);
+		response.data.on('data', (data: string): void => {
 
-		const lines: string[] = data.toString().split('\n').filter((line: string) => line.trim() !== '');
+			console.log(`Data received: ${data}`);
 
-		for (const line of lines) {
-			const message: string = line.replace(/^data: /, '');
-			if (message === '[DONE]') {
-				res.end();
+			const lines: string[] = data.toString().split('\n').filter((line: string) => line.trim() !== '');
+
+			for (const line of lines) {
+				const message: string = line.replace(/^data: /, '');
+				if (message === '[DONE]') {
+					res.end();
+				}
+
+				const parsed: CreateCompletionResponse = JSON.parse(message);
+				res.write(`data: ${parsed.choices[0].text}\n\n`);
 			}
+		});
 
-			const parsed: CreateCompletionResponse = JSON.parse(message);
-			res.write(`data: ${parsed.choices[0].text}\n\n`);
+	} catch (err) {
+		if (err instanceof Error) {
+			console.error(err.message);
 		}
-	});
+	}
 
 });
 
