@@ -104,10 +104,13 @@ const html: string = `
 `;
 
 app.get('/', (req: Request, res: Response) => {
+	console.log('app.get(/)');
 	res.send(html);
 });
 
 app.get('/completion', async (req: Request, res: Response) => {
+
+	console.log('app.get(completion)');
 
 	res.setHeader('Cache-Control', 'no-cache');
 	res.setHeader('Content-Type', 'text/event-stream');
@@ -131,6 +134,9 @@ app.get('/completion', async (req: Request, res: Response) => {
 	const response: AxiosResponse = await openai.createCompletion(createCompletionRequest, options);
 
 	response.data.on('data', (data: string): void => {
+
+		console.log(`Data received: ${data}`);
+
 		const lines: string[] = data.toString().split('\n').filter((line: string) => line.trim() !== '');
 
 		for (const line of lines) {
