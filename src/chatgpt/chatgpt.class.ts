@@ -71,7 +71,7 @@ export class ChatGptCommunication implements IChatGpt {
 
 			response.data.on('data', (data: string): void => {
 
-				this.logger.info(`Data received: ${data}`);
+				// this.logger.info(`Data received: ${data}`);
 
 				const lines: string[] = data.toString().split('\n').filter((line: string) => line.trim() !== '');
 
