@@ -102,7 +102,11 @@ const html: string = `
         <script>
         var source = new EventSource("/completion");
         source.onmessage = function(event) {
-            document.getElementById("result").innerHTML += event.data + "<br>";
+            if (event.data === '[DONE]') {
+				source.close()
+			} else {
+				document.getElementById("result").innerHTML += event.data + "<br>";
+			}
         };
         </script>
         </body>
@@ -151,10 +155,11 @@ app.get('/completion', async (req: Request, res: Response) => {
 				const message: string = line.replace(/^data: /, '');
 				if (message === '[DONE]') {
 					res.end();
+				} else {
+					const parsed: CreateCompletionResponse = JSON.parse(message);
+					res.write(`data: ${parsed.choices[0].text}\n\n`);
 				}
 
-				const parsed: CreateCompletionResponse = JSON.parse(message);
-				res.write(`data: ${parsed.choices[0].text}\n\n`);
 			}
 		});
 
