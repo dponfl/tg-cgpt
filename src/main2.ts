@@ -50,9 +50,9 @@ const callGhatGPT = async () => {
 			const lines: string[] = data.toString().split('\n').filter((line: string) => line.trim() !== '');
 
 			for (const line of lines) {
-				const message: string = line.replace(/^data: /, '');
+				const message: string = line.replace(/^data: /, '').replace('\n', ' ');
 				if (message === '[DONE]') {
-					console.log(`\n\nRequest completed: ${textResponse}`);
+					console.log(`\n\nRequest completed: ${textResponse.join(' ')}`);
 					return;
 				}
 
@@ -60,7 +60,7 @@ const callGhatGPT = async () => {
 
 				if (typeof parsed.choices[0].text === 'string') {
 					textResponse.push(`${parsed.choices[0].text} `);
-					console.log(`data: ${parsed.choices[0].text}\n\n`);
+					console.log(`data: ${parsed.choices[0].text}`);
 				} else {
 					console.log('Received text is not string');
 				}
