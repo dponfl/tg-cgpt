@@ -76,6 +76,12 @@
 import { AxiosRequestConfig, AxiosResponse } from 'axios';
 import express, { Request, Response } from 'express';
 import { Configuration, CreateCompletionRequest, CreateCompletionResponse, OpenAIApi } from 'openai';
+import { exit } from 'process';
+
+if (!process.env.OPENAI_API_KEY) {
+	console.error('No OPENAI_API_KEY');
+	exit(1);
+}
 
 const configuration: Configuration = new Configuration({
 	apiKey: process.env.OPENAI_API_KEY,
@@ -154,7 +160,7 @@ app.get('/completion', async (req: Request, res: Response) => {
 
 	} catch (err) {
 		if (err instanceof Error) {
-			console.error(err.message);
+			console.error(`Error: ${err.message}`);
 		}
 	}
 
