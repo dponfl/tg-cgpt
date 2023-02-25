@@ -1,10 +1,10 @@
 import { AxiosRequestConfig, AxiosResponse } from 'axios';
 import { CreateCompletionRequest, CreateCompletionResponse, OpenAIApi } from 'openai/dist/api.js';
 import { Configuration } from 'openai/dist/configuration.js';
-import { ILogger } from '../logger/logger.interface.js';
-import { IChatGpt } from './chatgpt.interface.js';
+import { ILogger } from '../../logger/logger.interface.js';
+import { IOpenAI } from './tc.interface.js';
 
-export class ChatGptCommunication implements IChatGpt {
+export class OpenAICommunication implements IOpenAI {
 
 	private configuration: Configuration;
 	private openai: OpenAIApi;

@@ -1,4 +1,4 @@
-import { IChatGpt } from './chatgpt/chatgpt.interface.js';
+import { IOpenAI } from './openai/text_completion/tc.interface.js';
 import { ILogger } from './logger/logger.interface.js';
 
 export class App {
@@ -7,7 +7,7 @@ export class App {
 
 	constructor(
 		private readonly logger: ILogger,
-		private readonly chatGpt: IChatGpt
+		private readonly openAi: IOpenAI
 	) { }
 
 	public async init(): Promise<void> {
@@ -17,6 +17,6 @@ export class App {
 		this.logger.info('App.init() started');
 		this.logger.warn(`The prompt is "${this.prompt}"`);
 
-		const res = await this.chatGpt.sendTextRequest(this.prompt);
+		const res = await this.openAi.sendTextRequest(this.prompt);
 	}
 }

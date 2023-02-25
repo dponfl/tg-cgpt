@@ -1,6 +1,6 @@
 import { exit } from 'process';
 import { App } from './app.class.js';
-import { ChatGptCommunication } from './chatgpt/chatgpt.class.js';
+import { OpenAICommunication } from './openai/text_completion/tc.class.js';
 import { UseLogger } from './logger/logger.class.js';
 
 const bootstap = async () => {
@@ -13,7 +13,7 @@ const bootstap = async () => {
 
 	const app = new App(
 		logger,
-		new ChatGptCommunication(logger)
+		new OpenAICommunication(logger)
 	);
 
 	await app.init();
