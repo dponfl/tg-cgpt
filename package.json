@@ -6,6 +6,9 @@
   "scripts": {
     "build": "rm -rf ./dist && tsc",
     "start": "node ./dist/main.js",
+    "h:start": "heroku ps:scale worker=1 && heroku logs -t",
+    "h:stop": "heroku ps:scale worker=0",
+    "h:restart": "heroku ps:restart",
     "lint": "tslint --fix --project .",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
