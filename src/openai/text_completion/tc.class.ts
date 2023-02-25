@@ -26,12 +26,7 @@ export class OpenAICommunication implements IOpenAI {
 
 		this.prompt = process.env.PROMPT as string;
 
-		this.createCompletionRequest = {
-			model: 'text-davinci-003',
-			prompt: this.prompt,
-			max_tokens: 4000 - this.prompt.length,
-			stream: true
-		};
+		this.createCompletionRequest = this.buildTextCompletionParams();
 
 		this.options = {
 			responseType: 'stream'
@@ -57,6 +52,38 @@ export class OpenAICommunication implements IOpenAI {
 			throw new Error('process.env.PROMPT must be a string');
 		}
 
+	}
+
+	buildTextCompletionParams(): CreateCompletionRequest {
+		const params: CreateCompletionRequest = {
+			model: process.env.TC_MODEL ? process.env.TC_MODEL : 'text-davinci-003',
+			prompt: this.prompt,
+			max_tokens: 4000 - this.prompt.length,
+			stream: true
+		};
+
+		if (process.env.TC_USE) {
+			switch (process.env.TC_USE) {
+				case 'TEMP':
+					params.temperature = parseInt(process.env.TC_TEMP as string);
+					break;
+				case 'TOPP':
+					params.top_p = parseFloat(process.env.TC_TOPP as string);
+					break;
+				default:
+					throw new Error(`process.env.TC_USE to be 'TEMP' or 'TOPP' but it is ${process.env.TC_USE}`);
+			}
+		}
+
+		if (process.env.TC_P_PNLT) {
+			params.presence_penalty = parseFloat(process.env.TC_P_PNLT as string);
+		}
+
+		if (process.env.TC_F_PNLT) {
+			params.frequency_penalty = parseFloat(process.env.TC_F_PNLT as string);
+		}
+
+		return params;
 	}
 
 	public async sendTextRequest(prompt: string): Promise<string | void> {
