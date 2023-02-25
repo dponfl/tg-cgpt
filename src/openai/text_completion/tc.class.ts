@@ -63,7 +63,7 @@ export class OpenAICommunication implements IOpenAI {
 
 		try {
 
-			this.logger.info('Sending request to ChatGPT');
+			this.logger.info('Sending request to OpenAI (ChatGPT)');
 
 			let requestCompleted: boolean = false;
 
