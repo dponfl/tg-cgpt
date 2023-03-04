@@ -23,7 +23,7 @@ export class ScenesGenerator implements ISceneGenerator {
 		const intro = new BaseScene('intro');
 
 		intro.enter(async (ctx: any) => {
-			await ctx.replyWithHTML(`Hi! You've entered 'into' scene`);
+			await ctx.replyWithHTML(`Hi, ${ctx.firstname}! You've entered 'into' scene`);
 			await ctx.scene.enter('introTwo');
 
 		});
@@ -36,7 +36,7 @@ export class ScenesGenerator implements ISceneGenerator {
 		const introTwo = new BaseScene('introTwo');
 
 		introTwo.enter(async (ctx: any) => {
-			await ctx.replyWithHTML(`Hi! You've entered 'introTwo' scene`);
+			await ctx.replyWithHTML(`Hi, ${ctx.firstname}! You've entered 'introTwo' scene`);
 			await ctx.scene.leave();
 
 		});

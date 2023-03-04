@@ -9,23 +9,21 @@ export class BotService implements IBotService {
 
 	public bot: Telegraf<IMyContext>;
 
-	private scenesList: unknown[] = [];
+	private scenesList: any[] = [];
 
 	constructor(
 		private readonly logger: ILogger,
 		configService: IConfigService,
 		private readonly scenesGenerator: ISceneGenerator
 	) {
-
 		this.bot = new Telegraf<IMyContext>(configService.get('TELEGRAM_TOKEN'));
-
 	}
 
 	public async launch(): Promise<void> {
 
-		const scenes = [... await this.scenesGenerator.getBaseScenes()];
+		this.scenesList = [... await this.scenesGenerator.getBaseScenes()];
 
-		const stage = new Stage(scenes);
+		const stage = new Stage(this.scenesList);
 
 		this.bot.use(session());
 		this.bot.use(stage.middleware());
@@ -33,6 +31,9 @@ export class BotService implements IBotService {
 		this.bot.start(async (ctx) => {
 
 			await ctx.reply(`Hello, ${ctx.from.first_name}!!!`);
+
+			ctx.firstname = ctx.from.first_name;
+
 			await ctx.scene.enter('intro');
 
 		});
