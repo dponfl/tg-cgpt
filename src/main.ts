@@ -1,19 +1,20 @@
-import { exit } from 'process';
 import { App } from './app.class.js';
 import { OpenAICommunication } from './openai/text_completion/tc.class.js';
 import { UseLogger } from './logger/logger.class.js';
+import { ConfigService } from './config/config.service.js';
+import { IConfigService } from './config/config.interface.js';
+import { ILogger } from './logger/logger.interface.js';
 
 const bootstap = async () => {
 
-	const hostname: string = process.env.PAPERTRAIL_HOSTNAME as string;
-	const program: string = process.env.PAPERTRAIL_PROGRAM as string;
-	const prompt: string = process.env.PROMPT as string;
 
-	const logger = new UseLogger();
+	const logger: ILogger = new UseLogger();
+	const configService: IConfigService = new ConfigService(logger);
 
 	const app = new App(
 		logger,
-		new OpenAICommunication(logger)
+		new OpenAICommunication(logger, configService),
+		configService
 	);
 
 	await app.init();

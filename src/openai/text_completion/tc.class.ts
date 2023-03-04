@@ -1,6 +1,7 @@
 import { AxiosRequestConfig, AxiosResponse } from 'axios';
 import { CreateCompletionRequest, CreateCompletionResponse, OpenAIApi } from 'openai/dist/api.js';
 import { Configuration } from 'openai/dist/configuration.js';
+import { IConfigService } from '../../config/config.interface.js';
 import { ILogger } from '../../logger/logger.interface.js';
 import { IOpenAI } from './tc.interface.js';
 
@@ -14,17 +15,18 @@ export class OpenAICommunication implements IOpenAI {
 	private textResponse: string[] = [];
 	private textResponseStr: string = '';
 
-	constructor(private readonly logger: ILogger) {
-
-		this.checkCredentials();
+	constructor(
+		private readonly logger: ILogger,
+		private readonly configService: IConfigService
+	) {
 
 		this.configuration = new Configuration({
-			apiKey: process.env.OPENAI_API_KEY,
+			apiKey: configService.get('OPENAI_API_KEY'),
 		});
 
 		this.openai = new OpenAIApi(this.configuration);
 
-		this.prompt = process.env.PROMPT as string;
+		this.prompt = configService.get('PROMPT');
 
 		this.createCompletionRequest = this.buildTextCompletionParams();
 
@@ -34,54 +36,20 @@ export class OpenAICommunication implements IOpenAI {
 
 	}
 
-	checkCredentials(): void {
-
-		if (!process.env.OPENAI_API_KEY) {
-			throw new Error('No process.env.OPENAI_API_KEY');
-		}
-
-		if (typeof process.env.OPENAI_API_KEY !== 'string') {
-			throw new Error('process.env.OPENAI_API_KEY must be a string');
-		}
-
-		if (!process.env.PROMPT) {
-			throw new Error('No process.env.PROMPT');
-		}
-
-		if (typeof process.env.PROMPT !== 'string') {
-			throw new Error('process.env.PROMPT must be a string');
-		}
-
-	}
-
 	buildTextCompletionParams(): CreateCompletionRequest {
+
 		const params: CreateCompletionRequest = {
-			model: process.env.TC_MODEL ? process.env.TC_MODEL : 'text-davinci-003',
+			model: this.configService.get('TC_MODEL')
+				? this.configService.get('TC_MODEL')
+				: 'text-davinci-003',
 			prompt: this.prompt,
 			max_tokens: 4000 - this.prompt.length,
+			temperature: parseInt(this.configService.get('TC_TEMP')),
+			top_p: parseFloat(this.configService.get('TC_TOPP')),
+			presence_penalty: parseFloat(this.configService.get('TC_P_PNLT')),
+			frequency_penalty: parseFloat(this.configService.get('TC_F_PNLT')),
 			stream: true
 		};
-
-		if (process.env.TC_USE) {
-			switch (process.env.TC_USE) {
-				case 'TEMP':
-					params.temperature = parseInt(process.env.TC_TEMP as string);
-					break;
-				case 'TOPP':
-					params.top_p = parseFloat(process.env.TC_TOPP as string);
-					break;
-				default:
-					throw new Error(`process.env.TC_USE to be 'TEMP' or 'TOPP' but it is ${process.env.TC_USE}`);
-			}
-		}
-
-		if (process.env.TC_P_PNLT) {
-			params.presence_penalty = parseFloat(process.env.TC_P_PNLT as string);
-		}
-
-		if (process.env.TC_F_PNLT) {
-			params.frequency_penalty = parseFloat(process.env.TC_F_PNLT as string);
-		}
 
 		return params;
 	}
