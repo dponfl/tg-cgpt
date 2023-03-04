@@ -7,6 +7,9 @@ export class ConfigService implements IConfigService {
 	private config: DotenvParseOutput;
 
 	constructor(private readonly logger: ILogger) {
+
+		logger.info(`PROCESS.ENV: ${process.env}`);
+
 		const { error, parsed } = config();
 
 		if (error) {
