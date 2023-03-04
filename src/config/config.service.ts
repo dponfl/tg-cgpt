@@ -8,7 +8,8 @@ export class ConfigService implements IConfigService {
 
 	constructor(private readonly logger: ILogger) {
 
-		logger.info(`PROCESS.ENV: ${process.env}`);
+		logger.info(`PROCESS.ENV:`);
+		logger.info(process.env);
 
 		const { error, parsed } = config();
 
