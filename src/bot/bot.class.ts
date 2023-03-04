@@ -30,7 +30,7 @@ export class BotService implements IBotService {
 
 		this.bot.start(async (ctx) => {
 
-			await ctx.reply(`Hello, ${ctx.from.first_name}!!!`);
+			// await ctx.reply(`Hello, ${ctx.from.first_name}!!!`);
 
 			ctx.firstname = ctx.from.first_name;
 
