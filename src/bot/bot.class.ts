@@ -1,22 +1,44 @@
-import { Telegraf } from 'telegraf';
+import { Telegraf, session } from 'telegraf';
+import { Stage } from 'telegraf/scenes';
 import { IConfigService } from '../config/config.interface.js';
 import { ILogger } from '../logger/logger.interface.js';
-import { IBotService } from './bot.interface.js';
+import { ISceneGenerator } from '../scenes/scenes.interface.js';
+import { IBotService, IMyContext } from './bot.interface.js';
 
 export class BotService implements IBotService {
 
-	public bot: Telegraf<any>;
+	public bot: Telegraf<IMyContext>;
+
+	private scenesList: unknown[] = [];
 
 	constructor(
 		private readonly logger: ILogger,
-		private readonly configService: IConfigService
+		configService: IConfigService,
+		private readonly scenesGenerator: ISceneGenerator
 	) {
-		this.bot = new Telegraf<any>(configService.get('TELEGRAM_TOKEN'));
 
-		this.bot.start(ctx => ctx.reply(`Hello, ${ctx.from.first_name}!!!`));
+		this.bot = new Telegraf<IMyContext>(configService.get('TELEGRAM_TOKEN'));
+
 	}
 
-	launch(): void {
+	public async launch(): Promise<void> {
+
+		const scenes = [... await this.scenesGenerator.getBaseScenes()];
+
+		const stage = new Stage(scenes);
+
+		this.bot.use(session());
+		this.bot.use(stage.middleware());
+
+		this.bot.start(async (ctx) => {
+
+			await ctx.reply(`Hello, ${ctx.from.first_name}!!!`);
+			await ctx.scene.enter('intro');
+
+		});
+
+
+
 		this.bot.launch();
 	}
 }
