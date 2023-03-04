@@ -1,3 +1,3 @@
-export interface IBot {
+export interface IBotService {
 	launch(): void;
 }

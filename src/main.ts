@@ -1,9 +1,11 @@
 import { App } from './app.class.js';
-import { OpenAICommunication } from './openai/text_completion/tc.class.js';
-import { UseLogger } from './logger/logger.class.js';
-import { ConfigService } from './config/config.service.js';
+import { BotService } from './bot/bot.class.js';
 import { IConfigService } from './config/config.interface.js';
+import { ConfigService } from './config/config.service.js';
+import { MainController } from './controller/controller.class.js';
+import { UseLogger } from './logger/logger.class.js';
 import { ILogger } from './logger/logger.interface.js';
+import { OpenAICommunication } from './openai/text_completion/tc.class.js';
 
 const bootstap = async () => {
 
@@ -13,8 +15,12 @@ const bootstap = async () => {
 
 	const app = new App(
 		logger,
-		new OpenAICommunication(logger, configService),
-		configService
+		new MainController(
+			logger,
+			configService,
+			new BotService(logger, configService),
+			new OpenAICommunication(logger, configService)
+		)
 	);
 
 	await app.init();

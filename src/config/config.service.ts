@@ -8,8 +8,6 @@ export class ConfigService implements IConfigService {
 
 	constructor(private readonly logger: ILogger) {
 
-		logger.info(`PROCESS.ENV: ${JSON.stringify(process.env, null, 2)}`);
-
 		if (process.env.NODE_ENV === 'production') {
 
 			this.config = { ...process.env } as DotenvParseOutput;
