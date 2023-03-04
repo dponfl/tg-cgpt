@@ -10,19 +10,26 @@ export class ConfigService implements IConfigService {
 
 		logger.info(`PROCESS.ENV: ${JSON.stringify(process.env, null, 2)}`);
 
-		const { error, parsed } = config();
+		if (process.env.NODE_ENV === 'production') {
 
-		if (error) {
-			logger.error('Cannot find or parse .env file');
-			throw new Error('Cannot find or parse .env file');
+			this.config = { ...process.env } as DotenvParseOutput;
+
+		} else {
+
+			const { error, parsed } = config();
+
+			if (error) {
+				logger.error('Cannot find or parse .env file');
+				throw new Error('Cannot find or parse .env file');
+			}
+
+			if (!parsed) {
+				logger.error('File .env is empty');
+				throw new Error('File .env is empty');
+			}
+
+			this.config = parsed;
 		}
-
-		if (!parsed) {
-			logger.error('File .env is empty');
-			throw new Error('File .env is empty');
-		}
-
-		this.config = parsed;
 	}
 
 	get(key: string): string {
