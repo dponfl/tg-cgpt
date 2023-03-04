@@ -1,7 +1,7 @@
-import { Context } from 'telegraf';
+import { Context, Telegraf } from 'telegraf';
 
 export interface IBotService {
-	launch(): void;
+	launch(): Promise<Telegraf<IMyContext>>;
 }
 
 export interface IMyContext extends Context {

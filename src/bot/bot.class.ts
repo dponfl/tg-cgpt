@@ -19,7 +19,7 @@ export class BotService implements IBotService {
 		this.bot = new Telegraf<IMyContext>(configService.get('TELEGRAM_TOKEN'));
 	}
 
-	public async launch(): Promise<void> {
+	public async launch(): Promise<Telegraf<IMyContext>> {
 
 		this.scenesList = [... await this.scenesGenerator.getBaseScenes()];
 
@@ -28,18 +28,20 @@ export class BotService implements IBotService {
 		this.bot.use(session());
 		this.bot.use(stage.middleware());
 
-		this.bot.start(async (ctx) => {
+		// this.bot.start(async (ctx) => {
 
-			// await ctx.reply(`Hello, ${ctx.from.first_name}!!!`);
+		// 	// await ctx.reply(`Hello, ${ctx.from.first_name}!!!`);
 
-			ctx.firstname = ctx.from.first_name;
+		// 	ctx.firstname = ctx.from.first_name;
 
-			await ctx.scene.enter('intro');
+		// 	await ctx.scene.enter('intro');
 
-		});
+		// });
 
 
 
-		this.bot.launch();
+		// this.bot.launch();
+
+		return this.bot;
 	}
 }
