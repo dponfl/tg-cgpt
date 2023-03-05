@@ -62,7 +62,7 @@ export class ScenesGenerator implements ISceneGenerator {
 `;
 
 			await ctx.replyWithHTML(text);
-			await ctx.scene.enter('introTwo');
+			await ctx.scene.enter('startNext');
 
 		});
 
