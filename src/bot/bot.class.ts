@@ -1,5 +1,6 @@
 import { Telegraf, session } from 'telegraf';
 import { Stage } from 'telegraf/scenes';
+import { BotCommand } from 'telegraf/types';
 import { IConfigService } from '../config/config.interface.js';
 import { ILogger } from '../logger/logger.interface.js';
 import { ISceneGenerator } from '../scenes/scenes.interface.js';
@@ -10,6 +11,21 @@ export class BotService implements IBotService {
 	public bot: Telegraf<IMyContext>;
 
 	private scenesList: any[] = [];
+
+	/**
+	 * list of commands the bot will handle 
+	 */
+
+	private readonly botCommands: readonly BotCommand[] = [
+		{
+			command: 'menu',
+			description: 'Главное меню',
+		},
+		{
+			command: 'img',
+			description: 'Запрос в Midjorney',
+		},
+	];
 
 	constructor(
 		private readonly logger: ILogger,
@@ -28,19 +44,11 @@ export class BotService implements IBotService {
 		this.bot.use(session());
 		this.bot.use(stage.middleware());
 
-		// this.bot.start(async (ctx) => {
+		/**
+		 * register available bot commands on telegram server
+		 */
 
-		// 	// await ctx.reply(`Hello, ${ctx.from.first_name}!!!`);
-
-		// 	ctx.firstname = ctx.from.first_name;
-
-		// 	await ctx.scene.enter('intro');
-
-		// });
-
-
-
-		// this.bot.launch();
+		this.bot.telegram.setMyCommands(this.botCommands);
 
 		return this.bot;
 	}
