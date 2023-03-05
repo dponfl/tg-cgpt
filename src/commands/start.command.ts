@@ -12,10 +12,7 @@ export class StartCommand extends MyBotCommand {
 	}
 	public async handle(): Promise<void> {
 		this.bot.start(async (ctx) => {
-
-			ctx.userSession.firstname = ctx.from.first_name;
-
-			await ctx.scene.enter('intro');
+			await ctx.scene.enter('startIntro');
 		});
 	}
 }

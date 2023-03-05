@@ -5,8 +5,8 @@ export interface IBotService {
 }
 
 export interface IBotSessionData {
-	firstname: string;
-	surname: string;
+	firstname?: string;
+	surname?: string;
 }
 
 export interface IBotContext extends Context {

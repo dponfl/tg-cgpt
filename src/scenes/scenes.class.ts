@@ -1,3 +1,4 @@
+import { Context, Markup } from 'telegraf';
 import { BaseScene } from 'telegraf/scenes';
 import { ISceneGenerator } from './scenes.interface.js';
 
@@ -6,8 +7,9 @@ export class ScenesGenerator implements ISceneGenerator {
 	public async getBaseScenes(): Promise<unknown[]> {
 
 		return Promise.all([
-			this.intro(),
-			this.introTwo()
+			this.startIntro(),
+			this.startNext(),
+			this.menu()
 		]);
 	}
 
@@ -19,10 +21,10 @@ export class ScenesGenerator implements ISceneGenerator {
 	 * Base scenes
 	 */
 
-	private async intro(): Promise<unknown> {
-		const intro = new BaseScene('intro');
+	private async startIntro(): Promise<unknown> {
+		const startIntro = new BaseScene('startIntro');
 
-		intro.enter(async (ctx: any) => {
+		startIntro.enter(async (ctx: any) => {
 
 			const text =
 				`
@@ -63,13 +65,13 @@ export class ScenesGenerator implements ISceneGenerator {
 
 		});
 
-		return intro;
+		return startIntro;
 	}
 
-	private async introTwo(): Promise<unknown> {
-		const introTwo = new BaseScene('introTwo');
+	private async startNext(): Promise<unknown> {
+		const startNext = new BaseScene('startNext');
 
-		introTwo.enter(async (ctx: any) => {
+		startNext.enter(async (ctx: any) => {
 
 			const text =
 				`
@@ -92,7 +94,83 @@ export class ScenesGenerator implements ISceneGenerator {
 
 		});
 
-		return introTwo;
+		return startNext;
+	}
+
+	private async menu(): Promise<unknown> {
+		const menuScene = new BaseScene('menuScene');
+
+		menuScene.enter(async (ctx: any) => {
+
+			const text =
+				`
+Добро пожаловать в главное меню, для коммуникации используй кнопки ниже 👇
+`;
+
+			await ctx.replyWithHTML(text, Markup.inlineKeyboard([
+				[
+					Markup.button.callback('Оплатить запросы ✅', 'make_payment')
+				],
+				[
+					Markup.button.callback('Информация ℹ️', 'info')
+				],
+				[
+					Markup.button.callback('Помощь 👨🏻🔧', 'help')
+				],
+				[
+					Markup.button.callback('Назад 🔙', 'back')
+				],
+			]));
+
+		});
+
+		menuScene.action('make_payment', async (ctx: any) => {
+			await ctx.answerCbQuery('Переход в "Оплатить запросы..."');
+			await ctx.scene.enter('paymentScene');
+		});
+
+		return menuScene;
+	}
+
+	private async paymentScene(): Promise<unknown> {
+		const paymentScene = new BaseScene('paymentScene');
+
+		paymentScene.enter(async (ctx) => {
+
+			const text =
+				`
+	Для того, чтобы пользоваться всем функционалом необходимо оплатить запросы 👇 
+	
+	1)10 запросов <b>для искусственного интеллекта (GPT)</b> — 150₽
+	
+	2)10 запросов для <b>Midjourney</b> — 150₽
+	
+	3)10 запросов для <b>искусственного интеллекта</b> + 10 запросов для <b>Midjourney</b> — 250₽
+	`;
+
+			await ctx.replyWithHTML(text, Markup.inlineKeyboard([
+				[
+					Markup.button.callback('1) 🤖 Gpt 150₽', 'pay_gpt')
+				],
+				[
+					Markup.button.callback('2) 🎑 Midjourney 150₽', 'pay_mj')
+				],
+				[
+					Markup.button.callback('3) 🔝 GPT + Midjourney 250₽', 'pay_gpt_mj')
+				],
+				[
+					Markup.button.callback('Вернуться в меню  🔙', 'menu')
+				],
+			]));
+
+		});
+
+		paymentScene.action('menu', async (ctx: any) => {
+			await ctx.answerCbQuery('Переход в "Меню"...');
+			await ctx.scene.enter('menuScene');
+		});
+
+		return paymentScene;
 	}
 
 	/**

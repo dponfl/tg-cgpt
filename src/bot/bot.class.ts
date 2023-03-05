@@ -29,6 +29,18 @@ export class BotService implements IBotService {
 			command: 'img',
 			description: 'Запрос в Midjorney',
 		},
+		{
+			command: 'pay',
+			description: 'Оплатить запросы',
+		},
+		{
+			command: 'info',
+			description: 'Информация по запросам',
+		},
+		{
+			command: 'help',
+			description: 'Помощь',
+		},
 	];
 
 	constructor(
