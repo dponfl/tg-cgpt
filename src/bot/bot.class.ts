@@ -2,12 +2,14 @@ import { Telegraf, session } from 'telegraf';
 import { Stage } from 'telegraf/scenes';
 import { BotCommand } from 'telegraf/types';
 import { MyBotCommand } from '../commands/command.class.js';
-import { StartCommand } from '../commands/start.command.js';
 import { IConfigService } from '../config/config.interface.js';
 import { ILogger } from '../logger/logger.interface.js';
 import { ISceneGenerator } from '../scenes/scenes.interface.js';
 import { IBotService, IBotContext } from './bot.interface.js';
 import createSession from '../middleware/user_session.js';
+import { StartCommand } from '../commands/start.command.js';
+import { MenuCommand } from '../commands/menu.command.js';
+import { PaymentCommand } from '../commands/payment.command.js';
 
 export class BotService implements IBotService {
 
@@ -68,21 +70,31 @@ export class BotService implements IBotService {
 		});
 
 		/**
-		 * Init bot commands
-		 */
-
-		this.commands = [new StartCommand(this.bot, this.logger)];
-
-		for (const command of this.commands) {
-			await command.handle();
-		}
-
-		/**
 		 * register available bot commands on telegram server
 		 */
 
 		this.bot.telegram.setMyCommands(this.botCommands);
 
+		await this.activateCommands();
+
 		return this.bot;
+	}
+
+	private async activateCommands(): Promise<void> {
+
+		/**
+		 * Init bot commands
+		 */
+
+		this.commands = [
+			new StartCommand(this.bot, this.logger),
+			new MenuCommand(this.bot, this.logger),
+			new PaymentCommand(this.bot, this.logger),
+		];
+
+		for (const command of this.commands) {
+			await command.handle();
+		}
+
 	}
 }
