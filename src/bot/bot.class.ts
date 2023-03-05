@@ -7,6 +7,7 @@ import { IConfigService } from '../config/config.interface.js';
 import { ILogger } from '../logger/logger.interface.js';
 import { ISceneGenerator } from '../scenes/scenes.interface.js';
 import { IBotService, IBotContext } from './bot.interface.js';
+import createSession from '../middleware/user_session.js';
 
 export class BotService implements IBotService {
 
@@ -44,8 +45,15 @@ export class BotService implements IBotService {
 
 		const stage = new Stage(this.scenesList);
 
+		/**
+		 * Init middlewares
+		 */
+
 		this.bot.use(session());
 		this.bot.use(stage.middleware());
+		this.bot.use(async (ctx, next) => {
+			await createSession(ctx, next);
+		});
 
 		/**
 		 * Init bot commands
