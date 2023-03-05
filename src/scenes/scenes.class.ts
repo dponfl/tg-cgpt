@@ -126,8 +126,15 @@ export class ScenesGenerator implements ISceneGenerator {
 		});
 
 		menuScene.action('make_payment', async (ctx: any) => {
-			await ctx.answerCbQuery('Переход в "Оплатить запросы..."');
+			await ctx.answerCbQuery('Переход в "Оплатить запросы"');
+			await ctx.deleteMessage();
 			await ctx.scene.enter('paymentScene');
+		});
+
+		menuScene.action('back', async (ctx: any) => {
+			await ctx.answerCbQuery('Выход из  "Меню"');
+			await ctx.deleteMessage();
+			await ctx.scene.enter('startNext');
 		});
 
 		return menuScene;
@@ -167,7 +174,8 @@ export class ScenesGenerator implements ISceneGenerator {
 		});
 
 		paymentScene.action('menu', async (ctx: any) => {
-			await ctx.answerCbQuery('Переход в "Меню"...');
+			await ctx.answerCbQuery('Переход в "Меню"');
+			await ctx.deleteMessage();
 			await ctx.scene.enter('menuScene');
 		});
 
