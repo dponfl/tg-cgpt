@@ -51,7 +51,7 @@ export class BotService implements IBotService {
 		 * Init bot commands
 		 */
 
-		this.commands = [new StartCommand(this.bot)];
+		this.commands = [new StartCommand(this.bot, this.logger)];
 
 		for (const command of this.commands) {
 			await command.handle();
