@@ -12,7 +12,7 @@ export class ScenesGenerator implements ISceneGenerator {
 	}
 
 	public async getWizardScenes(): Promise<unknown[]> {
-		return [];
+		return Promise.all([]);
 	}
 
 	/**

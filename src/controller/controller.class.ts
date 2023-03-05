@@ -1,5 +1,5 @@
 import { Telegraf } from 'telegraf';
-import { IBotService, IMyContext } from '../bot/bot.interface.js';
+import { IBotService, IBotContext } from '../bot/bot.interface.js';
 import { IConfigService } from '../config/config.interface.js';
 import { ILogger } from '../logger/logger.interface.js';
 import { IOpenAI } from '../openai/text_completion/tc.interface.js';
@@ -7,7 +7,7 @@ import { IMainController } from './controller.interface.js';
 
 export class MainController implements IMainController {
 
-	private bot: Telegraf<IMyContext> = <Telegraf<IMyContext>>{};
+	private bot: Telegraf<IBotContext> = <Telegraf<IBotContext>>{};
 
 	constructor(
 		private readonly logger: ILogger,
@@ -18,15 +18,15 @@ export class MainController implements IMainController {
 
 	public async run(): Promise<void> {
 
-		this.bot = await this.botService.launch();
+		this.bot = await this.botService.init();
 
-		this.bot.start(async (ctx) => {
+		// this.bot.start(async (ctx) => {
 
-			ctx.firstname = ctx.from.first_name;
+		// 	ctx.userSession.firstname = ctx.from.first_name;
 
-			await ctx.scene.enter('intro');
+		// 	await ctx.scene.enter('intro');
 
-		});
+		// });
 
 		/**
 		 * default error handler

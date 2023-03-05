@@ -1,11 +1,15 @@
 import { Context, Telegraf } from 'telegraf';
 
 export interface IBotService {
-	launch(): Promise<Telegraf<IMyContext>>;
+	init(): Promise<Telegraf<IBotContext>>;
 }
 
-export interface IMyContext extends Context {
-	scene: any;
+export interface IBotSessionData {
 	firstname: string;
 	surname: string;
+}
+
+export interface IBotContext extends Context {
+	userSession: IBotSessionData;
+	scene: any;
 }

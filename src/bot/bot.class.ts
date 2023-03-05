@@ -1,15 +1,18 @@
 import { Telegraf, session } from 'telegraf';
 import { Stage } from 'telegraf/scenes';
 import { BotCommand } from 'telegraf/types';
+import { MyBotCommand } from '../commands/command.class.js';
+import { StartCommand } from '../commands/start.command.js';
 import { IConfigService } from '../config/config.interface.js';
 import { ILogger } from '../logger/logger.interface.js';
 import { ISceneGenerator } from '../scenes/scenes.interface.js';
-import { IBotService, IMyContext } from './bot.interface.js';
+import { IBotService, IBotContext } from './bot.interface.js';
 
 export class BotService implements IBotService {
 
-	public bot: Telegraf<IMyContext>;
+	public bot: Telegraf<IBotContext>;
 
+	private commands: MyBotCommand[] = [];
 	private scenesList: any[] = [];
 
 	/**
@@ -32,10 +35,10 @@ export class BotService implements IBotService {
 		configService: IConfigService,
 		private readonly scenesGenerator: ISceneGenerator
 	) {
-		this.bot = new Telegraf<IMyContext>(configService.get('TELEGRAM_TOKEN'));
+		this.bot = new Telegraf<IBotContext>(configService.get('TELEGRAM_TOKEN'));
 	}
 
-	public async launch(): Promise<Telegraf<IMyContext>> {
+	public async init(): Promise<Telegraf<IBotContext>> {
 
 		this.scenesList = [... await this.scenesGenerator.getBaseScenes()];
 
@@ -43,6 +46,16 @@ export class BotService implements IBotService {
 
 		this.bot.use(session());
 		this.bot.use(stage.middleware());
+
+		/**
+		 * Init bot commands
+		 */
+
+		this.commands = [new StartCommand(this.bot)];
+
+		for (const command of this.commands) {
+			await command.handle();
+		}
 
 		/**
 		 * register available bot commands on telegram server
