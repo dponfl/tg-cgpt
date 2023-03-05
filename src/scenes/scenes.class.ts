@@ -9,7 +9,8 @@ export class ScenesGenerator implements ISceneGenerator {
 		return Promise.all([
 			this.startIntro(),
 			this.startNext(),
-			this.menu()
+			this.menu(),
+			this.paymentScene()
 		]);
 	}
 
