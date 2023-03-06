@@ -18,6 +18,7 @@ export class BotService implements IBotService {
 	public bot: Telegraf<IBotContext>;
 
 	private commands: MyBotCommand[] = [];
+	// tslint:disable-next-line: no-any
 	private scenesList: any[] = [];
 
 

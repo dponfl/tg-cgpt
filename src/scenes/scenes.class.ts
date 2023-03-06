@@ -93,6 +93,7 @@ export class ScenesGenerator implements ISceneGenerator {
 	private async startIntro(): Promise<BaseScene> {
 		const startIntro = new BaseScene('startIntro');
 
+		// tslint:disable-next-line: no-any
 		startIntro.enter(async (ctx: any) => {
 
 			const text =
@@ -140,6 +141,7 @@ export class ScenesGenerator implements ISceneGenerator {
 	private async startNext(): Promise<BaseScene> {
 		const startNext = new BaseScene('startNext');
 
+		// tslint:disable-next-line: no-any
 		startNext.enter(async (ctx: any) => {
 
 			const text =
@@ -171,7 +173,7 @@ export class ScenesGenerator implements ISceneGenerator {
 
 		await this.activateCommands(mainGptScene);
 
-		const text =
+		const textMain =
 			`
 <b>Сейчас вы находитесь в Чате Gpt</b> 🤖 
 
@@ -183,13 +185,43 @@ export class ScenesGenerator implements ISceneGenerator {
 
 `;
 
+		const textOnMessage01 =
+			`
+Работаю над вашим вопросом 🔄
+`;
+
+		const textOnMessage02 =
+			`
+Работаю над вашим вопросом 🔃
+`;
+
 		mainGptScene.enter(async (ctx) => {
-			await ctx.replyWithHTML(text);
+			await ctx.replyWithHTML(textMain);
 		});
 
 
 		mainGptScene.on('message', async (ctx) => {
-			await ctx.replyWithHTML('This is a reply to your request', { reply_to_message_id: ctx.update.message.message_id });
+
+			const { message_id } = await ctx.replyWithHTML(textOnMessage01);
+
+			const opt = Object(message_id);
+
+			const int01 = setInterval(async () => {
+				await ctx.editMessageText(textOnMessage02, opt);
+				setTimeout(async () => {
+					await ctx.editMessageText(textOnMessage01, opt);
+				}, 500);
+			}, 1000);
+
+			setTimeout(async () => {
+				clearInterval(int01);
+				await ctx.deleteMessage(message_id);
+				await ctx.replyWithHTML('This is a reply to your request',
+					{ reply_to_message_id: ctx.update.message.message_id });
+			}, 5000);
+
+			// await ctx.replyWithHTML('This is a reply to your request',
+			// 	{ reply_to_message_id: ctx.update.message.message_id });
 		});
 
 		this.mainGptSceneProp = mainGptScene;
@@ -202,7 +234,7 @@ export class ScenesGenerator implements ISceneGenerator {
 
 		await this.activateCommands(mainMJScene);
 
-		const text =
+		const textMain =
 			`
 <b>Сейчас вы находитесь в Midjourney</b> 🏞
 
@@ -215,7 +247,7 @@ export class ScenesGenerator implements ISceneGenerator {
 `;
 
 		mainMJScene.enter(async (ctx) => {
-			await ctx.replyWithHTML(text);
+			await ctx.replyWithHTML(textMain);
 		});
 
 
@@ -232,6 +264,7 @@ export class ScenesGenerator implements ISceneGenerator {
 	private async menuScene(): Promise<BaseScene> {
 		const menuScene = new BaseScene('menuScene');
 
+		// tslint:disable-next-line: no-any
 		menuScene.enter(async (ctx: any) => {
 
 			const text =
@@ -250,18 +283,21 @@ export class ScenesGenerator implements ISceneGenerator {
 					Markup.button.callback('Помощь 👨🏻🔧', 'help')
 				],
 				[
-					Markup.button.callback('Назад 🔙', 'back')
+					Markup.button.callback('Назад в GPT 🔙', 'back')
 				],
 			]));
 
 		});
 
+		// tslint:disable-next-line: no-any
+		// tslint:disable-next-line: no-any
 		menuScene.action('make_payment', async (ctx: any) => {
 			await ctx.answerCbQuery('Переход в "Оплатить запросы"');
 			await ctx.deleteMessage();
 			await ctx.scene.enter('paymentScene');
 		});
 
+		// tslint:disable-next-line: no-any
 		menuScene.action('back', async (ctx: any) => {
 			await ctx.answerCbQuery('Выход из  "Меню"');
 			await ctx.deleteMessage();
@@ -306,6 +342,7 @@ export class ScenesGenerator implements ISceneGenerator {
 
 		});
 
+		// tslint:disable-next-line: no-any
 		paymentScene.action('menu', async (ctx: any) => {
 			await ctx.answerCbQuery('Переход в "Меню"');
 			await ctx.deleteMessage();
