@@ -10,6 +10,8 @@ import createSession from '../middleware/user_session.js';
 import { StartCommand } from '../commands/start.command.js';
 import { MenuCommand } from '../commands/menu.command.js';
 import { PaymentCommand } from '../commands/payment.command.js';
+import { GptCommand } from '../commands/gpt.command.js';
+import { MjCommand } from '../commands/mj.command.js';
 
 export class BotService implements IBotService {
 
@@ -89,6 +91,8 @@ export class BotService implements IBotService {
 
 		this.commands = [
 			new StartCommand(this.bot, this.logger),
+			new GptCommand(this.bot, this.logger),
+			new MjCommand(this.bot, this.logger),
 			new MenuCommand(this.bot, this.logger),
 			new PaymentCommand(this.bot, this.logger),
 		];

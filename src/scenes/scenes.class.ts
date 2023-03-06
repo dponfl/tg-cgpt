@@ -2,6 +2,7 @@ import { Markup } from 'telegraf';
 import { BaseScene } from 'telegraf/scenes';
 import { BotCommand } from 'typegram';
 import { MySceneCommand } from '../commands/base_scenes/command.class.js';
+import { GptCommand } from '../commands/base_scenes/gpt.command.js';
 import { MenuCommand } from '../commands/base_scenes/menu.command.js';
 import { ILogger } from '../logger/logger.interface.js';
 import { ISceneGenerator } from './scenes.interface.js';
@@ -10,6 +11,7 @@ export class ScenesGenerator implements ISceneGenerator {
 
 	private menuSceneProp: BaseScene = Object(BaseScene);
 	private mainGptSceneProp: BaseScene = Object(BaseScene);
+	private mainMJSceneProp: BaseScene = Object(BaseScene);
 
 	private commands: MySceneCommand[] = [];
 
@@ -27,6 +29,7 @@ export class ScenesGenerator implements ISceneGenerator {
 			this.startIntro(),
 			this.startNext(),
 			this.mainGptScene(),
+			this.mainMJScene(),
 			this.menuScene(),
 			this.paymentScene()
 		]);
@@ -71,6 +74,7 @@ export class ScenesGenerator implements ISceneGenerator {
 
 		this.commands = [
 			new MenuCommand(scene),
+			new GptCommand(scene),
 		];
 
 		for (const command of this.commands) {
@@ -189,6 +193,38 @@ export class ScenesGenerator implements ISceneGenerator {
 		this.mainGptSceneProp = mainGptScene;
 
 		return mainGptScene;
+	}
+
+	private async mainMJScene(): Promise<BaseScene> {
+		const mainMJScene = new BaseScene('mainMJScene');
+
+		await this.activateCommands(mainMJScene);
+
+		const text =
+			`
+<b>Сейчас вы находитесь в Midjourney</b> 🏞
+
+Секреты Midjourney (гиперссылка)
+
+<i>Все ваши обращения которые вы напишете</i> — <b>будут отправлены мне</b>. 
+
+<i>Чтобы вернуться к чату GPT</i> — введите команду /gpt
+
+`;
+
+		mainMJScene.enter(async (ctx) => {
+			await ctx.replyWithHTML(text);
+		});
+
+
+		mainMJScene.on('message', async (ctx) => {
+			await ctx.replyWithHTML('This is a reply to your MJ request',
+				{ reply_to_message_id: ctx.update.message.message_id });
+		});
+
+		this.mainMJSceneProp = mainMJScene;
+
+		return mainMJScene;
 	}
 
 	private async menuScene(): Promise<BaseScene> {
