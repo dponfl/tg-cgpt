@@ -19,8 +19,6 @@ export class ScenesGenerator implements ISceneGenerator {
 		const baseScenes = await this.getBaseScenes();
 		const wizardScenes = await this.getWizardScenes();
 
-		this.activateCommands();
-
 		return [...baseScenes, ...wizardScenes];
 	}
 
@@ -65,14 +63,14 @@ export class ScenesGenerator implements ISceneGenerator {
 		},
 	];
 
-	private async activateCommands(): Promise<void> {
+	private async activateCommands(scene: BaseScene): Promise<void> {
 
 		/**
 		 * Init scene commands
 		 */
 
 		this.commands = [
-			new MenuCommand(this.mainGptSceneProp),
+			new MenuCommand(scene),
 		];
 
 		for (const command of this.commands) {
@@ -165,6 +163,8 @@ export class ScenesGenerator implements ISceneGenerator {
 	private async mainGptScene(): Promise<BaseScene> {
 		const mainGptScene = new BaseScene('mainGptScene');
 
+		await this.activateCommands(mainGptScene);
+
 		const text =
 			`
 <b>Сейчас вы находитесь в Чате Gpt</b> 🤖 
@@ -180,6 +180,7 @@ export class ScenesGenerator implements ISceneGenerator {
 		mainGptScene.enter(async (ctx) => {
 			await ctx.replyWithHTML(text);
 		});
+
 
 		mainGptScene.on('message', async (ctx) => {
 			await ctx.replyWithHTML('This is a reply to your request', { reply_to_message_id: ctx.update.message.message_id });
