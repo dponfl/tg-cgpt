@@ -12,6 +12,8 @@ import { MenuCommand } from '../commands/menu.command.js';
 import { PaymentCommand } from '../commands/payment.command.js';
 import { GptCommand } from '../commands/gpt.command.js';
 import { MjCommand } from '../commands/mj.command.js';
+import { StatsCommand } from '../commands/stats.command.js';
+import { HelpCommand } from '../commands/help.command.js';
 
 export class BotService implements IBotService {
 
@@ -48,8 +50,8 @@ export class BotService implements IBotService {
 			description: 'Оплатить запросы',
 		},
 		{
-			command: 'info',
-			description: 'Информация по запросам',
+			command: 'stats',
+			description: 'Статистика по запросам',
 		},
 		{
 			command: 'help',
@@ -96,6 +98,8 @@ export class BotService implements IBotService {
 			new MjCommand(this.bot, this.logger),
 			new MenuCommand(this.bot, this.logger),
 			new PaymentCommand(this.bot, this.logger),
+			new StatsCommand(this.bot, this.logger),
+			new HelpCommand(this.bot, this.logger),
 		];
 
 		for (const command of this.commands) {

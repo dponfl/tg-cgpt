@@ -3,17 +3,21 @@ import { BaseScene } from 'telegraf/scenes';
 import { BotCommand } from 'typegram';
 import { MySceneCommand } from '../commands/base_scenes/command.class.js';
 import { GptCommand } from '../commands/base_scenes/gpt.command.js';
+import { HelpCommand } from '../commands/base_scenes/help.command.js';
 import { MenuCommand } from '../commands/base_scenes/menu.command.js';
 import { MjCommand } from '../commands/base_scenes/mj.command.js';
+import { PaymentCommand } from '../commands/base_scenes/payment.command.js';
+import { StatsCommand } from '../commands/base_scenes/stats.command.js';
 import { ILogger } from '../logger/logger.interface.js';
 import { ISceneGenerator } from './scenes.interface.js';
 
 export class ScenesGenerator implements ISceneGenerator {
 
-	private menuSceneProp: BaseScene = Object(BaseScene);
-	private mainGptSceneProp: BaseScene = Object(BaseScene);
-	private mainMJSceneProp: BaseScene = Object(BaseScene);
-	private pushToPaymentSceneProp: BaseScene = Object(BaseScene);
+	// private menuSceneProp: BaseScene = Object(BaseScene);
+	// private mainGptSceneProp: BaseScene = Object(BaseScene);
+	// private mainMJSceneProp: BaseScene = Object(BaseScene);
+	// private pushToPaymentSceneProp: BaseScene = Object(BaseScene);
+	// private statsSceneProp: BaseScene = Object(BaseScene);
 
 	private commands: MySceneCommand[] = [];
 
@@ -34,7 +38,9 @@ export class ScenesGenerator implements ISceneGenerator {
 			this.mainMJScene(),
 			this.menuScene(),
 			this.paymentScene(),
-			this.pushToPaymentScene()
+			this.pushToPaymentScene(),
+			this.statsScene(),
+			this.helpScene()
 		]);
 	}
 
@@ -77,8 +83,11 @@ export class ScenesGenerator implements ISceneGenerator {
 
 		this.commands = [
 			new MenuCommand(scene),
+			new PaymentCommand(scene),
 			new GptCommand(scene),
 			new MjCommand(scene),
+			new StatsCommand(scene),
+			new HelpCommand(scene),
 		];
 
 		for (const command of this.commands) {
@@ -93,6 +102,7 @@ export class ScenesGenerator implements ISceneGenerator {
 	 */
 
 	private async startIntro(): Promise<BaseScene> {
+
 		const startIntro = new BaseScene('startIntro');
 
 		// tslint:disable-next-line: no-any
@@ -141,6 +151,7 @@ export class ScenesGenerator implements ISceneGenerator {
 	}
 
 	private async startNext(): Promise<BaseScene> {
+
 		const startNext = new BaseScene('startNext');
 
 		// tslint:disable-next-line: no-any
@@ -163,8 +174,7 @@ export class ScenesGenerator implements ISceneGenerator {
 `;
 
 			await ctx.replyWithHTML(text);
-			// await ctx.scene.enter('mainGptScene');
-			await ctx.scene.enter('pushToPaymentScene');
+			await ctx.scene.enter('mainGptScene');
 
 		});
 
@@ -172,6 +182,7 @@ export class ScenesGenerator implements ISceneGenerator {
 	}
 
 	private async mainGptScene(): Promise<BaseScene> {
+
 		const mainGptScene = new BaseScene('mainGptScene');
 
 		await this.activateCommands(mainGptScene);
@@ -244,12 +255,13 @@ export class ScenesGenerator implements ISceneGenerator {
 			// 	{ reply_to_message_id: ctx.update.message.message_id });
 		});
 
-		this.mainGptSceneProp = mainGptScene;
+		// this.mainGptSceneProp = mainGptScene;
 
 		return mainGptScene;
 	}
 
 	private async mainMJScene(): Promise<BaseScene> {
+
 		const mainMJScene = new BaseScene('mainMJScene');
 
 		await this.activateCommands(mainMJScene);
@@ -276,13 +288,16 @@ export class ScenesGenerator implements ISceneGenerator {
 				{ reply_to_message_id: ctx.update.message.message_id });
 		});
 
-		this.mainMJSceneProp = mainMJScene;
+		// this.mainMJSceneProp = mainMJScene;
 
 		return mainMJScene;
 	}
 
 	private async menuScene(): Promise<BaseScene> {
+
 		const menuScene = new BaseScene('menuScene');
+
+		await this.activateCommands(menuScene);
 
 		// tslint:disable-next-line: no-any
 		menuScene.enter(async (ctx: any) => {
@@ -297,7 +312,7 @@ export class ScenesGenerator implements ISceneGenerator {
 					Markup.button.callback('Оплатить запросы ✅', 'make_payment')
 				],
 				[
-					Markup.button.callback('Информация ℹ️', 'info')
+					Markup.button.callback('Информация ℹ️', 'stats')
 				],
 				[
 					Markup.button.callback('Помощь 👨🏻🔧', 'help')
@@ -317,19 +332,29 @@ export class ScenesGenerator implements ISceneGenerator {
 		});
 
 		// tslint:disable-next-line: no-any
+		menuScene.action('stats', async (ctx: any) => {
+			await ctx.answerCbQuery('Переход в "Статистику"');
+			await ctx.deleteMessage();
+			await ctx.scene.enter('statsScene');
+		});
+
+		// tslint:disable-next-line: no-any
 		menuScene.action('back', async (ctx: any) => {
 			await ctx.answerCbQuery('Выход из  "Меню"');
 			await ctx.deleteMessage();
 			await ctx.scene.enter('mainGptScene');
 		});
 
-		this.menuSceneProp = menuScene;
+		// this.menuSceneProp = menuScene;
 
 		return menuScene;
 	}
 
 	private async paymentScene(): Promise<BaseScene> {
+
 		const paymentScene = new BaseScene('paymentScene');
+
+		await this.activateCommands(paymentScene);
 
 		paymentScene.enter(async (ctx) => {
 
@@ -420,9 +445,83 @@ export class ScenesGenerator implements ISceneGenerator {
 
 		});
 
-		this.pushToPaymentSceneProp = pushToPaymentScene;
+		// this.pushToPaymentSceneProp = pushToPaymentScene;
 
 		return pushToPaymentScene;
+	}
+
+	private async statsScene(): Promise<BaseScene> {
+
+		const statsScene = new BaseScene('statsScene');
+
+		await this.activateCommands(statsScene);
+
+		const usedFree = Math.floor(Math.random() * 10);
+		const usedGpt = Math.floor(Math.random() * 10);
+		const usedMJ = Math.floor(Math.random() * 10);
+
+
+		statsScene.enter(async (ctx) => {
+
+			const text =
+				`
+<i>Бесплатных запросов:</i> <b>${usedFree}</b> из <b>5</b>
+
+<i>Платных</i> <b>запросов Gpt</b>: <b>${usedGpt}</b> из <b>10</b>
+
+<i>Платных</i> <b>запросов Midjourney</b>: <b>${usedMJ}</b> из <b>10</b>
+	
+	`;
+
+			await ctx.replyWithHTML(text, Markup.inlineKeyboard([
+				[
+					Markup.button.callback('Вернуться в меню  🔙', 'menu')
+				]
+			]));
+		});
+
+		// tslint:disable-next-line: no-any
+		statsScene.action('menu', async (ctx: any) => {
+			await ctx.answerCbQuery('Переход в "Меню"');
+			await ctx.deleteMessage();
+			await ctx.scene.enter('menuScene');
+		});
+
+
+		// const statsSceneProp = statsScene;
+
+		return statsScene;
+	}
+
+	private async helpScene(): Promise<BaseScene> {
+
+		const helpScene = new BaseScene('helpScene');
+
+		await this.activateCommands(helpScene);
+
+
+		helpScene.enter(async (ctx) => {
+
+			const text =
+				`
+<b>Если у вас возникли вопросы</b> <i>или сложности при коммуникации со мной, напишите нам в поддержку</i> @mindmatehelp
+`;
+			await ctx.replyWithHTML(text, Markup.inlineKeyboard([
+				[
+					Markup.button.callback('Вернуться в меню  🔙', 'menu')
+				]
+			]));
+
+		});
+
+		// tslint:disable-next-line: no-any
+		helpScene.action('menu', async (ctx: any) => {
+			await ctx.answerCbQuery('Переход в "Меню"');
+			await ctx.deleteMessage();
+			await ctx.scene.enter('menuScene');
+		});
+
+		return helpScene;
 	}
 
 	/**
