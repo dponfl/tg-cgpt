@@ -143,9 +143,10 @@ export class ScenesGenerator implements ISceneGenerator {
 `;
 
 			await ctx.replyWithHTML(text);
+
 			setTimeout(async () => {
 				await ctx.scene.enter('startNext');
-			}, 3000);
+			}, 5000);
 
 		});
 
@@ -176,7 +177,9 @@ export class ScenesGenerator implements ISceneGenerator {
 `;
 
 			await ctx.replyWithHTML(text);
-			await ctx.scene.enter('mainGptScene');
+			setTimeout(async () => {
+				await ctx.scene.enter('mainGptScene');
+			}, 3000);
 
 		});
 

@@ -1,20 +1,33 @@
 import { ILogger } from './logger/logger.interface.js';
-import { IMainController } from './controller/controller.interface.js';
+import { IBotContext, IBotService } from './bot/bot.interface.js';
+import { Telegraf } from 'telegraf';
 
 export class App {
 
-	private prompt: string = '';
+	private bot: Telegraf<IBotContext> = <Telegraf<IBotContext>>{};
 
 	constructor(
 		private readonly logger: ILogger,
-		private readonly mainController: IMainController
+		private readonly botService: IBotService,
 	) { }
 
 	public async init(): Promise<void> {
 
-		this.logger.info('App.init() started');
+		this.bot = await this.botService.init();
 
-		this.mainController.run();
+		/**
+		 * default error handler
+		 */
+
+		this.bot.catch(async (error: unknown, ctx) => {
+			this.logger.error('Bot error:', error);
+
+			await ctx.reply('При обработке вашего сообщения что-то пошло не так.');
+		});
+
+		this.bot.launch();
+
+		this.logger.info('App.init() started');
 
 	}
 }

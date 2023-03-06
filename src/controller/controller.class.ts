@@ -16,22 +16,5 @@ export class MainController implements IMainController {
 		private readonly openAi: IOpenAI,
 	) { }
 
-	public async run(): Promise<void> {
-
-		this.bot = await this.botService.init();
-
-		/**
-		 * default error handler
-		 */
-
-		this.bot.catch(async (error: unknown, ctx) => {
-			this.logger.error('Bot error:', error);
-
-			await ctx.reply('При обработке вашего сообщения что-то пошло не так.');
-		});
-
-		this.bot.launch();
-
-	}
 
 }
