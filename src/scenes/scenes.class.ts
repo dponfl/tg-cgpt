@@ -143,7 +143,9 @@ export class ScenesGenerator implements ISceneGenerator {
 `;
 
 			await ctx.replyWithHTML(text);
-			await ctx.scene.enter('startNext');
+			setTimeout(async () => {
+				await ctx.scene.enter('startNext');
+			}, 3000);
 
 		});
 
