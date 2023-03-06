@@ -456,12 +456,13 @@ export class ScenesGenerator implements ISceneGenerator {
 
 		await this.activateCommands(statsScene);
 
-		const usedFree = Math.floor(Math.random() * 10);
-		const usedGpt = Math.floor(Math.random() * 10);
-		const usedMJ = Math.floor(Math.random() * 10);
 
 
 		statsScene.enter(async (ctx) => {
+
+			const usedFree = Math.floor(Math.random() * 10);
+			const usedGpt = Math.floor(Math.random() * 10);
+			const usedMJ = Math.floor(Math.random() * 10);
 
 			const text =
 				`

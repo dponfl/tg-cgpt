@@ -42,6 +42,10 @@ export class BotService implements IBotService {
 			description: 'Главное меню',
 		},
 		{
+			command: 'gpt',
+			description: 'Запрос в ChatGPT',
+		},
+		{
 			command: 'img',
 			description: 'Запрос в Midjorney',
 		},
