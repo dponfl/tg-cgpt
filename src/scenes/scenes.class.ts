@@ -339,6 +339,13 @@ export class ScenesGenerator implements ISceneGenerator {
 		});
 
 		// tslint:disable-next-line: no-any
+		menuScene.action('help', async (ctx: any) => {
+			await ctx.answerCbQuery('Переход в "Помощь"');
+			await ctx.deleteMessage();
+			await ctx.scene.enter('helpScene');
+		});
+
+		// tslint:disable-next-line: no-any
 		menuScene.action('back', async (ctx: any) => {
 			await ctx.answerCbQuery('Выход из  "Меню"');
 			await ctx.deleteMessage();
@@ -455,8 +462,6 @@ export class ScenesGenerator implements ISceneGenerator {
 		const statsScene = new BaseScene('statsScene');
 
 		await this.activateCommands(statsScene);
-
-
 
 		statsScene.enter(async (ctx) => {
 
