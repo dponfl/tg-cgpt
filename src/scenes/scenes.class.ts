@@ -207,9 +207,9 @@ export class ScenesGenerator implements ISceneGenerator {
 			const opt = Object(message_id);
 
 			const int01 = setInterval(async () => {
-				await ctx.editMessageText(textOnMessage02, opt);
+				await ctx.telegram.editMessageText(ctx.chat.id, message_id, undefined, textOnMessage02);
 				setTimeout(async () => {
-					await ctx.editMessageText(textOnMessage01, opt);
+					await ctx.telegram.editMessageText(ctx.chat.id, message_id, undefined, textOnMessage01);
 				}, 500);
 			}, 1000);
 
