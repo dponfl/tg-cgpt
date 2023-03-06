@@ -12,6 +12,7 @@ export class MenuCommand extends MyBotCommand {
 	}
 	public async handle(): Promise<void> {
 		this.bot.command('menu', async (ctx) => {
+			await ctx.deleteMessage();
 			await ctx.scene.enter('menuScene');
 		});
 	}

@@ -12,6 +12,7 @@ export class StartCommand extends MyBotCommand {
 	}
 	public async handle(): Promise<void> {
 		this.bot.start(async (ctx) => {
+			await ctx.deleteMessage();
 			await ctx.scene.enter('startIntro');
 		});
 	}

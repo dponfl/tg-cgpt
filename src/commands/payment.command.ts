@@ -12,6 +12,7 @@ export class PaymentCommand extends MyBotCommand {
 	}
 	public async handle(): Promise<void> {
 		this.bot.command('pay', async (ctx) => {
+			await ctx.deleteMessage();
 			await ctx.scene.enter('paymentScene');
 		});
 	}

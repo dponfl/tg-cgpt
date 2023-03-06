@@ -20,20 +20,12 @@ export class MainController implements IMainController {
 
 		this.bot = await this.botService.init();
 
-		// this.bot.start(async (ctx) => {
-
-		// 	ctx.userSession.firstname = ctx.from.first_name;
-
-		// 	await ctx.scene.enter('intro');
-
-		// });
-
 		/**
 		 * default error handler
 		 */
 
 		this.bot.catch(async (error: unknown, ctx) => {
-			this.logger.error('Bot error', error);
+			this.logger.error('Bot error:', error);
 
 			await ctx.reply('При обработке вашего сообщения что-то пошло не так.');
 		});
