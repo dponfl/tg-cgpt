@@ -1,6 +1,7 @@
 import { Markup } from 'telegraf';
 import { BaseScene } from 'telegraf/scenes';
 import { BotCommand } from 'typegram';
+import { ChatGPTService } from '../ai/cgpt/cgpt.class.js';
 import { MySceneCommand } from '../commands/base_scenes/command.class.js';
 import { GptCommand } from '../commands/base_scenes/gpt.command.js';
 import { HelpCommand } from '../commands/base_scenes/help.command.js';
@@ -250,14 +251,25 @@ export class ScenesGenerator implements ISceneGenerator {
 			// 		{ reply_to_message_id: ctx.update.message.message_id });
 			// }, 5000);
 
-			setTimeout(async () => {
-				await ctx.deleteMessage(message_id);
-				await ctx.replyWithHTML('This is a reply to your request',
-					{ reply_to_message_id: ctx.update.message.message_id });
-			}, 5000);
 
-			// await ctx.replyWithHTML('This is a reply to your request',
-			// 	{ reply_to_message_id: ctx.update.message.message_id });
+			/**
+			 * To show functionality
+			 */
+
+			// setTimeout(async () => {
+			// 	await ctx.deleteMessage(message_id);
+			// 	await ctx.replyWithHTML('This is a reply to your request',
+			// 		{ reply_to_message_id: ctx.update.message.message_id });
+			// }, 5000);
+
+			const chatGPTService = new ChatGPTService();
+
+			const str = await chatGPTService.textRequest('some text');
+
+			await ctx.deleteMessage(message_id);
+			await ctx.replyWithHTML(str,
+				{ reply_to_message_id: ctx.update.message.message_id });
+
 		});
 
 		// this.mainGptSceneProp = mainGptScene;
