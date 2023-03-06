@@ -185,15 +185,21 @@ export class ScenesGenerator implements ISceneGenerator {
 
 `;
 
-		const textOnMessage01 =
+		const textOnMessage =
 			`
-Работаю над вашим вопросом 🔄
+Работаю над вашим вопросом ⏳
+
 `;
 
-		const textOnMessage02 =
-			`
-Работаю над вашим вопросом 🔃
-`;
+		// 		const textOnMessage01 =
+		// 			`
+		// Работаю над вашим вопросом 🔄
+		// `;
+
+		// 		const textOnMessage02 =
+		// 			`
+		// Работаю над вашим вопросом 🔃
+		// `;
 
 		mainGptScene.enter(async (ctx) => {
 			await ctx.replyWithHTML(textMain);
@@ -202,19 +208,30 @@ export class ScenesGenerator implements ISceneGenerator {
 
 		mainGptScene.on('message', async (ctx) => {
 
-			const { message_id } = await ctx.replyWithHTML(textOnMessage01);
+			const { message_id } = await ctx.replyWithHTML(textOnMessage);
 
-			const opt = Object(message_id);
+			/**
+			 * The below approach can hit Telegram limit for sending messages
+			 */
+			// const { message_id } = await ctx.replyWithHTML(textOnMessage01);
 
-			const int01 = setInterval(async () => {
-				await ctx.telegram.editMessageText(ctx.chat.id, message_id, undefined, textOnMessage02);
-				setTimeout(async () => {
-					await ctx.telegram.editMessageText(ctx.chat.id, message_id, undefined, textOnMessage01);
-				}, 500);
-			}, 1000);
+			// const opt = Object(message_id);
+
+			// const int01 = setInterval(async () => {
+			// 	await ctx.telegram.editMessageText(ctx.chat.id, message_id, undefined, textOnMessage02);
+			// 	setTimeout(async () => {
+			// 		await ctx.telegram.editMessageText(ctx.chat.id, message_id, undefined, textOnMessage01);
+			// 	}, 500);
+			// }, 1000);
+
+			// setTimeout(async () => {
+			// 	clearInterval(int01);
+			// 	await ctx.deleteMessage(message_id);
+			// 	await ctx.replyWithHTML('This is a reply to your request',
+			// 		{ reply_to_message_id: ctx.update.message.message_id });
+			// }, 5000);
 
 			setTimeout(async () => {
-				clearInterval(int01);
 				await ctx.deleteMessage(message_id);
 				await ctx.replyWithHTML('This is a reply to your request',
 					{ reply_to_message_id: ctx.update.message.message_id });
