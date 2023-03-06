@@ -13,6 +13,7 @@ export class ScenesGenerator implements ISceneGenerator {
 	private menuSceneProp: BaseScene = Object(BaseScene);
 	private mainGptSceneProp: BaseScene = Object(BaseScene);
 	private mainMJSceneProp: BaseScene = Object(BaseScene);
+	private pushToPaymentSceneProp: BaseScene = Object(BaseScene);
 
 	private commands: MySceneCommand[] = [];
 
@@ -32,7 +33,8 @@ export class ScenesGenerator implements ISceneGenerator {
 			this.mainGptScene(),
 			this.mainMJScene(),
 			this.menuScene(),
-			this.paymentScene()
+			this.paymentScene(),
+			this.pushToPaymentScene()
 		]);
 	}
 
@@ -161,7 +163,8 @@ export class ScenesGenerator implements ISceneGenerator {
 `;
 
 			await ctx.replyWithHTML(text);
-			await ctx.scene.enter('mainGptScene');
+			// await ctx.scene.enter('mainGptScene');
+			await ctx.scene.enter('pushToPaymentScene');
 
 		});
 
@@ -307,7 +310,6 @@ export class ScenesGenerator implements ISceneGenerator {
 		});
 
 		// tslint:disable-next-line: no-any
-		// tslint:disable-next-line: no-any
 		menuScene.action('make_payment', async (ctx: any) => {
 			await ctx.answerCbQuery('Переход в "Оплатить запросы"');
 			await ctx.deleteMessage();
@@ -367,6 +369,60 @@ export class ScenesGenerator implements ISceneGenerator {
 		});
 
 		return paymentScene;
+	}
+
+	private async pushToPaymentScene(): Promise<BaseScene> {
+
+		const pushToPaymentScene = new BaseScene('pushToPaymentScene');
+
+		await this.activateCommands(pushToPaymentScene);
+
+		let messageId: number;
+
+		const text =
+			`
+К <i>сожалению текущий лимит запросов подошёл к концу</i>, <b>чтобы продолжить коммуникацию со мной — выберите один из пакетов по кнопке ниже</b> 👇
+`;
+
+		// tslint:disable-next-line: no-any
+		pushToPaymentScene.enter(async (ctx: any) => {
+
+			const { message_id } = await ctx.replyWithHTML(text, Markup.inlineKeyboard([
+				[
+					Markup.button.callback('Оплатить запросы ✅', 'make_payment')
+				]
+			]));
+
+			messageId = message_id;
+
+		});
+
+		// tslint:disable-next-line: no-any
+		pushToPaymentScene.action('make_payment', async (ctx: any) => {
+			await ctx.answerCbQuery('Переход в "Оплатить запросы"');
+			await ctx.deleteMessage();
+			await ctx.scene.enter('paymentScene');
+		});
+
+		pushToPaymentScene.on('message', async (ctx) => {
+
+			if (messageId) {
+				await ctx.deleteMessage(messageId);
+			}
+
+			const { message_id } = await ctx.replyWithHTML(text, Markup.inlineKeyboard([
+				[
+					Markup.button.callback('Оплатить запросы ✅', 'make_payment')
+				]
+			]));
+
+			messageId = message_id;
+
+		});
+
+		this.pushToPaymentSceneProp = pushToPaymentScene;
+
+		return pushToPaymentScene;
 	}
 
 	/**
