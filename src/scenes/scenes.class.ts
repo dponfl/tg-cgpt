@@ -9,6 +9,7 @@ export class ScenesGenerator implements ISceneGenerator {
 		return Promise.all([
 			this.startIntro(),
 			this.startNext(),
+			this.mainGptScene(),
 			this.menu(),
 			this.paymentScene()
 		]);
@@ -91,11 +92,37 @@ export class ScenesGenerator implements ISceneGenerator {
 `;
 
 			await ctx.replyWithHTML(text);
-			await ctx.scene.leave();
+			await ctx.scene.enter('mainGptScene');
 
 		});
 
 		return startNext;
+	}
+
+	private async mainGptScene(): Promise<unknown> {
+		const mainGptScene = new BaseScene('mainGptScene');
+
+		const text =
+			`
+<b>Сейчас вы находитесь в Чате Gpt</b> 🤖 
+
+Секреты GPT (гиперссылка)
+
+<i>Все ваши обращения которые вы напишете</i> — <b>будут отправлены мне</b>. 
+
+<i>Чтобы перейти к Midjourney</i> — введите команду /img
+
+`;
+
+		mainGptScene.enter(async (ctx) => {
+			await ctx.replyWithHTML(text);
+		});
+
+		mainGptScene.on('text', async (ctx) => {
+			await ctx.replyWithHTML('This is a reply to your request', { reply_to_message_id: ctx.update.message.message_id });
+		});
+
+		return mainGptScene;
 	}
 
 	private async menu(): Promise<unknown> {
