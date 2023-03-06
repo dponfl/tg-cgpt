@@ -4,6 +4,7 @@ import { BotCommand } from 'typegram';
 import { MySceneCommand } from '../commands/base_scenes/command.class.js';
 import { GptCommand } from '../commands/base_scenes/gpt.command.js';
 import { MenuCommand } from '../commands/base_scenes/menu.command.js';
+import { MjCommand } from '../commands/base_scenes/mj.command.js';
 import { ILogger } from '../logger/logger.interface.js';
 import { ISceneGenerator } from './scenes.interface.js';
 
@@ -75,6 +76,7 @@ export class ScenesGenerator implements ISceneGenerator {
 		this.commands = [
 			new MenuCommand(scene),
 			new GptCommand(scene),
+			new MjCommand(scene),
 		];
 
 		for (const command of this.commands) {
