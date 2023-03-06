@@ -118,7 +118,7 @@ export class ScenesGenerator implements ISceneGenerator {
 			await ctx.replyWithHTML(text);
 		});
 
-		mainGptScene.on('text', async (ctx) => {
+		mainGptScene.on('message', async (ctx) => {
 			await ctx.replyWithHTML('This is a reply to your request', { reply_to_message_id: ctx.update.message.message_id });
 		});
 
@@ -161,7 +161,7 @@ export class ScenesGenerator implements ISceneGenerator {
 		menuScene.action('back', async (ctx: any) => {
 			await ctx.answerCbQuery('Выход из  "Меню"');
 			await ctx.deleteMessage();
-			await ctx.scene.enter('startNext');
+			await ctx.scene.enter('mainGptScene');
 		});
 
 		return menuScene;
