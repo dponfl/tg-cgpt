@@ -1,4 +1,5 @@
+import { BaseScene } from 'telegraf/scenes';
+
 export interface ISceneGenerator {
-	getBaseScenes(): Promise<any[]>;
-	getWizardScenes(): Promise<any[]>;
+	getScenes(): Promise<BaseScene[] | unknown[]>
 }

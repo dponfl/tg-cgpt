@@ -18,6 +18,15 @@ export class BotService implements IBotService {
 	private commands: MyBotCommand[] = [];
 	private scenesList: any[] = [];
 
+
+	constructor(
+		private readonly logger: ILogger,
+		configService: IConfigService,
+		private readonly scenesGenerator: ISceneGenerator
+	) {
+		this.bot = new Telegraf<IBotContext>(configService.get('TELEGRAM_TOKEN'));
+	}
+
 	/**
 	 * list of commands the bot will handle 
 	 */
@@ -45,17 +54,9 @@ export class BotService implements IBotService {
 		},
 	];
 
-	constructor(
-		private readonly logger: ILogger,
-		configService: IConfigService,
-		private readonly scenesGenerator: ISceneGenerator
-	) {
-		this.bot = new Telegraf<IBotContext>(configService.get('TELEGRAM_TOKEN'));
-	}
-
 	public async init(): Promise<Telegraf<IBotContext>> {
 
-		this.scenesList = [... await this.scenesGenerator.getBaseScenes()];
+		this.scenesList = await this.scenesGenerator.getScenes();
 
 		const stage = new Stage(this.scenesList);
 

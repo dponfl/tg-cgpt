@@ -1,11 +1,28 @@
-import { Context, Markup } from 'telegraf';
+import { Markup } from 'telegraf';
 import { BaseScene } from 'telegraf/scenes';
+import { BotCommand } from 'typegram';
+import { MySceneCommand } from '../commands/base_scenes/command.class.js';
+import { MenuCommand } from '../commands/base_scenes/menu.command.js';
+import { ILogger } from '../logger/logger.interface.js';
 import { ISceneGenerator } from './scenes.interface.js';
 
 export class ScenesGenerator implements ISceneGenerator {
 
-	public async getBaseScenes(): Promise<unknown[]> {
+	private menuScene: BaseScene = Object(BaseScene);
+	private commands: MySceneCommand[] = [];
 
+	constructor(private readonly logger: ILogger) { }
+
+	public async getScenes(): Promise<BaseScene[] | unknown[]> {
+		const baseScenes = await this.getBaseScenes();
+		const wizardScenes = await this.getWizardScenes();
+
+		this.activateCommands();
+
+		return [...baseScenes, ...wizardScenes];
+	}
+
+	public async getBaseScenes(): Promise<BaseScene[]> {
 		return Promise.all([
 			this.startIntro(),
 			this.startNext(),
@@ -20,10 +37,54 @@ export class ScenesGenerator implements ISceneGenerator {
 	}
 
 	/**
+	 * list of commands the scene will handle 
+	 */
+
+	private readonly sceneCommands: readonly BotCommand[] = [
+		{
+			command: 'menu',
+			description: 'Главное меню',
+		},
+		{
+			command: 'img',
+			description: 'Запрос в Midjorney',
+		},
+		{
+			command: 'pay',
+			description: 'Оплатить запросы',
+		},
+		{
+			command: 'info',
+			description: 'Информация по запросам',
+		},
+		{
+			command: 'help',
+			description: 'Помощь',
+		},
+	];
+
+	private async activateCommands(): Promise<void> {
+
+		/**
+		 * Init scene commands
+		 */
+
+		this.commands = [
+			new MenuCommand(this.menuScene, this.logger),
+		];
+
+		for (const command of this.commands) {
+			await command.handle();
+		}
+
+	}
+
+
+	/**
 	 * Base scenes
 	 */
 
-	private async startIntro(): Promise<unknown> {
+	private async startIntro(): Promise<BaseScene> {
 		const startIntro = new BaseScene('startIntro');
 
 		startIntro.enter(async (ctx: any) => {
@@ -70,7 +131,7 @@ export class ScenesGenerator implements ISceneGenerator {
 		return startIntro;
 	}
 
-	private async startNext(): Promise<unknown> {
+	private async startNext(): Promise<BaseScene> {
 		const startNext = new BaseScene('startNext');
 
 		startNext.enter(async (ctx: any) => {
@@ -99,7 +160,7 @@ export class ScenesGenerator implements ISceneGenerator {
 		return startNext;
 	}
 
-	private async mainGptScene(): Promise<unknown> {
+	private async mainGptScene(): Promise<BaseScene> {
 		const mainGptScene = new BaseScene('mainGptScene');
 
 		const text =
@@ -125,7 +186,7 @@ export class ScenesGenerator implements ISceneGenerator {
 		return mainGptScene;
 	}
 
-	private async menu(): Promise<unknown> {
+	private async menu(): Promise<BaseScene> {
 		const menuScene = new BaseScene('menuScene');
 
 		menuScene.enter(async (ctx: any) => {
@@ -164,10 +225,12 @@ export class ScenesGenerator implements ISceneGenerator {
 			await ctx.scene.enter('mainGptScene');
 		});
 
+		this.menuScene = menuScene;
+
 		return menuScene;
 	}
 
-	private async paymentScene(): Promise<unknown> {
+	private async paymentScene(): Promise<BaseScene> {
 		const paymentScene = new BaseScene('paymentScene');
 
 		paymentScene.enter(async (ctx) => {

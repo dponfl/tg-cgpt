@@ -14,7 +14,7 @@ const bootstap = async () => {
 
 	const logger: ILogger = new UseLogger();
 	const configService: IConfigService = new ConfigService(logger);
-	const scenesGenerator: ISceneGenerator = new ScenesGenerator();
+	const scenesGenerator: ISceneGenerator = new ScenesGenerator(logger);
 
 	const app = new App(
 		logger,
