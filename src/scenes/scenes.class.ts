@@ -8,7 +8,9 @@ import { ISceneGenerator } from './scenes.interface.js';
 
 export class ScenesGenerator implements ISceneGenerator {
 
-	private menuScene: BaseScene = Object(BaseScene);
+	private menuSceneProp: BaseScene = Object(BaseScene);
+	private mainGptSceneProp: BaseScene = Object(BaseScene);
+
 	private commands: MySceneCommand[] = [];
 
 	constructor(private readonly logger: ILogger) { }
@@ -27,7 +29,7 @@ export class ScenesGenerator implements ISceneGenerator {
 			this.startIntro(),
 			this.startNext(),
 			this.mainGptScene(),
-			this.menu(),
+			this.menuScene(),
 			this.paymentScene()
 		]);
 	}
@@ -70,7 +72,7 @@ export class ScenesGenerator implements ISceneGenerator {
 		 */
 
 		this.commands = [
-			new MenuCommand(this.menuScene, this.logger),
+			new MenuCommand(this.mainGptSceneProp),
 		];
 
 		for (const command of this.commands) {
@@ -183,10 +185,12 @@ export class ScenesGenerator implements ISceneGenerator {
 			await ctx.replyWithHTML('This is a reply to your request', { reply_to_message_id: ctx.update.message.message_id });
 		});
 
+		this.mainGptSceneProp = mainGptScene;
+
 		return mainGptScene;
 	}
 
-	private async menu(): Promise<BaseScene> {
+	private async menuScene(): Promise<BaseScene> {
 		const menuScene = new BaseScene('menuScene');
 
 		menuScene.enter(async (ctx: any) => {
@@ -225,7 +229,7 @@ export class ScenesGenerator implements ISceneGenerator {
 			await ctx.scene.enter('mainGptScene');
 		});
 
-		this.menuScene = menuScene;
+		this.menuSceneProp = menuScene;
 
 		return menuScene;
 	}
