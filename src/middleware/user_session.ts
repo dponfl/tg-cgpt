@@ -15,9 +15,9 @@ const createSession: MiddlewareFn<IBotContext> = async (ctx, next) => {
 
 	Object.assign(ctx, { ...ctx, userSession });
 
-	if (!ctx.state.botUserSession) {
-		ctx.state.botUserSession = userSession;
-	}
+	// if (!ctx.state.botUserSession) {
+	// 	ctx.state.botUserSession = userSession;
+	// }
 
 	return next();
 };

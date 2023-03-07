@@ -307,6 +307,11 @@ export class ScenesGenerator implements ISceneGenerator {
 						async (result) => {
 							ctx.userSession.pendingChatGptRequest = false;
 							ctx.state.botUserSession.pendingChatGptRequest = false;
+
+							this.logger.warn(`ctx.userSession: ${JSON.stringify(ctx.userSession, null, 2)}`);
+
+							this.logger.warn(`ctx.state.botUserSession: ${JSON.stringify(ctx.state.botUserSession, null, 2)}`);
+
 							await ctx.deleteMessage(message_id);
 							await ctx.replyWithHTML(result,
 								{ reply_to_message_id: ctx.update.message.message_id });
@@ -314,6 +319,11 @@ export class ScenesGenerator implements ISceneGenerator {
 						async (error) => {
 							ctx.userSession.pendingChatGptRequest = false;
 							ctx.state.botUserSession.pendingChatGptRequest = false;
+
+							this.logger.warn(`ctx.userSession: ${JSON.stringify(ctx.userSession, null, 2)}`);
+
+							this.logger.warn(`ctx.state.botUserSession: ${JSON.stringify(ctx.state.botUserSession, null, 2)}`);
+
 							this.logger.error(`Error: ${error}`);
 						}
 					);
