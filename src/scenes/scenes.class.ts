@@ -506,6 +506,27 @@ export class ScenesGenerator implements ISceneGenerator {
 			await ctx.scene.enter('mainGptScene');
 		});
 
+		menuScene.on('message', async (ctx) => {
+
+			const text =
+				`
+Для коммуникации со мной, используй кнопки выше 👆🏾 
+
+— Чтобы вернуться в чат GPT, используй команду /gpt
+
+— Чтобы вернуться в Midjourney, используй команду /img
+
+`;
+
+			const { message_id: messageId } = await ctx.replyWithHTML(text);
+
+			// tslint:disable-next-line: no-shadowed-variable
+			setTimeout(async () => {
+				await ctx.deleteMessage(messageId);
+			}, 3000);
+
+		});
+
 		// this.menuSceneProp = menuScene;
 
 		return menuScene;
@@ -554,6 +575,28 @@ export class ScenesGenerator implements ISceneGenerator {
 			await ctx.scene.enter('menuScene');
 		});
 
+		paymentScene.on('message', async (ctx) => {
+
+			const text =
+				`
+Для коммуникации со мной, используй кнопки выше 👆🏾 
+
+— Чтобы вернуться в чат GPT, используй команду /gpt
+
+— Чтобы вернуться в Midjourney, используй команду /img
+
+`;
+
+			const { message_id: messageId } = await ctx.replyWithHTML(text);
+
+			// tslint:disable-next-line: no-shadowed-variable
+			setTimeout(async () => {
+				await ctx.deleteMessage(messageId);
+			}, 3000);
+
+		});
+
+
 		return paymentScene;
 	}
 
@@ -590,23 +633,45 @@ export class ScenesGenerator implements ISceneGenerator {
 			await ctx.scene.enter('paymentScene');
 		});
 
-		pushToPaymentScene.on('message', async (ctx) => {
+		// pushToPaymentScene.on('message', async (ctx) => {
 
-			if (messageId) {
-				await ctx.deleteMessage(messageId);
-			}
+		// 	if (messageId) {
+		// 		await ctx.deleteMessage(messageId);
+		// 	}
 
-			const { message_id } = await ctx.replyWithHTML(text, Markup.inlineKeyboard([
-				[
-					Markup.button.callback('Оплатить запросы ✅', 'make_payment')
-				]
-			]));
+		// 	const { message_id } = await ctx.replyWithHTML(text, Markup.inlineKeyboard([
+		// 		[
+		// 			Markup.button.callback('Оплатить запросы ✅', 'make_payment')
+		// 		]
+		// 	]));
 
-			messageId = message_id;
+		// 	messageId = message_id;
 
-		});
+		// });
 
 		// this.pushToPaymentSceneProp = pushToPaymentScene;
+
+		pushToPaymentScene.on('message', async (ctx) => {
+
+			const text =
+				`
+Для коммуникации со мной, используй кнопки выше 👆🏾 
+
+— Чтобы вернуться в чат GPT, используй команду /gpt
+
+— Чтобы вернуться в Midjourney, используй команду /img
+
+`;
+
+			// tslint:disable-next-line: no-shadowed-variable
+			const { message_id: messageId } = await ctx.replyWithHTML(text);
+
+			// tslint:disable-next-line: no-shadowed-variable
+			setTimeout(async () => {
+				await ctx.deleteMessage(messageId);
+			}, 3000);
+
+		});
 
 		return pushToPaymentScene;
 	}
@@ -647,6 +712,28 @@ export class ScenesGenerator implements ISceneGenerator {
 			await ctx.scene.enter('menuScene');
 		});
 
+		statsScene.on('message', async (ctx) => {
+
+			const text =
+				`
+Для коммуникации со мной, используй кнопки выше 👆🏾 
+
+— Чтобы вернуться в чат GPT, используй команду /gpt
+
+— Чтобы вернуться в Midjourney, используй команду /img
+
+`;
+
+			// tslint:disable-next-line: no-shadowed-variable
+			const { message_id: messageId } = await ctx.replyWithHTML(text);
+
+			// tslint:disable-next-line: no-shadowed-variable
+			setTimeout(async () => {
+				await ctx.deleteMessage(messageId);
+			}, 3000);
+
+		});
+
 
 		// const statsSceneProp = statsScene;
 
@@ -680,6 +767,29 @@ export class ScenesGenerator implements ISceneGenerator {
 			await ctx.deleteMessage();
 			await ctx.scene.enter('menuScene');
 		});
+
+		helpScene.on('message', async (ctx) => {
+
+			const text =
+				`
+Для коммуникации со мной, используй кнопки выше 👆🏾 
+
+— Чтобы вернуться в чат GPT, используй команду /gpt
+
+— Чтобы вернуться в Midjourney, используй команду /img
+
+`;
+
+			// tslint:disable-next-line: no-shadowed-variable
+			const { message_id: messageId } = await ctx.replyWithHTML(text);
+
+			// tslint:disable-next-line: no-shadowed-variable
+			setTimeout(async () => {
+				await ctx.deleteMessage(messageId);
+			}, 3000);
+
+		});
+
 
 		return helpScene;
 	}
