@@ -12,6 +12,7 @@ export interface IBotSessionData {
 }
 
 export interface IBotContext extends Context {
+	session: any;
 	userSession: IBotSessionData;
 	scene: any;
 }
