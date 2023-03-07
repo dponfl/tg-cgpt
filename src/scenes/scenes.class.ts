@@ -404,6 +404,8 @@ export class ScenesGenerator implements ISceneGenerator {
 
 				const text = ctx.message.text;
 
+				ctx.session.botUserSession.pendingMjRequest = true;
+
 				mjService.textRequest(text)
 					.then(
 						async (result) => {
