@@ -9,6 +9,7 @@ export interface IBotSessionData {
 	surname?: string;
 	pendingChatGptRequest?: boolean;
 	pendingMjRequest?: boolean;
+	pinnedMessage: number;
 }
 
 export interface IBotContext extends Context {

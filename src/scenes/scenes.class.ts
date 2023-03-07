@@ -227,8 +227,10 @@ export class ScenesGenerator implements ISceneGenerator {
 		// Работаю над вашим вопросом 🔃
 		// `;
 
-		mainGptScene.enter(async (ctx) => {
+		mainGptScene.enter(async (ctx: any) => {
 			const { message_id: messageId } = await ctx.replyWithHTML(textMain);
+
+			ctx.session.botUserSession.pinnedMessage = messageId;
 
 			await ctx.pinChatMessage(messageId, { disable_notification: true });
 		});
@@ -320,8 +322,10 @@ export class ScenesGenerator implements ISceneGenerator {
 
 		});
 
-		mainGptScene.leave(async (ctx) => {
-			ctx.reply('Leaving mainGptScene...');
+		mainGptScene.leave(async (ctx: any) => {
+			if (ctx.session.botUserSession.pinnedMessage > 0) {
+				ctx.unpinChatMessage(ctx.session.botUserSession.pinnedMessage);
+			}
 		});
 
 		// this.mainGptSceneProp = mainGptScene;
