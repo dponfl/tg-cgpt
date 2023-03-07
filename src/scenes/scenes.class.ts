@@ -2,6 +2,7 @@ import { Markup } from 'telegraf';
 import { BaseScene } from 'telegraf/scenes';
 import { BotCommand } from 'typegram';
 import { ChatGPTService } from '../ai/cgpt/cgpt.class.js';
+import { IBotContext } from '../bot/bot.interface.js';
 import { MySceneCommand } from '../commands/base_scenes/command.class.js';
 import { GptCommand } from '../commands/base_scenes/gpt.command.js';
 import { HelpCommand } from '../commands/base_scenes/help.command.js';
@@ -226,7 +227,16 @@ export class ScenesGenerator implements ISceneGenerator {
 		});
 
 
+		// tslint:disable-next-line: no-any
 		mainGptScene.on('message', async (ctx: any) => {
+
+			if (ctx.userSession.pendingChatGptRequest) {
+				// tslint:disable-next-line: no-shadowed-variable
+				const { message_id } = await ctx.replyWithHTML('Запрос уже был отправлен!');
+				setTimeout(() => {
+					ctx.deleteMessage(message_id);
+				}, 3000);
+			}
 
 			const { message_id } = await ctx.replyWithHTML(textOnMessage);
 
@@ -272,19 +282,21 @@ export class ScenesGenerator implements ISceneGenerator {
 			// await ctx.replyWithHTML(str,
 			// 	{ reply_to_message_id: ctx.update.message.message_id });
 
-			this.logger.info(`ctx.message: ${JSON.stringify(ctx.message, null, 2)}`);
-			this.logger.info(`ctx.update: ${JSON.stringify(ctx.update, null, 2)}`);
 
 			const text = ctx.message.text;
+
+			ctx.userSession.pendingChatGptRequest = true;
 
 			chatGPTService.textRequest(text)
 				.then(
 					async (result) => {
+						ctx.userSession.pendingChatGptRequest = false;
 						await ctx.deleteMessage(message_id);
 						await ctx.replyWithHTML(result,
 							{ reply_to_message_id: ctx.update.message.message_id });
 					},
 					async (error) => {
+						ctx.userSession.pendingChatGptRequest = false;
 						this.logger.error(`Error: ${error}`);
 					}
 				);
