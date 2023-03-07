@@ -275,6 +275,27 @@ export class ScenesGenerator implements ISceneGenerator {
 			this.logger.info('ctx.message: ', ctx.message);
 			this.logger.info('ctx.update: ', ctx.update);
 
+			this.logger.warn('ctx.message: ', ctx.message);
+			this.logger.warn('ctx.update: ', ctx.update);
+
+			this.logger.error('ctx.message: ', ctx.message);
+			this.logger.error('ctx.update: ', ctx.update);
+
+
+			this.logger.info(`ctx.message: ${ctx.message}`);
+			this.logger.info(`ctx.update: ${ctx.update}`);
+
+			this.logger.warn(`ctx.message: ${ctx.message}`);
+			this.logger.warn(`ctx.update: ${ctx.update}`);
+
+			this.logger.error(`ctx.message: ${ctx.message}`);
+			this.logger.error(`ctx.update: ${ctx.update}`);
+
+			this.logger.info(`ctx.message: ${JSON.stringify(ctx.message, null, 2)}`);
+			this.logger.info(`ctx.update: ${JSON.stringify(ctx.update, null, 2)}`);
+
+
+
 			chatGPTService.textRequest('some text here...')
 				.then(
 					async (result) => {
