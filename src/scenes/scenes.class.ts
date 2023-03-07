@@ -193,7 +193,6 @@ export class ScenesGenerator implements ISceneGenerator {
 
 		const mainGptScene = new BaseScene('mainGptScene');
 
-		// tslint:disable-next-line: no-any
 		mainGptScene.use(async (ctx: any, next) => {
 			await createSession(ctx, next);
 		});
@@ -235,6 +234,8 @@ export class ScenesGenerator implements ISceneGenerator {
 
 		// tslint:disable-next-line: no-any
 		mainGptScene.on('message', async (ctx: any) => {
+
+			this.logger.warn(`ctx.userSession: ${JSON.stringify(ctx.userSession, null, 2)}`);
 
 			if (ctx.userSession.pendingChatGptRequest) {
 				// tslint:disable-next-line: no-shadowed-variable

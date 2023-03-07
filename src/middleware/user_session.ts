@@ -2,7 +2,8 @@ import { MiddlewareFn } from 'telegraf';
 import { IBotContext, IBotSessionData } from '../bot/bot.interface.js';
 
 const createSession: MiddlewareFn<IBotContext> = async (ctx, next) => {
-	const userSession: IBotSessionData = {};
+
+	const userSession: IBotSessionData = ctx.userSession || {};
 
 	if (ctx.from?.first_name) {
 		userSession.firstname = ctx.from.first_name;
@@ -13,6 +14,8 @@ const createSession: MiddlewareFn<IBotContext> = async (ctx, next) => {
 	}
 
 	Object.assign(ctx, { ...ctx, userSession });
+
+	ctx.state.botUserSession = userSession;
 
 	return next();
 };
