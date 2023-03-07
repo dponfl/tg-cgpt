@@ -226,7 +226,7 @@ export class ScenesGenerator implements ISceneGenerator {
 		});
 
 
-		mainGptScene.on('message', async (ctx) => {
+		mainGptScene.on('message', async (ctx: any) => {
 
 			const { message_id } = await ctx.replyWithHTML(textOnMessage);
 
@@ -272,31 +272,12 @@ export class ScenesGenerator implements ISceneGenerator {
 			// await ctx.replyWithHTML(str,
 			// 	{ reply_to_message_id: ctx.update.message.message_id });
 
-			this.logger.info('ctx.message: ', ctx.message);
-			this.logger.info('ctx.update: ', ctx.update);
-
-			this.logger.warn('ctx.message: ', ctx.message);
-			this.logger.warn('ctx.update: ', ctx.update);
-
-			this.logger.error('ctx.message: ', ctx.message);
-			this.logger.error('ctx.update: ', ctx.update);
-
-
-			this.logger.info(`ctx.message: ${ctx.message}`);
-			this.logger.info(`ctx.update: ${ctx.update}`);
-
-			this.logger.warn(`ctx.message: ${ctx.message}`);
-			this.logger.warn(`ctx.update: ${ctx.update}`);
-
-			this.logger.error(`ctx.message: ${ctx.message}`);
-			this.logger.error(`ctx.update: ${ctx.update}`);
-
 			this.logger.info(`ctx.message: ${JSON.stringify(ctx.message, null, 2)}`);
 			this.logger.info(`ctx.update: ${JSON.stringify(ctx.update, null, 2)}`);
 
+			const text = ctx.message.text;
 
-
-			chatGPTService.textRequest('some text here...')
+			chatGPTService.textRequest(text)
 				.then(
 					async (result) => {
 						await ctx.deleteMessage(message_id);

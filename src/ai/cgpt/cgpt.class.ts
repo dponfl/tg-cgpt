@@ -18,11 +18,11 @@ export class ChatGPTService implements IAI {
 			 * Case of normal response within different time
 			 */
 
-			await sleep(dice * 3000);
+			await sleep(dice * 5000);
 
-			return `Response text with ${dice} sec. delay`;
+			return `Response text with ${dice} sec. delay\n\nrequest text: ${str}`;
 		} else {
-			return 'Response text with no delay';
+			return `Response text with no delay\n\nrequest text: ${str}`;
 		}
 	}
 
