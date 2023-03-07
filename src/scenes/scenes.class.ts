@@ -264,11 +264,16 @@ export class ScenesGenerator implements ISceneGenerator {
 
 			const chatGPTService = new ChatGPTService();
 
+			// This solution block user communication
+
 			// const str = await chatGPTService.textRequest('some text');
 
 			// await ctx.deleteMessage(message_id);
 			// await ctx.replyWithHTML(str,
 			// 	{ reply_to_message_id: ctx.update.message.message_id });
+
+			this.logger.info(`ctx.message: ${ctx.message}`);
+			this.logger.info(`ctx.update: ${ctx.update}`);
 
 			chatGPTService.textRequest('some text here...')
 				.then(
