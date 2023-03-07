@@ -304,14 +304,21 @@ export class ScenesGenerator implements ISceneGenerator {
 
 				ctx.state.botUserSession.pendingChatGptRequest = true;
 
-				ctx.session.my = true;
+				ctx.session.my.pendingChatGptRequest = true;
+
+				this.logger.warn(`ctx.userSession: ${JSON.stringify(ctx.userSession, null, 2)}`);
+
+				this.logger.warn(`ctx.state.botUserSession: ${JSON.stringify(ctx.state.botUserSession, null, 2)}`);
+
+				this.logger.warn(`ctx.session.my: ${JSON.stringify(ctx.session.my, null, 2)}`);
+
 
 				chatGPTService.textRequest(text)
 					.then(
 						async (result) => {
 							ctx.userSession.pendingChatGptRequest = false;
 							ctx.state.botUserSession.pendingChatGptRequest = false;
-							ctx.session.my = false;
+							ctx.session.my.pendingChatGptRequest = false;
 
 							this.logger.warn(`ctx.userSession: ${JSON.stringify(ctx.userSession, null, 2)}`);
 
@@ -326,7 +333,7 @@ export class ScenesGenerator implements ISceneGenerator {
 						async (error) => {
 							ctx.userSession.pendingChatGptRequest = false;
 							ctx.state.botUserSession.pendingChatGptRequest = false;
-							ctx.session.my = false;
+							ctx.session.my.pendingChatGptRequest = false;
 
 							this.logger.warn(`ctx.userSession: ${JSON.stringify(ctx.userSession, null, 2)}`);
 
