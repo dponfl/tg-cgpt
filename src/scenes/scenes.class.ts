@@ -548,7 +548,7 @@ export class ScenesGenerator implements ISceneGenerator {
 	
 	2)10 запросов для <b>Midjourney</b> — 150₽
 	
-	3)10 запросов для <b>искусственного интеллекта</b> + 10 запросов для <b>Midjourney</b> — 250₽
+	3)10 запросов для <b>искусственного интеллекта (GPT)</b> + 10 запросов для <b>Midjourney</b> — 250₽
 	`;
 
 			await ctx.replyWithHTML(text, Markup.inlineKeyboard([
