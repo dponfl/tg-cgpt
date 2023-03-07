@@ -228,7 +228,9 @@ export class ScenesGenerator implements ISceneGenerator {
 		// `;
 
 		mainGptScene.enter(async (ctx) => {
-			await ctx.replyWithHTML(textMain);
+			const { message_id: messageId } = await ctx.replyWithHTML(textMain);
+
+			await ctx.pinChatMessage(messageId, { disable_notification: true });
 		});
 
 
@@ -316,6 +318,10 @@ export class ScenesGenerator implements ISceneGenerator {
 
 			}
 
+		});
+
+		mainGptScene.leave(async (ctx) => {
+			ctx.reply('Leaving mainGptScene...');
 		});
 
 		// this.mainGptSceneProp = mainGptScene;
