@@ -231,6 +231,7 @@ export class ScenesGenerator implements ISceneGenerator {
 			const { message_id: messageId } = await ctx.replyWithHTML(textMain);
 
 			ctx.session.botUserSession.pinnedMessage = messageId;
+			await ctx.reply(`Entering mainGptScene: ${ctx.session.botUserSession}`);
 
 			await ctx.pinChatMessage(messageId, { disable_notification: true });
 		});
@@ -323,8 +324,9 @@ export class ScenesGenerator implements ISceneGenerator {
 		});
 
 		mainGptScene.leave(async (ctx: any) => {
+			await ctx.reply(`Leaving mainGptScene: ${ctx.session.botUserSession}`);
 			if (ctx.session.botUserSession.pinnedMessage > 0) {
-				ctx.unpinChatMessage(ctx.session.botUserSession.pinnedMessage);
+				await ctx.unpinChatMessage(ctx.session.botUserSession.pinnedMessage);
 			}
 		});
 
