@@ -193,9 +193,9 @@ export class ScenesGenerator implements ISceneGenerator {
 
 		const mainGptScene = new BaseScene('mainGptScene');
 
-		mainGptScene.use(async (ctx: any, next) => {
-			await createSession(ctx, next);
-		});
+		// mainGptScene.use(async (ctx: any, next) => {
+		// 	await createSession(ctx, next);
+		// });
 
 		await this.activateCommands(mainGptScene);
 
@@ -231,7 +231,6 @@ export class ScenesGenerator implements ISceneGenerator {
 			const { message_id: messageId } = await ctx.replyWithHTML(textMain);
 
 			ctx.session.botUserSession.pinnedMessage = messageId;
-			await ctx.reply(`Entering mainGptScene: ${JSON.stringify(ctx.session.botUserSession, null, 2)}`);
 
 			await ctx.pinChatMessage(messageId, { disable_notification: true });
 		});
@@ -324,7 +323,6 @@ export class ScenesGenerator implements ISceneGenerator {
 		});
 
 		mainGptScene.leave(async (ctx: any) => {
-			await ctx.reply(`Leaving mainGptScene: ${JSON.stringify(ctx.session.botUserSession, null, 2)}`);
 			if (ctx.session.botUserSession.pinnedMessage > 0) {
 				await ctx.unpinChatMessage(ctx.session.botUserSession.pinnedMessage);
 			}
