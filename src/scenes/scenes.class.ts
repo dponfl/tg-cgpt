@@ -237,76 +237,88 @@ export class ScenesGenerator implements ISceneGenerator {
 
 			this.logger.warn(`ctx.userSession: ${JSON.stringify(ctx.userSession, null, 2)}`);
 
+			this.logger.warn(`ctx.state.botUserSession: ${JSON.stringify(ctx.state.botUserSession, null, 2)}`);
+
+
+
 			if (ctx.userSession.pendingChatGptRequest) {
+
 				// tslint:disable-next-line: no-shadowed-variable
 				const { message_id } = await ctx.replyWithHTML('Запрос уже был отправлен!');
 				setTimeout(() => {
 					ctx.deleteMessage(message_id);
 				}, 3000);
+
+			} else {
+
+				const { message_id } = await ctx.replyWithHTML(textOnMessage);
+
+				/**
+				 * The below approach can hit Telegram limit for sending messages
+				 */
+				// const { message_id } = await ctx.replyWithHTML(textOnMessage01);
+
+				// const opt = Object(message_id);
+
+				// const int01 = setInterval(async () => {
+				// 	await ctx.telegram.editMessageText(ctx.chat.id, message_id, undefined, textOnMessage02);
+				// 	setTimeout(async () => {
+				// 		await ctx.telegram.editMessageText(ctx.chat.id, message_id, undefined, textOnMessage01);
+				// 	}, 500);
+				// }, 1000);
+
+				// setTimeout(async () => {
+				// 	clearInterval(int01);
+				// 	await ctx.deleteMessage(message_id);
+				// 	await ctx.replyWithHTML('This is a reply to your request',
+				// 		{ reply_to_message_id: ctx.update.message.message_id });
+				// }, 5000);
+
+
+				/**
+				 * To show functionality
+				 */
+
+				// setTimeout(async () => {
+				// 	await ctx.deleteMessage(message_id);
+				// 	await ctx.replyWithHTML('This is a reply to your request',
+				// 		{ reply_to_message_id: ctx.update.message.message_id });
+				// }, 5000);
+
+				const chatGPTService = new ChatGPTService();
+
+				// This solution block user communication
+
+				// const str = await chatGPTService.textRequest('some text');
+
+				// await ctx.deleteMessage(message_id);
+				// await ctx.replyWithHTML(str,
+				// 	{ reply_to_message_id: ctx.update.message.message_id });
+
+
+				const text = ctx.message.text;
+
+				ctx.userSession.pendingChatGptRequest = true;
+
+				ctx.state.botUserSession.pendingChatGptRequest = true;
+
+				chatGPTService.textRequest(text)
+					.then(
+						async (result) => {
+							ctx.userSession.pendingChatGptRequest = false;
+							ctx.state.botUserSession.pendingChatGptRequest = false;
+							await ctx.deleteMessage(message_id);
+							await ctx.replyWithHTML(result,
+								{ reply_to_message_id: ctx.update.message.message_id });
+						},
+						async (error) => {
+							ctx.userSession.pendingChatGptRequest = false;
+							ctx.state.botUserSession.pendingChatGptRequest = false;
+							this.logger.error(`Error: ${error}`);
+						}
+					);
+
 			}
-
-			const { message_id } = await ctx.replyWithHTML(textOnMessage);
-
-			/**
-			 * The below approach can hit Telegram limit for sending messages
-			 */
-			// const { message_id } = await ctx.replyWithHTML(textOnMessage01);
-
-			// const opt = Object(message_id);
-
-			// const int01 = setInterval(async () => {
-			// 	await ctx.telegram.editMessageText(ctx.chat.id, message_id, undefined, textOnMessage02);
-			// 	setTimeout(async () => {
-			// 		await ctx.telegram.editMessageText(ctx.chat.id, message_id, undefined, textOnMessage01);
-			// 	}, 500);
-			// }, 1000);
-
-			// setTimeout(async () => {
-			// 	clearInterval(int01);
-			// 	await ctx.deleteMessage(message_id);
-			// 	await ctx.replyWithHTML('This is a reply to your request',
-			// 		{ reply_to_message_id: ctx.update.message.message_id });
-			// }, 5000);
-
-
-			/**
-			 * To show functionality
-			 */
-
-			// setTimeout(async () => {
-			// 	await ctx.deleteMessage(message_id);
-			// 	await ctx.replyWithHTML('This is a reply to your request',
-			// 		{ reply_to_message_id: ctx.update.message.message_id });
-			// }, 5000);
-
-			const chatGPTService = new ChatGPTService();
-
-			// This solution block user communication
-
-			// const str = await chatGPTService.textRequest('some text');
-
-			// await ctx.deleteMessage(message_id);
-			// await ctx.replyWithHTML(str,
-			// 	{ reply_to_message_id: ctx.update.message.message_id });
-
-
-			const text = ctx.message.text;
-
-			ctx.userSession.pendingChatGptRequest = true;
-
-			chatGPTService.textRequest(text)
-				.then(
-					async (result) => {
-						ctx.userSession.pendingChatGptRequest = false;
-						await ctx.deleteMessage(message_id);
-						await ctx.replyWithHTML(result,
-							{ reply_to_message_id: ctx.update.message.message_id });
-					},
-					async (error) => {
-						ctx.userSession.pendingChatGptRequest = false;
-						this.logger.error(`Error: ${error}`);
-					}
-				);
 
 		});
 
