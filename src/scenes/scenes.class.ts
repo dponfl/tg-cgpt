@@ -240,7 +240,7 @@ export class ScenesGenerator implements ISceneGenerator {
 
 				const secondRequestText =
 					`
-В данный момент я обрабатываю ваш предыдущий запрос 🔄
+<b>В данный момент я обрабатываю ваш предыдущий запрос</b> 🔄
 
 После моего ответа, вы сможете задать следующий вопрос 👌🏼
 
@@ -250,7 +250,7 @@ export class ScenesGenerator implements ISceneGenerator {
 				const { message_id } = await ctx.replyWithHTML(secondRequestText);
 				setTimeout(() => {
 					ctx.deleteMessage(message_id);
-				}, 3000);
+				}, 5000);
 
 			} else {
 
@@ -384,7 +384,7 @@ export class ScenesGenerator implements ISceneGenerator {
 
 				const secondRequestText =
 					`
-В данный момент я обрабатываю ваш предыдущий запрос 🔄
+<b>В данный момент я обрабатываю ваш предыдущий запрос</b> 🔄
 
 После моего ответа, вы сможете задать следующий вопрос 👌🏼
 
@@ -394,7 +394,7 @@ export class ScenesGenerator implements ISceneGenerator {
 				const { message_id } = await ctx.replyWithHTML(secondRequestText);
 				setTimeout(() => {
 					ctx.deleteMessage(message_id);
-				}, 3000);
+				}, 5000);
 
 			} else {
 
@@ -523,7 +523,7 @@ export class ScenesGenerator implements ISceneGenerator {
 			// tslint:disable-next-line: no-shadowed-variable
 			setTimeout(async () => {
 				await ctx.deleteMessage(messageId);
-			}, 3000);
+			}, 10000);
 
 		});
 
@@ -592,7 +592,7 @@ export class ScenesGenerator implements ISceneGenerator {
 			// tslint:disable-next-line: no-shadowed-variable
 			setTimeout(async () => {
 				await ctx.deleteMessage(messageId);
-			}, 3000);
+			}, 10000);
 
 		});
 
@@ -669,7 +669,7 @@ export class ScenesGenerator implements ISceneGenerator {
 			// tslint:disable-next-line: no-shadowed-variable
 			setTimeout(async () => {
 				await ctx.deleteMessage(messageId);
-			}, 3000);
+			}, 10000);
 
 		});
 
@@ -730,7 +730,7 @@ export class ScenesGenerator implements ISceneGenerator {
 			// tslint:disable-next-line: no-shadowed-variable
 			setTimeout(async () => {
 				await ctx.deleteMessage(messageId);
-			}, 3000);
+			}, 10000);
 
 		});
 
@@ -786,7 +786,7 @@ export class ScenesGenerator implements ISceneGenerator {
 			// tslint:disable-next-line: no-shadowed-variable
 			setTimeout(async () => {
 				await ctx.deleteMessage(messageId);
-			}, 3000);
+			}, 10000);
 
 		});
 
