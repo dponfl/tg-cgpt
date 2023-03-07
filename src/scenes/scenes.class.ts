@@ -11,6 +11,7 @@ import { MjCommand } from '../commands/base_scenes/mj.command.js';
 import { PaymentCommand } from '../commands/base_scenes/payment.command.js';
 import { StatsCommand } from '../commands/base_scenes/stats.command.js';
 import { ILogger } from '../logger/logger.interface.js';
+import createSession from '../middleware/user_session.js';
 import { ISceneGenerator } from './scenes.interface.js';
 
 export class ScenesGenerator implements ISceneGenerator {
@@ -191,6 +192,11 @@ export class ScenesGenerator implements ISceneGenerator {
 	private async mainGptScene(): Promise<BaseScene> {
 
 		const mainGptScene = new BaseScene('mainGptScene');
+
+		// tslint:disable-next-line: no-any
+		mainGptScene.use(async (ctx: any, next) => {
+			await createSession(ctx, next);
+		});
 
 		await this.activateCommands(mainGptScene);
 
