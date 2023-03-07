@@ -2,6 +2,7 @@ import { Markup } from 'telegraf';
 import { BaseScene } from 'telegraf/scenes';
 import { BotCommand } from 'typegram';
 import { ChatGPTService } from '../ai/cgpt/cgpt.class.js';
+import { MjService } from '../ai/cgpt/mj.class.js';
 import { IBotContext } from '../bot/bot.interface.js';
 import { MySceneCommand } from '../commands/base_scenes/command.class.js';
 import { GptCommand } from '../commands/base_scenes/gpt.command.js';
@@ -193,10 +194,6 @@ export class ScenesGenerator implements ISceneGenerator {
 
 		const mainGptScene = new BaseScene('mainGptScene');
 
-		// mainGptScene.use(async (ctx: any, next) => {
-		// 	await createSession(ctx, next);
-		// });
-
 		await this.activateCommands(mainGptScene);
 
 		const textMain =
@@ -241,8 +238,16 @@ export class ScenesGenerator implements ISceneGenerator {
 
 			if (ctx.session.botUserSession.pendingChatGptRequest) {
 
+				const secondRequestText =
+					`
+В данный момент я обрабатываю ваш предыдущий запрос 🔄
+
+После моего ответа, вы сможете задать следующий вопрос 👌🏼
+
+`;
+
 				// tslint:disable-next-line: no-shadowed-variable
-				const { message_id } = await ctx.replyWithHTML('Запрос уже был отправлен!');
+				const { message_id } = await ctx.replyWithHTML(secondRequestText);
 				setTimeout(() => {
 					ctx.deleteMessage(message_id);
 				}, 3000);
@@ -308,13 +313,20 @@ export class ScenesGenerator implements ISceneGenerator {
 								{ reply_to_message_id: ctx.update.message.message_id });
 						},
 						async (error) => {
+
+							const errorResponseText =
+								`
+К сожалению что-то пошло не так 😔
+
+Пожалуйста, повторите ваш вопрос 🙏🏾
+
+`;
+
 							ctx.session.botUserSession.pendingChatGptRequest = false;
 
 							await ctx.deleteMessage(message_id);
-							await ctx.replyWithHTML('No ChatGPT response...',
+							await ctx.replyWithHTML(errorResponseText,
 								{ reply_to_message_id: ctx.update.message.message_id });
-
-							this.logger.error(`Error: ${error}`);
 						}
 					);
 
@@ -351,14 +363,81 @@ export class ScenesGenerator implements ISceneGenerator {
 
 `;
 
-		mainMJScene.enter(async (ctx) => {
-			await ctx.replyWithHTML(textMain);
+		const textOnMessage =
+			`
+Работаю над вашим вопросом ⏳
+
+`;
+
+		mainMJScene.enter(async (ctx: any) => {
+			const { message_id: messageId } = await ctx.replyWithHTML(textMain);
+
+			ctx.session.botUserSession.pinnedMessage = messageId;
+
+			await ctx.pinChatMessage(messageId, { disable_notification: true });
 		});
 
 
-		mainMJScene.on('message', async (ctx) => {
-			await ctx.replyWithHTML('This is a reply to your MJ request',
-				{ reply_to_message_id: ctx.update.message.message_id });
+		mainMJScene.on('message', async (ctx: any) => {
+
+			if (ctx.session.botUserSession.pendingMjRequest) {
+
+				const secondRequestText =
+					`
+В данный момент я обрабатываю ваш предыдущий запрос 🔄
+
+После моего ответа, вы сможете задать следующий вопрос 👌🏼
+
+`;
+
+				// tslint:disable-next-line: no-shadowed-variable
+				const { message_id } = await ctx.replyWithHTML(secondRequestText);
+				setTimeout(() => {
+					ctx.deleteMessage(message_id);
+				}, 3000);
+
+			} else {
+
+				const { message_id } = await ctx.replyWithHTML(textOnMessage);
+
+				const mjService = new MjService();
+
+				const text = ctx.message.text;
+
+				mjService.textRequest(text)
+					.then(
+						async (result) => {
+							ctx.session.botUserSession.pendingMjRequest = false;
+
+							await ctx.deleteMessage(message_id);
+							await ctx.replyWithHTML(result,
+								{ reply_to_message_id: ctx.update.message.message_id });
+						},
+						async (error) => {
+
+							const errorResponseText =
+								`
+К сожалению что-то пошло не так 😔
+
+Пожалуйста, повторите ваш вопрос 🙏🏾
+
+`;
+
+							ctx.session.botUserSession.pendingMjRequest = false;
+
+							await ctx.deleteMessage(message_id);
+							await ctx.replyWithHTML(errorResponseText,
+								{ reply_to_message_id: ctx.update.message.message_id });
+						}
+					);
+
+			}
+		});
+
+		mainMJScene.leave(async (ctx: any) => {
+			if (ctx.session.botUserSession.pinnedMessage > 0) {
+				await ctx.unpinChatMessage(ctx.session.botUserSession.pinnedMessage);
+			}
 		});
 
 		// this.mainMJSceneProp = mainMJScene;
