@@ -264,11 +264,23 @@ export class ScenesGenerator implements ISceneGenerator {
 
 			const chatGPTService = new ChatGPTService();
 
-			const str = await chatGPTService.textRequest('some text');
+			// const str = await chatGPTService.textRequest('some text');
 
-			await ctx.deleteMessage(message_id);
-			await ctx.replyWithHTML(str,
-				{ reply_to_message_id: ctx.update.message.message_id });
+			// await ctx.deleteMessage(message_id);
+			// await ctx.replyWithHTML(str,
+			// 	{ reply_to_message_id: ctx.update.message.message_id });
+
+			chatGPTService.textRequest('some text here...')
+				.then(
+					async (result) => {
+						await ctx.deleteMessage(message_id);
+						await ctx.replyWithHTML(result,
+							{ reply_to_message_id: ctx.update.message.message_id });
+					},
+					async (error) => {
+						this.logger.error(`Error: ${error}`);
+					}
+				);
 
 		});
 
