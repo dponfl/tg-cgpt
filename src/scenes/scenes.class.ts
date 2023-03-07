@@ -273,7 +273,9 @@ export class ScenesGenerator implements ISceneGenerator {
 			// 	{ reply_to_message_id: ctx.update.message.message_id });
 
 			this.logger.info(`ctx.message: ${ctx.message}`);
+			this.logger.info(ctx.message);
 			this.logger.info(`ctx.update: ${ctx.update}`);
+			this.logger.info(ctx.update);
 
 			chatGPTService.textRequest('some text here...')
 				.then(
