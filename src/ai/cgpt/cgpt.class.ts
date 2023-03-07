@@ -12,17 +12,20 @@ export class ChatGPTService implements IAI {
 		};
 
 		const dice: number = Math.floor(Math.random() * 10);
+		const timeout = dice * 5000;
 
-		if (dice > 0 && dice < 7) {
+		if (dice >= 0 && dice < 2) {
+			return `Response text with no delay\n\nrequest text: ${str}`;
+		} else if (dice >= 2 && dice < 7) {
 			/**
 			 * Case of normal response within different time
 			 */
 
-			await sleep(dice * 5000);
+			await sleep(timeout);
 
-			return `Response text with ${dice} sec. delay\n\nrequest text: ${str}`;
+			return `Response text with ${timeout / 1000} sec. delay\n\nrequest text: ${str}`;
 		} else {
-			return `Response text with no delay\n\nrequest text: ${str}`;
+			throw new Error('ChatGPTService error');
 		}
 	}
 

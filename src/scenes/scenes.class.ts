@@ -235,8 +235,6 @@ export class ScenesGenerator implements ISceneGenerator {
 		// tslint:disable-next-line: no-any
 		mainGptScene.on('message', async (ctx: any) => {
 
-			this.logger.warn(`ctx.session.botUserSession: ${JSON.stringify(ctx.session.botUserSession, null, 2)}`);
-
 			if (ctx.session.botUserSession.pendingChatGptRequest) {
 
 				// tslint:disable-next-line: no-shadowed-variable
@@ -296,15 +294,10 @@ export class ScenesGenerator implements ISceneGenerator {
 
 				ctx.session.botUserSession.pendingChatGptRequest = true;
 
-				this.logger.warn(`ctx.session.botUserSession: ${JSON.stringify(ctx.session.botUserSession, null, 2)}`);
-
-
 				chatGPTService.textRequest(text)
 					.then(
 						async (result) => {
 							ctx.session.botUserSession.pendingChatGptRequest = false;
-
-							this.logger.warn(`ctx.session.botUserSession: ${JSON.stringify(ctx.session.botUserSession, null, 2)}`);
 
 							await ctx.deleteMessage(message_id);
 							await ctx.replyWithHTML(result,
@@ -313,7 +306,9 @@ export class ScenesGenerator implements ISceneGenerator {
 						async (error) => {
 							ctx.session.botUserSession.pendingChatGptRequest = false;
 
-							this.logger.warn(`ctx.session.botUserSession: ${JSON.stringify(ctx.session.botUserSession, null, 2)}`);
+							await ctx.deleteMessage(message_id);
+							await ctx.replyWithHTML('No ChatGPT response...',
+								{ reply_to_message_id: ctx.update.message.message_id });
 
 							this.logger.error(`Error: ${error}`);
 						}
