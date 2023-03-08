@@ -1,7 +1,8 @@
-import { IAI } from '../ai.interface.js';
+import { AiResponseStatus, AiTextRequest, AiTextResponse } from '../../controller/controller.interface.js';
+import { IAIText } from '../ai.interface.js';
 
-export class ChatGPTService implements IAI {
-	public async textRequest(str: string): Promise<string> {
+export class ChatGPTService implements IAIText {
+	public async textRequest(str: AiTextRequest): Promise<AiTextResponse> {
 
 		/**
 		 * Mock API responce cases
@@ -15,7 +16,10 @@ export class ChatGPTService implements IAI {
 		const timeout = dice * 5000;
 
 		if (dice >= 0 && dice < 2) {
-			return `Response text with no delay\n\nrequest text: ${str}`;
+			return {
+				status: AiResponseStatus.SUCCESS,
+				payload: [`Response text with no delay. Request text: ${str}`]
+			};
 		} else if (dice >= 2 && dice < 7) {
 			/**
 			 * Case of normal response within different time
@@ -23,9 +27,15 @@ export class ChatGPTService implements IAI {
 
 			await sleep(timeout);
 
-			return `Response text with ${timeout / 1000} sec. delay\n\nrequest text: ${str}`;
+			return {
+				status: AiResponseStatus.SUCCESS,
+				payload: [`Response text with ${timeout / 1000} sec. delay`, `Request text: ${str}`]
+			};
 		} else {
-			throw new Error('ChatGPTService error');
+			return {
+				status: AiResponseStatus.ERROR,
+				payload: ['ChatGPTService error']
+			};
 		}
 	}
 

@@ -1,20 +1,36 @@
-import { Telegraf } from 'telegraf';
-import { IBotService, IBotContext } from '../bot/bot.interface.js';
-import { IConfigService } from '../config/config.interface.js';
+import { IAIImg, IAIText } from '../ai/ai.interface.js';
 import { ILogger } from '../logger/logger.interface.js';
-import { IOpenAI } from '../openai/text_completion/tc.interface.js';
-import { IMainController } from './controller.interface.js';
+// tslint:disable-next-line: max-line-length
+import { AiImgRequest, AiImgResponsePayload, AiResponseStatus, AiTextRequest, AiTextResponse, AiTextResponsePayload, IMainController } from './controller.interface.js';
 
 export class MainController implements IMainController {
 
-	private bot: Telegraf<IBotContext> = <Telegraf<IBotContext>>{};
-
 	constructor(
 		private readonly logger: ILogger,
-		private readonly configService: IConfigService,
-		private readonly botService: IBotService,
-		private readonly openAi: IOpenAI,
+		private readonly chatGptService: IAIText,
+		private readonly mjService: IAIImg
 	) { }
+
+	public async cgptTextRequest(str: AiTextRequest): Promise<AiTextResponsePayload> {
+
+		const resRaw: AiTextResponse = await this.chatGptService.textRequest(str);
+
+		if (resRaw.status !== AiResponseStatus.SUCCESS) {
+			throw new Error('ChatGPT error response');
+		} else {
+			return resRaw.payload;
+		}
+	}
+
+	public async mjImgRequest(str: AiImgRequest): Promise<AiImgResponsePayload> {
+		const resRaw: AiTextResponse = await this.mjService.imgRequest(str);
+
+		if (resRaw.status !== AiResponseStatus.SUCCESS) {
+			throw new Error('MidJourney error response');
+		} else {
+			return resRaw.payload;
+		}
+	}
 
 
 }

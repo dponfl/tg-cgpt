@@ -1,7 +1,12 @@
+import { IAIImg, IAIText } from './ai/ai.interface.js';
+import { ChatGPTService } from './ai/cgpt/cgpt.class.js';
+import { MjService } from './ai/cgpt/mj.class.js';
 import { App } from './app.class.js';
 import { BotService } from './bot/bot.class.js';
 import { IConfigService } from './config/config.interface.js';
 import { ConfigService } from './config/config.service.js';
+import { MainController } from './controller/controller.class.js';
+import { IMainController } from './controller/controller.interface.js';
 import { UseLogger } from './logger/logger.class.js';
 import { ILogger } from './logger/logger.interface.js';
 import { ScenesGenerator } from './scenes/scenes.class.js';
@@ -12,7 +17,10 @@ const bootstap = async () => {
 
 	const logger: ILogger = new UseLogger();
 	const configService: IConfigService = new ConfigService(logger);
-	const scenesGenerator: ISceneGenerator = new ScenesGenerator(logger);
+	const cgptService: IAIText = new ChatGPTService();
+	const mjService: IAIImg = new MjService();
+	const mainController: IMainController = new MainController(logger, cgptService, mjService);
+	const scenesGenerator: ISceneGenerator = new ScenesGenerator(logger, mainController);
 
 	const app = new App(
 		logger,

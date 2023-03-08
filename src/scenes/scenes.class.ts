@@ -1,9 +1,6 @@
 import { Markup } from 'telegraf';
 import { BaseScene } from 'telegraf/scenes';
 import { BotCommand } from 'typegram';
-import { ChatGPTService } from '../ai/cgpt/cgpt.class.js';
-import { MjService } from '../ai/cgpt/mj.class.js';
-import { IBotContext } from '../bot/bot.interface.js';
 import { MySceneCommand } from '../commands/base_scenes/command.class.js';
 import { GptCommand } from '../commands/base_scenes/gpt.command.js';
 import { HelpCommand } from '../commands/base_scenes/help.command.js';
@@ -11,8 +8,8 @@ import { MenuCommand } from '../commands/base_scenes/menu.command.js';
 import { MjCommand } from '../commands/base_scenes/mj.command.js';
 import { PaymentCommand } from '../commands/base_scenes/payment.command.js';
 import { StatsCommand } from '../commands/base_scenes/stats.command.js';
+import { IMainController } from '../controller/controller.interface.js';
 import { ILogger } from '../logger/logger.interface.js';
-import createSession from '../middleware/user_session.js';
 import { ISceneGenerator } from './scenes.interface.js';
 
 export class ScenesGenerator implements ISceneGenerator {
@@ -25,7 +22,10 @@ export class ScenesGenerator implements ISceneGenerator {
 
 	private commands: MySceneCommand[] = [];
 
-	constructor(private readonly logger: ILogger) { }
+	constructor(
+		private readonly logger: ILogger,
+		private readonly mainController: IMainController
+	) { }
 
 	public async getScenes(): Promise<BaseScene[] | unknown[]> {
 		const baseScenes = await this.getBaseScenes();
@@ -224,6 +224,7 @@ export class ScenesGenerator implements ISceneGenerator {
 		// Работаю над вашим вопросом 🔃
 		// `;
 
+		// tslint:disable-next-line: no-any
 		mainGptScene.enter(async (ctx: any) => {
 			const { message_id: messageId } = await ctx.replyWithHTML(textMain);
 
@@ -288,8 +289,6 @@ export class ScenesGenerator implements ISceneGenerator {
 				// 		{ reply_to_message_id: ctx.update.message.message_id });
 				// }, 5000);
 
-				const chatGPTService = new ChatGPTService();
-
 				// This solution block user communication
 
 				// const str = await chatGPTService.textRequest('some text');
@@ -303,16 +302,20 @@ export class ScenesGenerator implements ISceneGenerator {
 
 				ctx.session.botUserSession.pendingChatGptRequest = true;
 
-				chatGPTService.textRequest(text)
+				this.mainController.cgptTextRequest(text)
 					.then(
 						async (result) => {
-							ctx.session.botUserSession.pendingChatGptRequest = false;
 
+							ctx.session.botUserSession.pendingChatGptRequest = false;
+							const resText = result?.join('\n\n');
 							await ctx.deleteMessage(message_id);
-							await ctx.replyWithHTML(result,
+							await ctx.replyWithHTML(resText,
 								{ reply_to_message_id: ctx.update.message.message_id });
+
 						},
 						async (error) => {
+
+							this.logger.error(`Error response from cgptTextRequest: ${error}`);
 
 							const errorResponseText =
 								`
@@ -327,6 +330,7 @@ export class ScenesGenerator implements ISceneGenerator {
 							await ctx.deleteMessage(message_id);
 							await ctx.replyWithHTML(errorResponseText,
 								{ reply_to_message_id: ctx.update.message.message_id });
+
 						}
 					);
 
@@ -334,6 +338,7 @@ export class ScenesGenerator implements ISceneGenerator {
 
 		});
 
+		// tslint:disable-next-line: no-any
 		mainGptScene.leave(async (ctx: any) => {
 			if (ctx.session.botUserSession.pinnedMessage > 0) {
 				await ctx.unpinChatMessage(ctx.session.botUserSession.pinnedMessage);
@@ -369,6 +374,7 @@ export class ScenesGenerator implements ISceneGenerator {
 
 `;
 
+		// tslint:disable-next-line: no-any
 		mainMJScene.enter(async (ctx: any) => {
 			const { message_id: messageId } = await ctx.replyWithHTML(textMain);
 
@@ -378,6 +384,7 @@ export class ScenesGenerator implements ISceneGenerator {
 		});
 
 
+		// tslint:disable-next-line: no-any
 		mainMJScene.on('message', async (ctx: any) => {
 
 			if (ctx.session.botUserSession.pendingMjRequest) {
@@ -400,22 +407,22 @@ export class ScenesGenerator implements ISceneGenerator {
 
 				const { message_id } = await ctx.replyWithHTML(textOnMessage);
 
-				const mjService = new MjService();
-
 				const text = ctx.message.text;
 
 				ctx.session.botUserSession.pendingMjRequest = true;
 
-				mjService.textRequest(text)
+				this.mainController.mjImgRequest(text)
 					.then(
 						async (result) => {
 							ctx.session.botUserSession.pendingMjRequest = false;
-
+							const resText = result?.join('\n\n');
 							await ctx.deleteMessage(message_id);
-							await ctx.replyWithHTML(result,
+							await ctx.replyWithHTML(resText,
 								{ reply_to_message_id: ctx.update.message.message_id });
 						},
 						async (error) => {
+
+							this.logger.error(`Error response from mjImgRequest: ${error}`);
 
 							const errorResponseText =
 								`
@@ -436,6 +443,7 @@ export class ScenesGenerator implements ISceneGenerator {
 			}
 		});
 
+		// tslint:disable-next-line: no-any
 		mainMJScene.leave(async (ctx: any) => {
 			if (ctx.session.botUserSession.pinnedMessage > 0) {
 				await ctx.unpinChatMessage(ctx.session.botUserSession.pinnedMessage);
@@ -653,6 +661,7 @@ export class ScenesGenerator implements ISceneGenerator {
 
 		pushToPaymentScene.on('message', async (ctx) => {
 
+			// tslint:disable-next-line: no-shadowed-variable
 			const text =
 				`
 Для коммуникации со мной, используй кнопки выше 👆🏾 
