@@ -14,10 +14,12 @@ import { GptCommand } from '../commands/gpt.command.js';
 import { MjCommand } from '../commands/mj.command.js';
 import { StatsCommand } from '../commands/stats.command.js';
 import { HelpCommand } from '../commands/help.command.js';
+import { MySQL } from '@telegraf/session/mysql';
 
 export class BotService implements IBotService {
 
 	public bot: Telegraf<IBotContext>;
+	private store: any;
 
 	private commands: MyBotCommand[] = [];
 	// tslint:disable-next-line: no-any
@@ -30,6 +32,16 @@ export class BotService implements IBotService {
 		private readonly scenesGenerator: ISceneGenerator
 	) {
 		this.bot = new Telegraf<IBotContext>(configService.get('TELEGRAM_TOKEN'));
+
+		this.store = MySQL({
+			host: configService.get('DB_HOST'),
+			database: configService.get('DB_NAME'),
+			user: configService.get('DB_USER'),
+			password: configService.get('DB_PW'),
+			config: {}
+		});
+
+
 	}
 
 	/**
@@ -61,6 +73,10 @@ export class BotService implements IBotService {
 			command: 'help',
 			description: 'Помощь',
 		},
+		{
+			command: 'start',
+			description: 'Перезапустить бот',
+		},
 	];
 
 	public async init(): Promise<Telegraf<IBotContext>> {
@@ -73,7 +89,8 @@ export class BotService implements IBotService {
 		 * Init middlewares
 		 */
 
-		this.bot.use(session());
+		// this.bot.use(session());
+		this.bot.use(session({ store: this.store }));
 		this.bot.use(stage.middleware());
 		this.bot.use(async (ctx, next) => {
 			await createSession(ctx, next);
