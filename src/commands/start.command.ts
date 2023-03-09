@@ -17,7 +17,7 @@ export class StartCommand extends MyBotCommand {
 
 	public async handle(): Promise<void> {
 
-		const errMsg = `Error at ${__filename}:handle => `;
+		const errMsg = `Error at ${this.constructor.name}:handle => `;
 
 		this.bot.start(async (ctx) => {
 			try {
