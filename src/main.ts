@@ -15,7 +15,7 @@ import RedisSession from 'telegraf-session-redis-upd';
 import { SessionService } from './storage/session.class.js';
 import { Kysely, MysqlDialect } from 'kysely';
 import { IDatabase, IDbServices } from './storage/mysql.interface.js';
-import { createPool } from 'mysql2/promise';
+import { createPool } from 'mysql2';
 import { UsersSrorageService } from './storage/users.class.js';
 
 
@@ -39,7 +39,12 @@ const bootstap = async () => {
 
 	const dbConnection: Kysely<IDatabase> = new Kysely<IDatabase>({
 		dialect: new MysqlDialect({
-			pool: createPool(configService.get('DB_URL'))
+			pool: createPool({
+				host: configService.get('DB_HOST'),
+				user: configService.get('DB_USER'),
+				password: configService.get('DB_PW'),
+				database: configService.get('DB_NAME'),
+			})
 		})
 	});
 
