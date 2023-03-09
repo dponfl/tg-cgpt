@@ -14,7 +14,7 @@ import { GptCommand } from '../commands/gpt.command.js';
 import { MjCommand } from '../commands/mj.command.js';
 import { StatsCommand } from '../commands/stats.command.js';
 import { HelpCommand } from '../commands/help.command.js';
-import RedisSession from 'telegraf-session-redis';
+import RedisSession from 'telegraf-session-redis-upd';
 
 export class BotService implements IBotService {
 
@@ -23,21 +23,14 @@ export class BotService implements IBotService {
 	private commands: MyBotCommand[] = [];
 	// tslint:disable-next-line: no-any
 	private scenesList: any[] = [];
-	private session: RedisSession;
 
 	constructor(
 		private readonly logger: ILogger,
 		configService: IConfigService,
-		private readonly scenesGenerator: ISceneGenerator
+		private readonly scenesGenerator: ISceneGenerator,
+		public readonly redisSession: RedisSession
 	) {
 		this.bot = new Telegraf<IBotContext>(configService.get('TELEGRAM_TOKEN'));
-		this.session = new RedisSession({
-			store: {
-				host: configService.get('REDIS_HOST'),
-				port: configService.get('REDIS_PORT'),
-				url: configService.get('REDIS_URL')
-			}
-		});
 	}
 
 	/**
@@ -86,7 +79,7 @@ export class BotService implements IBotService {
 		 */
 
 		// this.bot.use(session());
-		this.bot.use(this.session);
+		this.bot.use(this.redisSession);
 		this.bot.use(stage.middleware());
 		this.bot.use(async (ctx, next) => {
 			await createSession(ctx, next);

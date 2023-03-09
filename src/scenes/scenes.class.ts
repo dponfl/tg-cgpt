@@ -1,4 +1,5 @@
 import { Markup } from 'telegraf';
+import RedisSession from 'telegraf-session-redis-upd';
 import { BaseScene } from 'telegraf/scenes';
 import { BotCommand } from 'typegram';
 import { MySceneCommand } from '../commands/base_scenes/command.class.js';
@@ -14,17 +15,12 @@ import { ISceneGenerator } from './scenes.interface.js';
 
 export class ScenesGenerator implements ISceneGenerator {
 
-	// private menuSceneProp: BaseScene = Object(BaseScene);
-	// private mainGptSceneProp: BaseScene = Object(BaseScene);
-	// private mainMJSceneProp: BaseScene = Object(BaseScene);
-	// private pushToPaymentSceneProp: BaseScene = Object(BaseScene);
-	// private statsSceneProp: BaseScene = Object(BaseScene);
-
 	private commands: MySceneCommand[] = [];
 
 	constructor(
 		private readonly logger: ILogger,
-		private readonly mainController: IMainController
+		private readonly mainController: IMainController,
+		private readonly redisSession: RedisSession
 	) { }
 
 	public async getScenes(): Promise<BaseScene[] | unknown[]> {
@@ -309,6 +305,11 @@ export class ScenesGenerator implements ISceneGenerator {
 						async (result) => {
 
 							ctx.session.botUserSession.pendingChatGptRequest = false;
+
+							const sessionKey = `${ctx.from.id}:${ctx.chat.id}`;
+
+							this.redisSession.saveSession(sessionKey, ctx.session);
+
 							const resText = result?.join('\n\n');
 							await ctx.deleteMessage(message_id);
 							await ctx.replyWithHTML(resText,
@@ -328,6 +329,10 @@ export class ScenesGenerator implements ISceneGenerator {
 `;
 
 							ctx.session.botUserSession.pendingChatGptRequest = false;
+
+							const sessionKey = `${ctx.from.id}:${ctx.chat.id}`;
+
+							this.redisSession.saveSession(sessionKey, ctx.session);
 
 							await ctx.deleteMessage(message_id);
 							await ctx.replyWithHTML(errorResponseText,
