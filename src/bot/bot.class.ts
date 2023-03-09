@@ -14,7 +14,7 @@ import { GptCommand } from '../commands/gpt.command.js';
 import { MjCommand } from '../commands/mj.command.js';
 import { StatsCommand } from '../commands/stats.command.js';
 import { HelpCommand } from '../commands/help.command.js';
-import RedisSession from 'telegraf-session-redis-upd';
+import RedisSession from 'telegraf-session-redis';
 
 export class BotService implements IBotService {
 
