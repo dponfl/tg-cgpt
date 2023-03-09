@@ -237,6 +237,8 @@ export class ScenesGenerator implements ISceneGenerator {
 		// tslint:disable-next-line: no-any
 		mainGptScene.on('message', async (ctx: any) => {
 
+			this.logger.warn('ctx.session.botUserSession', JSON.stringify(ctx.session.botUserSession, null, 2));
+
 			if (ctx.session.botUserSession.pendingChatGptRequest) {
 
 				const secondRequestText =
