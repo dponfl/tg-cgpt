@@ -2,9 +2,9 @@ import { Telegraf } from 'telegraf';
 import { IBotContext } from '../bot/bot.interface.js';
 import { ILogger } from '../logger/logger.interface.js';
 import { MyBotCommand } from './command.class.js';
-import uuid from 'uuid-apikey';
 import { Messenger } from '../types.js';
 import { DbResponseStatus, IDbServices, IUsersTable } from '../storage/mysql.interface.js';
+import { randomUUID } from 'crypto';
 
 export class StartCommand extends MyBotCommand {
 	constructor(
@@ -32,7 +32,7 @@ export class StartCommand extends MyBotCommand {
 					return;
 				}
 
-				const guid = uuid.default.create().uuid;
+				const guid = randomUUID();
 
 				const userRec: IUsersTable = {
 					guid,
