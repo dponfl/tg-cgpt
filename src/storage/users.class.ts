@@ -23,7 +23,6 @@ export class UsersSrorageService implements IUserStorageSevice {
 			res = await this.dbConnection
 				.insertInto('users')
 				.values(payload)
-				.returningAll()
 				.execute();
 
 			this.logger.info('12');
