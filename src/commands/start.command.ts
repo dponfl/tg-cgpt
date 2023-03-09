@@ -40,10 +40,16 @@ export class StartCommand extends MyBotCommand {
 
 				this.logger.info('3');
 
+				const firstname_c = ctx.from?.first_name.replace(/(?![a-zA-Z]|[а-яА-ЯёЁ]|[0-9]|[_\s-\(\),<>\|\!@#$%^&"№;:?*\[\]{}'\\\/\.])./g, '*') || '';
+
+				const surname_c = ctx.from?.last_name?.replace(/(?![a-zA-Z]|[а-яА-ЯёЁ]|[0-9]|[_\s-\(\),<>\|\!@#$%^&"№;:?*\[\]{}'\\\/\.])./g, '*') || '';
+
 				const userRec: IUsersTable = {
 					guid,
 					firstname: ctx.from?.first_name || '',
+					firstname_c,
 					surname: ctx.from?.last_name || '',
+					surname_c,
 					username: ctx.from?.username || '',
 					fromId: ctx.from?.id || '',
 					chatId: ctx.chat?.id || '',

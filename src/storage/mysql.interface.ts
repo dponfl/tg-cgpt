@@ -20,7 +20,9 @@ export interface IUsersTable {
 	id?: Generated<number>;
 	guid: string;
 	firstname: string;
+	firstname_c: string;
 	surname: string;
+	surname_c: string;
 	username: string;
 	fromId: string | number;
 	chatId: string | number;
