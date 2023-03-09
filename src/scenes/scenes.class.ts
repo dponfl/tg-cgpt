@@ -11,6 +11,7 @@ import { PaymentCommand } from '../commands/base_scenes/payment.command.js';
 import { StatsCommand } from '../commands/base_scenes/stats.command.js';
 import { IMainController } from '../controller/controller.interface.js';
 import { ILogger } from '../logger/logger.interface.js';
+import { ISessionService } from '../storage/session.interface.js';
 import { ISceneGenerator } from './scenes.interface.js';
 
 export class ScenesGenerator implements ISceneGenerator {
@@ -20,7 +21,8 @@ export class ScenesGenerator implements ISceneGenerator {
 	constructor(
 		private readonly logger: ILogger,
 		private readonly mainController: IMainController,
-		private readonly redisSession: RedisSession
+		private readonly redisSession: RedisSession,
+		private readonly sessionService: ISessionService
 	) { }
 
 	public async getScenes(): Promise<BaseScene[] | unknown[]> {
@@ -225,6 +227,7 @@ export class ScenesGenerator implements ISceneGenerator {
 			const { message_id: messageId } = await ctx.replyWithHTML(textMain);
 
 			ctx.session.botUserSession.pinnedMessage = messageId;
+			this.sessionService.updateSession(ctx);
 
 			await ctx.pinChatMessage(messageId, { disable_notification: true });
 		});
@@ -232,8 +235,6 @@ export class ScenesGenerator implements ISceneGenerator {
 
 		// tslint:disable-next-line: no-any
 		mainGptScene.on('message', async (ctx: any) => {
-
-			this.logger.warn('ctx.session.botUserSession', JSON.stringify(ctx.session.botUserSession, null, 2));
 
 			if (ctx.session.botUserSession.pendingChatGptRequest) {
 
@@ -300,15 +301,15 @@ export class ScenesGenerator implements ISceneGenerator {
 
 				ctx.session.botUserSession.pendingChatGptRequest = true;
 
+				this.sessionService.updateSession(ctx);
+
 				this.mainController.cgptTextRequest(text)
 					.then(
 						async (result) => {
 
 							ctx.session.botUserSession.pendingChatGptRequest = false;
 
-							const sessionKey = `${ctx.from.id}:${ctx.chat.id}`;
-
-							this.redisSession.saveSession(sessionKey, ctx.session);
+							this.sessionService.updateSession(ctx);
 
 							const resText = result?.join('\n\n');
 							await ctx.deleteMessage(message_id);
@@ -330,9 +331,7 @@ export class ScenesGenerator implements ISceneGenerator {
 
 							ctx.session.botUserSession.pendingChatGptRequest = false;
 
-							const sessionKey = `${ctx.from.id}:${ctx.chat.id}`;
-
-							this.redisSession.saveSession(sessionKey, ctx.session);
+							this.sessionService.updateSession(ctx);
 
 							await ctx.deleteMessage(message_id);
 							await ctx.replyWithHTML(errorResponseText,
@@ -348,7 +347,11 @@ export class ScenesGenerator implements ISceneGenerator {
 		// tslint:disable-next-line: no-any
 		mainGptScene.leave(async (ctx: any) => {
 			if (ctx.session.botUserSession.pinnedMessage > 0) {
-				await ctx.unpinChatMessage(ctx.session.botUserSession.pinnedMessage);
+				try {
+					await ctx.unpinChatMessage(ctx.session.botUserSession.pinnedMessage);
+				} catch (err) {
+					this.logger.error('Error: Cannot perform unpinChatMessage', err);
+				}
 			}
 		});
 
@@ -387,6 +390,8 @@ export class ScenesGenerator implements ISceneGenerator {
 
 			ctx.session.botUserSession.pinnedMessage = messageId;
 
+			this.sessionService.updateSession(ctx);
+
 			await ctx.pinChatMessage(messageId, { disable_notification: true });
 		});
 
@@ -418,10 +423,13 @@ export class ScenesGenerator implements ISceneGenerator {
 
 				ctx.session.botUserSession.pendingMjRequest = true;
 
+				this.sessionService.updateSession(ctx);
+
 				this.mainController.mjImgRequest(text)
 					.then(
 						async (result) => {
 							ctx.session.botUserSession.pendingMjRequest = false;
+							this.sessionService.updateSession(ctx);
 							const resText = result?.join('\n\n');
 							await ctx.deleteMessage(message_id);
 							await ctx.replyWithHTML(resText,
@@ -441,6 +449,8 @@ export class ScenesGenerator implements ISceneGenerator {
 
 							ctx.session.botUserSession.pendingMjRequest = false;
 
+							this.sessionService.updateSession(ctx);
+
 							await ctx.deleteMessage(message_id);
 							await ctx.replyWithHTML(errorResponseText,
 								{ reply_to_message_id: ctx.update.message.message_id });
@@ -453,7 +463,11 @@ export class ScenesGenerator implements ISceneGenerator {
 		// tslint:disable-next-line: no-any
 		mainMJScene.leave(async (ctx: any) => {
 			if (ctx.session.botUserSession.pinnedMessage > 0) {
-				await ctx.unpinChatMessage(ctx.session.botUserSession.pinnedMessage);
+				try {
+					await ctx.unpinChatMessage(ctx.session.botUserSession.pinnedMessage);
+				} catch (err) {
+					this.logger.error('Error: Cannot perform unpinChatMessage', err);
+				}
 			}
 		});
 

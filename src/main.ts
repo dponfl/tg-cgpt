@@ -13,6 +13,7 @@ import { ScenesGenerator } from './scenes/scenes.class.js';
 import { ISceneGenerator } from './scenes/scenes.interface.js';
 import RedisSession from 'telegraf-session-redis-upd';
 import { IBotContext } from './bot/bot.interface.js';
+import { SessionService } from './storage/session.class.js';
 
 
 const bootstap = async () => {
@@ -31,7 +32,9 @@ const bootstap = async () => {
 		}
 	});
 
-	const scenesGenerator: ISceneGenerator = new ScenesGenerator(logger, mainController, redisSession);
+	const sessionService = new SessionService(redisSession);
+
+	const scenesGenerator: ISceneGenerator = new ScenesGenerator(logger, mainController, redisSession, sessionService);
 
 	const app = new App(
 		logger,
