@@ -19,7 +19,14 @@ export class UsersSrorageService implements IUserStorageSevice {
 			res = await this.dbConnection
 				.insertInto('users')
 				.values(payload)
-				.explain('json');
+				.returningAll()
+				.execute();
+
+			return {
+				status: DbResponseStatus.SUCCESS,
+				payload: res
+			};
+
 		} catch (error) {
 			let errMsg = '';
 			if (error instanceof Error) {
@@ -36,10 +43,6 @@ export class UsersSrorageService implements IUserStorageSevice {
 			};
 		}
 
-		return {
-			status: DbResponseStatus.SUCCESS,
-			payload: res
-		};
 	}
 
 	getUserById(id: number): Promise<IDbServiceResponse> {
