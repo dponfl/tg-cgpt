@@ -12,8 +12,11 @@ import { ILogger } from './logger/logger.interface.js';
 import { ScenesGenerator } from './scenes/scenes.class.js';
 import { ISceneGenerator } from './scenes/scenes.interface.js';
 import RedisSession from 'telegraf-session-redis-upd';
-import { IBotContext } from './bot/bot.interface.js';
 import { SessionService } from './storage/session.class.js';
+import { Kysely, MysqlDialect } from 'kysely';
+import { IDatabase, IDbServices } from './storage/mysql.interface.js';
+import { createPool } from 'mysql2/promise';
+import { UsersSrorageService } from './storage/users.class.js';
 
 
 const bootstap = async () => {
@@ -34,11 +37,27 @@ const bootstap = async () => {
 
 	const sessionService = new SessionService(redisSession);
 
+	const dbConnection: Kysely<IDatabase> = new Kysely<IDatabase>({
+		dialect: new MysqlDialect({
+			pool: createPool(configService.get('DB_URL'))
+		})
+	});
+
+	const dbServices: IDbServices = {
+		usersDbService: new UsersSrorageService(dbConnection, logger)
+	};
+
 	const scenesGenerator: ISceneGenerator = new ScenesGenerator(logger, mainController, redisSession, sessionService);
 
 	const app = new App(
 		logger,
-		new BotService(logger, configService, scenesGenerator, redisSession),
+		new BotService(
+			logger,
+			configService,
+			scenesGenerator,
+			redisSession,
+			dbServices
+		),
 	);
 
 	await app.init();

@@ -350,7 +350,7 @@ export class ScenesGenerator implements ISceneGenerator {
 				try {
 					await ctx.unpinChatMessage(ctx.session.botUserSession.pinnedMessage);
 				} catch (err) {
-					this.logger.error('Error: Cannot perform unpinChatMessage', err);
+					this.logger.error(`Error: Cannot perform unpinChatMessage: ${err}`);
 				}
 			}
 		});
@@ -466,7 +466,7 @@ export class ScenesGenerator implements ISceneGenerator {
 				try {
 					await ctx.unpinChatMessage(ctx.session.botUserSession.pinnedMessage);
 				} catch (err) {
-					this.logger.error('Error: Cannot perform unpinChatMessage', err);
+					this.logger.error(`Error: Cannot perform unpinChatMessage: ${err}`);
 				}
 			}
 		});

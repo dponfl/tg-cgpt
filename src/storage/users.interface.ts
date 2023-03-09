@@ -1,10 +1,6 @@
-export interface IUserRecord {
-	id: number;
-	guid: string;
-	firstname: string;
-	surname: string;
-}
+import { IDbServiceResponse, IUsersTable } from './mysql.interface.js';
 
 export interface IUserStorageSevice {
-	getUserById(id: number): Promise<IUserRecord>;
+	createUser(data: IUsersTable): Promise<IDbServiceResponse>;
+	getUserById(id: number): Promise<IDbServiceResponse>;
 }
