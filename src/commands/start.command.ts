@@ -38,21 +38,15 @@ export class StartCommand extends MyBotCommand {
 				 * Create user record if none
 				 */
 
-				this.logger.info('1');
-
 				if (ctx.session.botUserSession.userGuid) {
 					await ctx.scene.enter('startNext');
 				}
-
-				this.logger.info('2');
 
 				const guid = randomUUID();
 
 				ctx.session.botUserSession.userGuid = guid;
 
 				this.sessionService.updateSession(ctx);
-
-				this.logger.info('3');
 
 				const firstname_c = this.utils.clearSpecialChars(ctx.from?.first_name);
 
@@ -79,17 +73,11 @@ export class StartCommand extends MyBotCommand {
 					lang: ctx.from?.language_code ?? 'ru',
 				};
 
-				this.logger.info('4');
-
 				const resRaw = await this.dbServices.usersDbService?.createUser(userRec);
-
-				this.logger.info('5');
 
 				if (resRaw?.status === DbResponseStatus.ERROR) {
 					throw new Error(`Error: cannot create user record`);
 				}
-
-				this.logger.info('6');
 
 				await ctx.scene.enter('startIntro');
 

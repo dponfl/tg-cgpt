@@ -20,7 +20,7 @@ export class App {
 		 */
 
 		this.bot.catch(async (error: unknown, ctx) => {
-			this.logger.error('Bot error:', error);
+			this.logger.error(`Bot error: ${error}`);
 
 			await ctx.reply('При обработке вашего сообщения что-то пошло не так.');
 		});

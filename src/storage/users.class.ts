@@ -11,11 +11,7 @@ export class UsersSrorageService implements IUserStorageSevice {
 
 	public async createUser(data: IUsersTable): Promise<IDbServiceResponse> {
 
-		this.logger.info('10');
-
 		const payload = Object(data);
-
-		this.logger.info('11');
 
 		let res;
 
@@ -24,8 +20,6 @@ export class UsersSrorageService implements IUserStorageSevice {
 				.insertInto('users')
 				.values(payload)
 				.execute();
-
-			this.logger.info('12');
 
 			return {
 				status: DbResponseStatus.SUCCESS,

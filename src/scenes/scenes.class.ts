@@ -206,7 +206,7 @@ export class ScenesGenerator implements ISceneGenerator {
 			ctx.session.botUserSession.pinnedMessage = messageId;
 			this.sessionService.updateSession(ctx);
 
-			await ctx.pinChatMessage(messageId, { disable_notification: true });
+			await ctx.pinChatMessage(messageId);
 		});
 
 
@@ -369,7 +369,7 @@ export class ScenesGenerator implements ISceneGenerator {
 
 			this.sessionService.updateSession(ctx);
 
-			await ctx.pinChatMessage(messageId, { disable_notification: true });
+			await ctx.pinChatMessage(messageId);
 		});
 
 
