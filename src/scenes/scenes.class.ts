@@ -8,6 +8,7 @@ import { HelpCommand } from '../commands/base_scenes/help.command.js';
 import { MenuCommand } from '../commands/base_scenes/menu.command.js';
 import { MjCommand } from '../commands/base_scenes/mj.command.js';
 import { PaymentCommand } from '../commands/base_scenes/payment.command.js';
+import { StartCommand } from '../commands/base_scenes/start.command.js';
 import { StatsCommand } from '../commands/base_scenes/stats.command.js';
 import { IMainController } from '../controller/controller.interface.js';
 import { ILogger } from '../logger/logger.interface.js';
@@ -52,33 +53,6 @@ export class ScenesGenerator implements ISceneGenerator {
 		return Promise.all([]);
 	}
 
-	/**
-	 * list of commands the scene will handle 
-	 */
-
-	private readonly sceneCommands: readonly BotCommand[] = [
-		{
-			command: 'menu',
-			description: 'Главное меню',
-		},
-		{
-			command: 'img',
-			description: 'Запрос в Midjorney',
-		},
-		{
-			command: 'pay',
-			description: 'Оплатить запросы',
-		},
-		{
-			command: 'info',
-			description: 'Информация по запросам',
-		},
-		{
-			command: 'help',
-			description: 'Помощь',
-		},
-	];
-
 	private async activateCommands(scene: BaseScene): Promise<void> {
 
 		/**
@@ -86,12 +60,13 @@ export class ScenesGenerator implements ISceneGenerator {
 		 */
 
 		this.commands = [
-			new MenuCommand(scene),
-			new PaymentCommand(scene),
-			new GptCommand(scene),
-			new MjCommand(scene),
-			new StatsCommand(scene),
-			new HelpCommand(scene),
+			new StartCommand(scene, this.logger),
+			new MenuCommand(scene, this.logger),
+			new PaymentCommand(scene, this.logger),
+			new GptCommand(scene, this.logger),
+			new MjCommand(scene, this.logger),
+			new StatsCommand(scene, this.logger),
+			new HelpCommand(scene, this.logger),
 		];
 
 		for (const command of this.commands) {

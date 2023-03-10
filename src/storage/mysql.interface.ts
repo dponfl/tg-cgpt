@@ -13,6 +13,7 @@ export interface IDbServices {
 
 export interface IDbServiceResponse {
 	status: DbResponseStatus;
+	// tslint:disable-next-line: no-any
 	payload?: any;
 }
 

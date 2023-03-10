@@ -2,7 +2,7 @@ import { BaseScene } from 'telegraf/scenes';
 import { ILogger } from '../../logger/logger.interface.js';
 import { MySceneCommand } from './command.class.js';
 
-export class StatsCommand extends MySceneCommand {
+export class StartCommand extends MySceneCommand {
 	constructor(
 		public readonly scene: BaseScene,
 		public readonly logger: ILogger,
@@ -11,9 +11,12 @@ export class StatsCommand extends MySceneCommand {
 	}
 	public async handle(): Promise<void> {
 		// tslint:disable-next-line: no-any
-		this.scene.command('stats', async (ctx: any) => {
+		this.scene.command('start', async (ctx: any) => {
 			await ctx.deleteMessage();
-			await ctx.scene.enter('statsScene');
+			if (!ctx.session.botUserSession.userGuid) {
+				this.logger.error('Error: No value at ctx.session.botUserSession.userGuid');
+			}
+			await ctx.scene.enter('startNext');
 		});
 	}
 }
