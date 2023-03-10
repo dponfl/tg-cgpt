@@ -17,6 +17,7 @@ import { Kysely, MysqlDialect } from 'kysely';
 import { IDatabase, IDbServices } from './storage/mysql.interface.js';
 import { createPool } from 'mysql2';
 import { UsersSrorageService } from './storage/users.class.js';
+import { IUtils, Utils } from './utils/utils.class.js';
 
 
 const bootstap = async () => {
@@ -52,7 +53,15 @@ const bootstap = async () => {
 		usersDbService: new UsersSrorageService(dbConnection, logger)
 	};
 
-	const scenesGenerator: ISceneGenerator = new ScenesGenerator(logger, mainController, redisSession, sessionService);
+	const utils: IUtils = new Utils();
+
+	const scenesGenerator: ISceneGenerator = new ScenesGenerator(
+		logger,
+		mainController,
+		redisSession,
+		sessionService,
+		utils
+	);
 
 	const app = new App(
 		logger,
@@ -61,7 +70,8 @@ const bootstap = async () => {
 			configService,
 			scenesGenerator,
 			redisSession,
-			dbServices
+			dbServices,
+			utils
 		),
 	);
 

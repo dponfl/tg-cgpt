@@ -12,6 +12,7 @@ import { StatsCommand } from '../commands/base_scenes/stats.command.js';
 import { IMainController } from '../controller/controller.interface.js';
 import { ILogger } from '../logger/logger.interface.js';
 import { ISessionService } from '../storage/session.interface.js';
+import { IUtils } from '../utils/utils.class.js';
 import { ISceneGenerator } from './scenes.interface.js';
 
 export class ScenesGenerator implements ISceneGenerator {
@@ -22,7 +23,8 @@ export class ScenesGenerator implements ISceneGenerator {
 		private readonly logger: ILogger,
 		private readonly mainController: IMainController,
 		private readonly redisSession: RedisSession,
-		private readonly sessionService: ISessionService
+		private readonly sessionService: ISessionService,
+		private readonly utils: IUtils
 	) { }
 
 	public async getScenes(): Promise<BaseScene[] | unknown[]> {

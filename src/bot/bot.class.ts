@@ -16,21 +16,23 @@ import { StatsCommand } from '../commands/stats.command.js';
 import { HelpCommand } from '../commands/help.command.js';
 import RedisSession from 'telegraf-session-redis-upd';
 import { IDbServices } from '../storage/mysql.interface.js';
+import { IUtils } from '../utils/utils.class.js';
 
 export class BotService implements IBotService {
 
-	public bot: Telegraf<IBotContext>;
+	private bot: Telegraf<IBotContext>;
 
 	private commands: MyBotCommand[] = [];
 	// tslint:disable-next-line: no-any
 	private scenesList: any[] = [];
 
 	constructor(
-		private readonly logger: ILogger,
-		configService: IConfigService,
-		private readonly scenesGenerator: ISceneGenerator,
+		public readonly logger: ILogger,
+		public readonly configService: IConfigService,
+		public readonly scenesGenerator: ISceneGenerator,
 		public readonly redisSession: RedisSession,
-		private readonly dbServices: IDbServices
+		public readonly dbServices: IDbServices,
+		public readonly utils: IUtils
 	) {
 		this.bot = new Telegraf<IBotContext>(configService.get('TELEGRAM_TOKEN'));
 	}
@@ -105,13 +107,13 @@ export class BotService implements IBotService {
 		 */
 
 		this.commands = [
-			new StartCommand(this.bot, this.logger, this.dbServices),
-			new GptCommand(this.bot, this.logger),
-			new MjCommand(this.bot, this.logger),
-			new MenuCommand(this.bot, this.logger),
-			new PaymentCommand(this.bot, this.logger),
-			new StatsCommand(this.bot, this.logger),
-			new HelpCommand(this.bot, this.logger),
+			new StartCommand(this.bot, this.logger, this.dbServices, this.utils),
+			new GptCommand(this.bot, this.logger, this.dbServices, this.utils),
+			new MjCommand(this.bot, this.logger, this.dbServices, this.utils),
+			new MenuCommand(this.bot, this.logger, this.dbServices, this.utils),
+			new PaymentCommand(this.bot, this.logger, this.dbServices, this.utils),
+			new StatsCommand(this.bot, this.logger, this.dbServices, this.utils),
+			new HelpCommand(this.bot, this.logger, this.dbServices, this.utils),
 		];
 
 		for (const command of this.commands) {

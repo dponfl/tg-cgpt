@@ -1,4 +1,4 @@
-import { Generated } from 'kysely';
+import { ColumnType, Generated } from 'kysely';
 import { IUserStorageSevice } from './users.interface.js';
 
 export enum DbResponseStatus {
@@ -18,6 +18,8 @@ export interface IDbServiceResponse {
 
 export interface IUsersTable {
 	id?: Generated<number>;
+	createdAt: string;
+	updatedAt: string;
 	guid: string;
 	firstname: string;
 	firstname_c: string;

@@ -5,14 +5,22 @@ import { MyBotCommand } from './command.class.js';
 import { Messenger } from '../types.js';
 import { DbResponseStatus, IDbServices, IUsersTable } from '../storage/mysql.interface.js';
 import { randomUUID } from 'crypto';
+import { IUtils } from '../utils/utils.class.js';
+import moment from 'moment';
 
 export class StartCommand extends MyBotCommand {
 	constructor(
 		public readonly bot: Telegraf<IBotContext>,
 		public readonly logger: ILogger,
-		private readonly dbServices: IDbServices
+		public readonly dbServices: IDbServices,
+		public readonly utils: IUtils
 	) {
-		super(bot, logger);
+		super(
+			bot,
+			logger,
+			dbServices,
+			utils
+		);
 	}
 
 	public async handle(): Promise<void> {
@@ -38,14 +46,18 @@ export class StartCommand extends MyBotCommand {
 
 				const guid = randomUUID();
 
+				ctx.session.botUserSession.userGuid = guid;
+
 				this.logger.info('3');
 
-				const firstname_c = ctx.from?.first_name.replace(/(?![a-zA-Z]|[а-яА-ЯёЁ]|[0-9]|[_\s-\(\),<>\|\!@#$%^&"№;:?*\[\]{}'\\\/\.])./g, '*') || '';
+				const firstname_c = this.utils.clearSpecialChars(ctx.from?.first_name);
 
-				const surname_c = ctx.from?.last_name?.replace(/(?![a-zA-Z]|[а-яА-ЯёЁ]|[0-9]|[_\s-\(\),<>\|\!@#$%^&"№;:?*\[\]{}'\\\/\.])./g, '*') || '';
+				const surname_c = this.utils.clearSpecialChars(ctx.from?.last_name ?? '');
 
 				const userRec: IUsersTable = {
 					guid,
+					createdAt: moment().utc().format(),
+					updatedAt: moment().utc().format(),
 					firstname: ctx.from?.first_name || '',
 					firstname_c,
 					surname: ctx.from?.last_name || '',
@@ -60,7 +72,7 @@ export class StartCommand extends MyBotCommand {
 					clientUnreachableDetails: '',
 					deleted: false,
 					banned: false,
-					lang: ctx.from?.language_code || 'RU'
+					lang: ctx.from?.language_code || 'RU',
 				};
 
 				this.logger.info('4');
