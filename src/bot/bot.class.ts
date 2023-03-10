@@ -1,4 +1,4 @@
-import { Telegraf, session } from 'telegraf';
+import { Telegraf, session, Markup } from 'telegraf';
 import { Stage } from 'telegraf/scenes';
 import { BotCommand } from 'telegraf/types';
 import { MyBotCommand } from '../commands/command.class.js';
@@ -16,8 +16,8 @@ import { StatsCommand } from '../commands/stats.command.js';
 import { HelpCommand } from '../commands/help.command.js';
 import RedisSession from 'telegraf-session-redis-upd';
 import { IDbServices } from '../storage/mysql.interface.js';
-import { IUtils } from '../utils/utils.class.js';
 import { ISessionService } from '../storage/session.interface.js';
+import { BroadcaseMsgCategory, IUtils } from '../utils/utils.class.js';
 
 export class BotService implements IBotService {
 
@@ -123,4 +123,96 @@ export class BotService implements IBotService {
 		}
 
 	}
+
+	private async specialChannelProcessing(): Promise<void> {
+
+		let msgToSend: string = '';
+
+		const textSendToAll = 'Отправить всем 🤔';
+		const textDoNotSend = 'Не отправлять ❌';
+
+		// tslint:disable-next-line: no-any
+		this.bot.on('message', async (ctx: any) => {
+
+			const { chatId } = this.utils.getChatIdObj(ctx);
+
+			if (chatId?.toString() !== this.configService.get('SIGNAL_GROUP_CHAT_ID')) {
+				return;
+			}
+
+			msgToSend = ctx.update.message.text;
+
+			const replyMsg = `Получено сообщение:\n\n${msgToSend}`;
+
+			ctx.telegram.sendMessage(
+				chatId,
+				replyMsg,
+				{
+					parse_mode: 'HTML',
+					reply_markup: {
+						inline_keyboard: [
+							[
+								{
+									text: textSendToAll,
+									callback_data: 'send_to_all',
+								}
+							],
+							[
+								{
+									text: textDoNotSend,
+									callback_data: 'do_not_send',
+								}
+							]
+						]
+					},
+				}
+			);
+
+		});
+
+		this.bot.action('send_to_all', async (ctx) => {
+
+			try {
+
+				await ctx.replyWithHTML(`✅ Вы выбрали: <b><i>${textSendToAll}</i></b>`);
+				await ctx.editMessageReplyMarkup({ inline_keyboard: [] });
+
+				if (msgToSend) {
+
+					await this.utils.broadcastMsg(BroadcaseMsgCategory.all, msgToSend);
+
+					msgToSend = '';
+
+				} else {
+					this.logger.error(`Error: Broadcast message content is empty`);
+				}
+
+			} catch (error) {
+				if (error instanceof Error) {
+					this.logger.error(`Error: Broadcast message sending: "send_to_all" action error: ${error.message}`);
+				} else {
+					this.logger.error(`Error: Broadcast message sending: "send_to_all" action error`);
+				}
+			}
+
+		});
+
+		this.bot.action('do_not_send', async (ctx) => {
+			try {
+
+				await ctx.replyWithHTML(`✅ Вы выбрали: <b><i>${textDoNotSend}</i></b>`);
+				await ctx.editMessageReplyMarkup({ inline_keyboard: [] });
+				msgToSend = '';
+
+			} catch (error) {
+				if (error instanceof Error) {
+					this.logger.error(`Error: Broadcast message sending: "do_not_send" action error: ${error.message}`);
+				} else {
+					this.logger.error(`Error: Broadcast message sending: "do_not_send" action error`);
+				}
+			}
+		});
+
+	}
+
 }

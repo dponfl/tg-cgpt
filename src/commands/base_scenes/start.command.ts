@@ -16,7 +16,7 @@ export class StartCommand extends MySceneCommand {
 		this.scene.command('start', async (ctx: any) => {
 			await ctx.deleteMessage();
 			if (!ctx.session.botUserSession.userGuid) {
-				this.logger.error(`Error: [${this.utils?.getChatIds(ctx)}] No value at ctx.session.botUserSession.userGuid`);
+				this.logger.error(`Error: [${this.utils?.getChatIdStr(ctx)}] No value at ctx.session.botUserSession.userGuid`);
 			}
 			await ctx.scene.enter('startNext');
 		});
