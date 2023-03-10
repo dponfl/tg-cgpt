@@ -99,6 +99,8 @@ export class BotService implements IBotService {
 
 		await this.activateCommands();
 
+		await this.specialChannelProcessing();
+
 		return this.bot;
 	}
 
