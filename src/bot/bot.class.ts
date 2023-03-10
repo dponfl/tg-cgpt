@@ -17,6 +17,7 @@ import { HelpCommand } from '../commands/help.command.js';
 import RedisSession from 'telegraf-session-redis-upd';
 import { IDbServices } from '../storage/mysql.interface.js';
 import { IUtils } from '../utils/utils.class.js';
+import { ISessionService } from '../storage/session.interface.js';
 
 export class BotService implements IBotService {
 
@@ -32,6 +33,7 @@ export class BotService implements IBotService {
 		public readonly scenesGenerator: ISceneGenerator,
 		public readonly redisSession: RedisSession,
 		public readonly dbServices: IDbServices,
+		private readonly sessionService: ISessionService,
 		public readonly utils: IUtils
 	) {
 		this.bot = new Telegraf<IBotContext>(configService.get('TELEGRAM_TOKEN'));
@@ -107,7 +109,7 @@ export class BotService implements IBotService {
 		 */
 
 		this.commands = [
-			new StartCommand(this.bot, this.logger, this.dbServices, this.utils),
+			new StartCommand(this.bot, this.logger, this.sessionService, this.dbServices, this.utils),
 			new GptCommand(this.bot, this.logger, this.dbServices, this.utils),
 			new MjCommand(this.bot, this.logger, this.dbServices, this.utils),
 			new MenuCommand(this.bot, this.logger, this.dbServices, this.utils),

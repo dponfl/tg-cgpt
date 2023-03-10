@@ -71,6 +71,7 @@ const bootstap = async () => {
 			scenesGenerator,
 			redisSession,
 			dbServices,
+			sessionService,
 			utils
 		),
 	);

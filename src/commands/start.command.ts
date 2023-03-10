@@ -7,11 +7,13 @@ import { DbResponseStatus, IDbServices, IUsersTable } from '../storage/mysql.int
 import { randomUUID } from 'crypto';
 import { IUtils } from '../utils/utils.class.js';
 import moment from 'moment';
+import { ISessionService } from '../storage/session.interface.js';
 
 export class StartCommand extends MyBotCommand {
 	constructor(
 		public readonly bot: Telegraf<IBotContext>,
 		public readonly logger: ILogger,
+		private readonly sessionService: ISessionService,
 		public readonly dbServices: IDbServices,
 		public readonly utils: IUtils
 	) {
@@ -39,7 +41,7 @@ export class StartCommand extends MyBotCommand {
 				this.logger.info('1');
 
 				if (ctx.session.botUserSession.userGuid) {
-					return;
+					await ctx.scene.enter('startNext');
 				}
 
 				this.logger.info('2');
@@ -47,6 +49,8 @@ export class StartCommand extends MyBotCommand {
 				const guid = randomUUID();
 
 				ctx.session.botUserSession.userGuid = guid;
+
+				this.sessionService.updateSession(ctx);
 
 				this.logger.info('3');
 
@@ -58,21 +62,21 @@ export class StartCommand extends MyBotCommand {
 					guid,
 					createdAt: moment().utc().format(),
 					updatedAt: moment().utc().format(),
-					firstname: ctx.from?.first_name || '',
+					firstname: ctx.from?.first_name ?? '',
 					firstname_c,
-					surname: ctx.from?.last_name || '',
+					surname: ctx.from?.last_name ?? '',
 					surname_c,
-					username: ctx.from?.username || '',
-					fromId: ctx.from?.id || '',
-					chatId: ctx.chat?.id || '',
-					region: 'RU',
-					country: 'RU',
+					username: ctx.from?.username ?? '',
+					fromId: ctx.from?.id ?? '',
+					chatId: ctx.chat?.id ?? '',
+					region: 'ru',
+					country: 'ru',
 					messenger: Messenger.TELEGRAM,
 					clientUnreachable: false,
 					clientUnreachableDetails: '',
 					deleted: false,
 					banned: false,
-					lang: ctx.from?.language_code || 'RU',
+					lang: ctx.from?.language_code ?? 'ru',
 				};
 
 				this.logger.info('4');
