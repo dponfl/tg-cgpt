@@ -1,4 +1,5 @@
 import { IBotContext } from '../bot/bot.interface.js';
+import { ILogger } from '../logger/logger.interface.js';
 
 type GetChatIdObjResult = {
 	fromId: number | undefined,
@@ -11,13 +12,25 @@ export enum BroadcaseMsgCategory {
 }
 
 export interface IUtils {
+	errorLog(err: unknown): void;
 	clearSpecialChars(str: string): string;
 	getChatIdStr(ctx: IBotContext): string;
 	getChatIdObj(ctx: IBotContext): GetChatIdObjResult;
-	broadcastMsg(category: BroadcaseMsgCategory, msg: string): Promise<void>;
 }
 
 export class Utils implements IUtils {
+
+	constructor(
+		private readonly logger: ILogger,
+	) { }
+
+	errorLog(err: unknown): void {
+		if (err instanceof Error) {
+			this.logger.error(`Error in [${this.constructor.name}:${this.constructor.call.name}]: ${err.message}`);
+		} else {
+			this.logger.error(`Error in [${this.constructor.name}:${this.constructor.call.name}]`);
+		}
+	}
 
 	clearSpecialChars(str: string): string {
 		return str.replace(/(?![a-zA-Z]|[а-яА-ЯёЁ]|[0-9]|[_\s-\(\),<>\|\!@#$%^&"№;:?*\[\]{}'\\\/\.])./g, '*') || '';
@@ -32,10 +45,6 @@ export class Utils implements IUtils {
 		const fromId = ctx.from?.id;
 		const chatId = ctx.chat?.id;
 		return { fromId, chatId };
-	}
-
-	async broadcastMsg(category: BroadcaseMsgCategory, msg: string): Promise<void> {
-		throw new Error('broadcastMsg Method not implemented.');
 	}
 
 }

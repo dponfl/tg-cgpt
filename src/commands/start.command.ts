@@ -73,7 +73,7 @@ export class StartCommand extends MyBotCommand {
 					lang: ctx.from?.language_code ?? 'ru',
 				};
 
-				const resRaw = await this.dbServices.usersDbService?.createUser(userRec);
+				const resRaw = await this.dbServices.usersDbService?.create(userRec);
 
 				if (resRaw?.status === DbResponseStatus.ERROR) {
 					throw new Error(`Error: cannot create user record`);

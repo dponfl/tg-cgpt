@@ -18,6 +18,7 @@ import RedisSession from 'telegraf-session-redis-upd';
 import { IDbServices } from '../storage/mysql.interface.js';
 import { ISessionService } from '../storage/session.interface.js';
 import { BroadcaseMsgCategory, IUtils } from '../utils/utils.class.js';
+import { IBroadcastService } from '../broadcast/bc.interface.js';
 
 export class BotService implements IBotService {
 
@@ -34,7 +35,8 @@ export class BotService implements IBotService {
 		public readonly redisSession: RedisSession,
 		public readonly dbServices: IDbServices,
 		private readonly sessionService: ISessionService,
-		public readonly utils: IUtils
+		public readonly utils: IUtils,
+		private readonly broadcastService: IBroadcastService
 	) {
 		this.bot = new Telegraf<IBotContext>(configService.get('TELEGRAM_TOKEN'));
 	}
@@ -181,7 +183,7 @@ export class BotService implements IBotService {
 
 				if (msgToSend) {
 
-					await this.utils.broadcastMsg(BroadcaseMsgCategory.all, msgToSend);
+					await this.broadcastService.broadcastMsg(this.bot, BroadcaseMsgCategory.all, msgToSend);
 
 					msgToSend = '';
 

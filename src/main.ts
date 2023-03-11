@@ -18,6 +18,7 @@ import { IDatabase, IDbServices } from './storage/mysql.interface.js';
 import { createPool } from 'mysql2';
 import { UsersSrorageService } from './storage/users.class.js';
 import { IUtils, Utils } from './utils/utils.class.js';
+import { BroadcastService } from './broadcast/bc.service.js';
 
 
 const bootstap = async () => {
@@ -49,11 +50,13 @@ const bootstap = async () => {
 		})
 	});
 
+	const utils: IUtils = new Utils(logger);
+
 	const dbServices: IDbServices = {
-		usersDbService: new UsersSrorageService(dbConnection, logger)
+		usersDbService: new UsersSrorageService(dbConnection, logger, utils)
 	};
 
-	const utils: IUtils = new Utils();
+	const broadcastService = new BroadcastService(logger, dbServices, utils);
 
 	const scenesGenerator: ISceneGenerator = new ScenesGenerator(
 		logger,
@@ -72,7 +75,8 @@ const bootstap = async () => {
 			redisSession,
 			dbServices,
 			sessionService,
-			utils
+			utils,
+			broadcastService
 		),
 	);
 
