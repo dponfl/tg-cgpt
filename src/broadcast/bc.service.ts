@@ -17,8 +17,17 @@ export class BroadcastService implements IBroadcastService {
 		const broadcastAllUsers = async (bs: Telegraf<IBotContext>, text: string): Promise<void> => {
 			try {
 
-				const res = await this.dbServices.usersDbService?.getAll(['chatId']);
-				this.logger.info(`Res: ${JSON.stringify(res, null, 2)}`);
+				const allRecs = await this.dbServices.usersDbService?.getAll(['chatId']);
+
+				for (const rec of allRecs?.payload) {
+					botService.telegram.sendMessage(
+						rec.chatId,
+						text,
+						{
+							parse_mode: 'HTML'
+						}
+					);
+				}
 
 			} catch (error) {
 				this.utils.errorLog(error);
