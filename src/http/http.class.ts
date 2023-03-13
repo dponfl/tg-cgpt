@@ -44,8 +44,15 @@ export class HttpService implements IHttpService {
 
 			const data = params.options?.dataFormat === HttpDataFormat.json ? await res.json() : await res.text();
 
+			if (res.status !== 200) {
+				return {
+					status: HttpResponseStatus.ERROR,
+					payload: `Error: Http response failed: ${JSON.stringify(data, null, 2)}`
+				};
+			}
+
 			return {
-				status: res.status === 200 ? HttpResponseStatus.SUCCESS : HttpResponseStatus.ERROR,
+				status: HttpResponseStatus.SUCCESS,
 				payload: data,
 			};
 		} catch (error) {

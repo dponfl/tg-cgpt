@@ -20,7 +20,7 @@ export interface IGetPaymentLinkParams {
 }
 
 export interface IGetPaymentLinkResponse {
-
+	url: string;
 }
 
 export interface IHashData {
@@ -32,6 +32,6 @@ export interface IHashData {
 }
 
 export interface IPaymentService {
-	getPaymentLink(params: IGetPaymentLinkParams): Promise<IPaymentResponse>;
+	getPaymentLink(params: IGetPaymentLinkParams): Promise<IGetPaymentLinkResponse | undefined>;
 	calculateHash(params: IHashData): Promise<string>;
 }

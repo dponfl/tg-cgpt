@@ -1,10 +1,10 @@
 import { createHash } from 'crypto';
 import { IConfigService } from '../config/config.interface.js';
-import { HttpDataFormat, HttpRequestMethod, IHttpPostRequestOptions, IHttpRequest, IHttpService } from '../http/http.interface.js';
+import { HttpDataFormat, HttpRequestMethod, HttpResponseStatus, IHttpPostRequestOptions, IHttpRequest, IHttpService } from '../http/http.interface.js';
 import { ILogger } from '../logger/logger.interface.js';
 import { GeneralServiceResponseStatus } from '../types.js';
 import { IUtils } from '../utils/utils.class.js';
-import { IGetPaymentLinkHttpRequest, IGetPaymentLinkParams, IHashData, IPaymentResponse, IPaymentService } from './payments.interface.js';
+import { IGetPaymentLinkHttpRequest, IGetPaymentLinkParams, IGetPaymentLinkResponse, IHashData, IPaymentResponse, IPaymentService } from './payments.interface.js';
 
 export class RobokassaService implements IPaymentService {
 
@@ -24,9 +24,9 @@ export class RobokassaService implements IPaymentService {
 		this.apiAction = 'payment';
 		this.hashingAlgorithm = 'md5';
 	}
-	async getPaymentLink(params: IGetPaymentLinkParams): Promise<IPaymentResponse> {
+	async getPaymentLink(params: IGetPaymentLinkParams): Promise<IGetPaymentLinkResponse | undefined> {
 		try {
-			const res: IPaymentResponse = Object();
+			const res: IGetPaymentLinkResponse = Object();
 
 			/**
 			 * Создаём записи в таблицах платежей
@@ -70,6 +70,13 @@ export class RobokassaService implements IPaymentService {
 				options,
 			};
 
+			const resRaw = await this.httpService.post(httpParams);
+
+			if (resRaw.status !== HttpResponseStatus.SUCCESS) {
+				return undefined;
+			}
+
+			this.logger.info(`resRaw: ${resRaw}`);
 
 			return res;
 		} catch (error) {
