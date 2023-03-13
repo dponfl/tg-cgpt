@@ -82,7 +82,7 @@ export class RobokassaService implements IPaymentService {
 		} catch (error) {
 			return Object({
 				status: GeneralServiceResponseStatus.ERROR,
-				payload: this.utils.errorLog(error)
+				payload: this.utils.errorLog.bind(this)(error)
 			});
 		}
 

@@ -29,10 +29,10 @@ export class Utils implements IUtils {
 		let str: string;
 
 		if (err instanceof Error) {
-			str = `Error in [${this.constructor.name}:${this.constructor.call.name}]: ${err.message}`;
+			str = `Error in [${this.constructor.name}:${this.constructor.caller.name}]: ${err.message}`;
 			this.logger.error(str);
 		} else {
-			str = `Error in [${this.constructor.name}:${this.constructor.call.name}]`;
+			str = `Error in [${this.constructor.name}:${this.constructor.caller.name}]`;
 			this.logger.error(str);
 		}
 
