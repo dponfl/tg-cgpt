@@ -56,7 +56,7 @@ export class HttpService implements IHttpService {
 				payload: data,
 			};
 		} catch (error) {
-			throw new Error(this.utils.errorLog(error));
+			throw new Error(this.utils.errorLog.bind(this)(error));
 		}
 	}
 
