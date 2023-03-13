@@ -12,7 +12,7 @@ export enum BroadcaseMsgCategory {
 }
 
 export interface IUtils {
-	errorLog(err: unknown): string;
+	errorLog(err: unknown, methodName: string): string;
 	isObject(data: unknown): boolean;
 	clearSpecialChars(str: string): string;
 	getChatIdStr(ctx: IBotContext): string;
@@ -25,14 +25,14 @@ export class Utils implements IUtils {
 		private readonly logger: ILogger,
 	) { }
 
-	errorLog(err: unknown): string {
+	errorLog(err: unknown, methodName: string): string {
 		let str: string;
 
 		if (err instanceof Error) {
-			str = `Error in [${this.constructor.name}:${this.constructor.caller.name}]: ${err.message}`;
+			str = `Error in [${this.constructor.name}:${methodName}]: ${err.message}`;
 			this.logger.error(str);
 		} else {
-			str = `Error in [${this.constructor.name}:${this.constructor.caller.name}]`;
+			str = `Error in [${this.constructor.name}:${methodName}]`;
 			this.logger.error(str);
 		}
 

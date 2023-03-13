@@ -14,7 +14,10 @@ export class BroadcastService implements IBroadcastService {
 
 	async broadcastMsg(botService: Telegraf<IBotContext>, category: BroadcaseMsgCategory, msg: string): Promise<void> {
 
+		const methodName = 'broadcastMsg';
+
 		const broadcastAllUsers = async (bs: Telegraf<IBotContext>, text: string): Promise<void> => {
+			const methodName = 'broadcastAllUsers';
 			try {
 
 				const allRecs = await this.dbServices.usersDbService?.getAll(['chatId']);
@@ -30,7 +33,7 @@ export class BroadcastService implements IBroadcastService {
 				}
 
 			} catch (error) {
-				this.utils.errorLog(error);
+				this.utils.errorLog(error, methodName);
 			}
 		};
 
@@ -45,7 +48,7 @@ export class BroadcastService implements IBroadcastService {
 			}
 
 		} catch (error) {
-			this.utils.errorLog(error);
+			this.utils.errorLog(error, methodName);
 		}
 	}
 }

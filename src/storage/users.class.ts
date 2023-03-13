@@ -48,6 +48,7 @@ export class UsersSrorageService implements IUserStorageSevice {
 
 	// tslint:disable-next-line: no-any
 	public async getAll(fields: any[]): Promise<IDbServiceResponse> {
+		const methodName = 'getAll';
 		try {
 
 			const res = await this.dbConnection
@@ -61,7 +62,7 @@ export class UsersSrorageService implements IUserStorageSevice {
 			};
 
 		} catch (error) {
-			this.utils.errorLog(error);
+			this.utils.errorLog(error, methodName);
 
 			return {
 				status: DbResponseStatus.ERROR,

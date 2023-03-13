@@ -11,6 +11,7 @@ export class HttpService implements IHttpService {
 	) { }
 
 	async get(params: IHttpRequest): Promise<IHttpResponse> {
+		const methodName = 'get';
 		try {
 			let res: Response;
 
@@ -27,10 +28,11 @@ export class HttpService implements IHttpService {
 				payload: data,
 			};
 		} catch (error) {
-			throw new Error(this.utils.errorLog(error));
+			throw new Error(this.utils.errorLog(error, methodName));
 		}
 	}
 	async post(params: IHttpRequest): Promise<IHttpResponse> {
+		const methodName = 'post';
 		try {
 			let res: Response;
 			if (params.options) {
@@ -56,7 +58,7 @@ export class HttpService implements IHttpService {
 				payload: data,
 			};
 		} catch (error) {
-			throw new Error(this.utils.errorLog.bind(this)(error));
+			throw new Error(this.utils.errorLog(error, methodName));
 		}
 	}
 

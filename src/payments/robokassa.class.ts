@@ -25,6 +25,7 @@ export class RobokassaService implements IPaymentService {
 		this.hashingAlgorithm = 'md5';
 	}
 	async getPaymentLink(params: IGetPaymentLinkParams): Promise<IGetPaymentLinkResponse | undefined> {
+		const methodName = 'getPaymentLink';
 		try {
 			const res: IGetPaymentLinkResponse = Object();
 
@@ -82,13 +83,14 @@ export class RobokassaService implements IPaymentService {
 		} catch (error) {
 			return Object({
 				status: GeneralServiceResponseStatus.ERROR,
-				payload: this.utils.errorLog.bind(this)(error)
+				payload: this.utils.errorLog(error, methodName)
 			});
 		}
 
 	}
 
 	async calculateHash(params: IHashData): Promise<string> {
+		const methodName = 'calculateHash';
 		try {
 			let calculatedHash: string;
 
@@ -110,7 +112,7 @@ export class RobokassaService implements IPaymentService {
 
 			return calculatedHash;
 		} catch (error) {
-			throw new Error(this.utils.errorLog(error));
+			throw new Error(this.utils.errorLog(error, methodName));
 		}
 	}
 
