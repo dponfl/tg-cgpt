@@ -20,12 +20,19 @@ export class GtStorageService implements IGTStorageService {
 			const resultRaw = await this.dbConnection
 				.insertInto('groupTransactions')
 				.values(payload)
-				.execute();
+				.executeTakeFirst();
 
-			return {
-				status: DbResponseStatus.SUCCESS,
-				payload: resultRaw,
-			};
+			if (resultRaw) {
+				return {
+					status: DbResponseStatus.SUCCESS,
+					payload: resultRaw,
+				};
+			} else {
+				return {
+					status: DbResponseStatus.ERROR,
+					payload: `ERROR: No data returned on insert`,
+				};
+			}
 
 		} catch (error) {
 			const errMsg = this.utils.errorLog(error, methodName);
