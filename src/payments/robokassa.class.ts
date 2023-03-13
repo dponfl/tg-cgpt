@@ -77,7 +77,7 @@ export class RobokassaService implements IPaymentService {
 				return undefined;
 			}
 
-			this.logger.info(`resRaw: ${resRaw}`);
+			this.logger.info(`resRaw: ${JSON.stringify(resRaw, null, 2)}`);
 
 			return res;
 		} catch (error) {
