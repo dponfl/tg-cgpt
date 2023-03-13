@@ -60,11 +60,11 @@ export class RobokassaService implements IPaymentService {
 
 			const gtRaw = await this.dbServices.gtDbService?.create(gtCreateParams);
 
-			if (gtRaw?.status === DbResponseStatus.ERROR) {
-				throw new Error(`Error: cannot create groupTransaction record`);
+			if (gtRaw?.status !== DbResponseStatus.SUCCESS) {
+				throw new Error(`ERROR: create groupTransaction record error`);
 			}
 
-			const { id } = gtRaw?.payload;
+			const { id } = gtRaw?.payload[0];
 
 			/**
 			 * Делаем запрос на получение платёжного линка

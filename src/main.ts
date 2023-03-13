@@ -24,6 +24,7 @@ import { HttpService } from './http/http.class.js';
 import { exit } from 'process';
 import { RobokassaService } from './payments/robokassa.class.js';
 import { IGetPaymentLinkParams } from './payments/payments.interface.js';
+import { GtStorageService } from './storage/gt.class.js';
 
 
 const bootstap = async () => {
@@ -58,7 +59,8 @@ const bootstap = async () => {
 	const utils: IUtils = new Utils(logger);
 
 	const dbServices: IDbServices = {
-		usersDbService: new UsersStorageService(dbConnection, logger, utils)
+		usersDbService: new UsersStorageService(dbConnection, logger, utils),
+		gtDbService: new GtStorageService(dbConnection, logger, utils)
 	};
 
 	const broadcastService = new BroadcastService(logger, dbServices, utils);
