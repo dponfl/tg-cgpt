@@ -20,6 +20,7 @@ export class GtStorageService implements IGTStorageService {
 			const resultRaw = await this.dbConnection
 				.insertInto('groupTransactions')
 				.values(payload)
+				.returning('id')
 				.executeTakeFirstOrThrow();
 
 			// TODO: delete
