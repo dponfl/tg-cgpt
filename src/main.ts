@@ -19,6 +19,9 @@ import { createPool } from 'mysql2';
 import { UsersSrorageService } from './storage/users.class.js';
 import { IUtils, Utils } from './utils/utils.class.js';
 import { BroadcastService } from './broadcast/bc.service.js';
+import { HttpDataFormat, HttpRequestMethod, IHttpPostRequestOptions, IHttpRequest, IHttpService } from './http/http.interface.js';
+import { HttpService } from './http/http.class.js';
+import { exit } from 'process';
 
 
 const bootstap = async () => {
@@ -79,6 +82,29 @@ const bootstap = async () => {
 			broadcastService
 		),
 	);
+
+	const httpService: IHttpService = new HttpService(logger, utils);
+
+	const payload = {
+		a: 1,
+		t: 'some text'
+	};
+
+	const options: IHttpPostRequestOptions = {
+		body: JSON.stringify(payload),
+		method: HttpRequestMethod.POST,
+		dataFormat: HttpDataFormat.json,
+	};
+
+	const params: IHttpRequest = {
+		url: 'https://httpbin.org/post',
+		options,
+	};
+	const res = await httpService.post(params);
+
+	logger.info(`Res: ${JSON.stringify(res, null, 2)}`);
+
+	exit;
 
 	await app.init();
 
