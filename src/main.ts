@@ -14,7 +14,7 @@ import { ISceneGenerator } from './scenes/scenes.interface.js';
 import RedisSession from 'telegraf-session-redis-upd';
 import { SessionService } from './storage/session.class.js';
 import { Kysely, MysqlDialect } from 'kysely';
-import { IDatabase, IDbServices } from './storage/mysql.interface.js';
+import { GroupTransactionCurrency, GroupTransactionServiceName, IDatabase, IDbServices } from './storage/mysql.interface.js';
 import { createPool } from 'mysql2';
 import { UsersStorageService } from './storage/users.class.js';
 import { IUtils, Utils } from './utils/utils.class.js';
@@ -117,8 +117,11 @@ const bootstap = async () => {
 
 	const paramsRobokassa: IGetPaymentLinkParams = {
 		amount: 150,
+		currency: GroupTransactionCurrency.RUB,
 		description: 'Подписка на GPT сервис (10 запросов)',
-		uid: '8f149f57-9f04-4bff-b34a-781dc6439bec'
+		uid: '8f149f57-9f04-4bff-b34a-781dc6439bec',
+		serviceName: GroupTransactionServiceName.GPT,
+		purchasedQty: '10'
 	};
 	const result = await robokassaService.getPaymentLink(paramsRobokassa);
 
