@@ -35,12 +35,11 @@ export class HttpService implements IHttpService {
 			let res: Response;
 			if (params.options) {
 				if (params.options.dataFormat === HttpDataFormat.json) {
-					this.logger.info(`params.options.headers [1]: ${JSON.stringify(params.options.headers, null, 2)}`);
-					const meta = {
+					params.options.headers = {
 						'Content-Type': 'text/xml',
 						'Accept': '123'
 					};
-					params.options.headers = new Headers(meta);
+					this.logger.info(`params.options.headers [1]: ${JSON.stringify(params.options.headers, null, 2)}`);
 					params.options.headers = { ...params.options.headers, ...{ 'Content-Type': 'application/json' } };
 					this.logger.info(`params.options.headers [2]: ${JSON.stringify(params.options.headers, null, 2)}`);
 				}
