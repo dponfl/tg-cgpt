@@ -77,7 +77,7 @@ export class RobokassaService implements IPaymentService {
 				return undefined;
 			}
 
-			this.logger.info(`resRaw: ${JSON.stringify(resRaw, null, 2)}`);
+			this.logger.info(`Result => resRaw: ${JSON.stringify(resRaw, null, 2)}`);
 
 			return res;
 		} catch (error) {
@@ -106,9 +106,15 @@ export class RobokassaService implements IPaymentService {
 
 			const hash = createHash(this.hashingAlgorithm);
 
+			// TODO: Delete
+			this.logger.warn(`Result => values: ${values}`);
+
 			hash.update(values.join(':'));
 
 			calculatedHash = hash.digest('hex');
+
+			// TODO: Delete
+			this.logger.warn(`calculatedHash: ${calculatedHash}`);
 
 			return calculatedHash;
 		} catch (error) {
