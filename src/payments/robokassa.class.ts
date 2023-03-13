@@ -1,10 +1,15 @@
-import { createHash } from 'crypto';
+import { createHash, randomUUID } from 'crypto';
+import moment from 'moment';
 import { IConfigService } from '../config/config.interface.js';
+// tslint:disable-next-line: max-line-length
 import { HttpDataFormat, HttpRequestMethod, HttpResponseStatus, IHttpPostRequestOptions, IHttpRequest, IHttpService } from '../http/http.interface.js';
 import { ILogger } from '../logger/logger.interface.js';
-import { GeneralServiceResponseStatus } from '../types.js';
+// tslint:disable-next-line: max-line-length
+import { DbResponseStatus, GroupTransactionPaymentProvider, GroupTransactionPaymentStatus, GroupTransactionType, IDbServices, IGroupTransactionTable } from '../storage/mysql.interface.js';
+import { GeneralServiceResponseStatus, Messenger } from '../types.js';
 import { IUtils } from '../utils/utils.class.js';
-import { IGetPaymentLinkHttpRequest, IGetPaymentLinkParams, IGetPaymentLinkResponse, IHashData, IPaymentResponse, IPaymentService } from './payments.interface.js';
+// tslint:disable-next-line: max-line-length
+import { IGetPaymentLinkHttpPayload, IGetPaymentLinkHttpRequest, IGetPaymentLinkParams, IGetPaymentLinkResponse, IHashData, IPaymentService } from './payments.interface.js';
 
 export class RobokassaService implements IPaymentService {
 
@@ -17,7 +22,8 @@ export class RobokassaService implements IPaymentService {
 		private readonly configService: IConfigService,
 		private readonly logger: ILogger,
 		private readonly utils: IUtils,
-		private readonly httpService: IHttpService
+		private readonly httpService: IHttpService,
+		public readonly dbServices: IDbServices,
 	) {
 		this.baseUrl = configService.get('PAYMENT_MS_URL');
 		this.apiName = 'robokassa';
@@ -33,18 +39,44 @@ export class RobokassaService implements IPaymentService {
 			 * Создаём записи в таблицах платежей
 			 */
 
+			const guid = randomUUID();
+
+			const gtCreateParams: IGroupTransactionTable = {
+				createdAt: moment().utc().format(),
+				updatedAt: moment().utc().format(),
+				guid,
+				type: GroupTransactionType.DEPOSIT,
+				serviceName: params.serviceName as string,
+				purchasedQty: params.purchasedQty as string,
+				status: GroupTransactionPaymentStatus.PROCESSING,
+				amount: params.amount,
+				currency: params.currency as string,
+				paymentProvider: GroupTransactionPaymentProvider.ROBOKASSA,
+				messenger: Messenger.TELEGRAM,
+				paymentLink: '',
+				userGuid: params.uid,
+				comments: ''
+			};
+
+			const gtRaw = await this.dbServices.gtDbService?.create(gtCreateParams);
+
+			if (gtRaw?.status === DbResponseStatus.ERROR) {
+				throw new Error(`Error: cannot create groupTransaction record`);
+			}
+
+			const { id } = gtRaw?.payload;
+
 			/**
 			 * Делаем запрос на получение платёжного линка
 			 */
 
-			const orderId: number = 5000;
+			const orderId: number = id;
 
 			const hashData: IHashData = {
 				amount: params.amount,
-				orderId, // paymentGroupRec.id,
-				cid: params.cid, // client.guid,
-				aid: params.aid, // currentAccount.guid,
-				gtid: params.gtid, // paymentGroupRec.guid,
+				orderId,
+				uid: params.uid,
+				gtid: guid,
 			};
 
 			const signature = await this.calculateHash(hashData);
@@ -54,9 +86,8 @@ export class RobokassaService implements IPaymentService {
 				amount: params.amount,
 				description: params.description,
 				orderId,
-				cid: params.cid,
-				aid: params.aid,
-				gtid: params.gtid,
+				uid: params.uid,
+				gtid: guid,
 				isTest: true,
 			};
 
@@ -77,9 +108,12 @@ export class RobokassaService implements IPaymentService {
 				return undefined;
 			}
 
-			this.logger.info(`Result => resRaw: ${JSON.stringify(resRaw, null, 2)}`);
+			const { url } = resRaw.payload as IGetPaymentLinkHttpPayload;
+
+			res.url = url;
 
 			return res;
+
 		} catch (error) {
 			return Object({
 				status: GeneralServiceResponseStatus.ERROR,
@@ -92,6 +126,7 @@ export class RobokassaService implements IPaymentService {
 	async calculateHash(params: IHashData): Promise<string> {
 		const methodName = 'calculateHash';
 		try {
+
 			let calculatedHash: string;
 
 			const values: string[] = [];
@@ -106,17 +141,12 @@ export class RobokassaService implements IPaymentService {
 
 			const hash = createHash(this.hashingAlgorithm);
 
-			// TODO: Delete
-			this.logger.warn(`Result => values: ${values}`);
-
 			hash.update(values.join(':'));
 
 			calculatedHash = hash.digest('hex');
 
-			// TODO: Delete
-			this.logger.warn(`calculatedHash: ${calculatedHash}`);
-
 			return calculatedHash;
+
 		} catch (error) {
 			throw new Error(this.utils.errorLog(error, methodName));
 		}

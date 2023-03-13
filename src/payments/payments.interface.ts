@@ -1,4 +1,4 @@
-import { Sticker } from 'telegraf/types';
+import { GroupTransactionServiceName } from '../storage/mysql.interface.js';
 import { IGeneralServiceResponse } from '../types.js';
 
 export interface IPaymentResponse extends IGeneralServiceResponse {
@@ -8,15 +8,22 @@ export interface IPaymentResponse extends IGeneralServiceResponse {
 export interface IGetPaymentLinkHttpRequest extends IGetPaymentLinkParams {
 	signature: string;
 	orderId: number;
+	gtid: string;
 	isTest: boolean;
 }
 
 export interface IGetPaymentLinkParams {
 	amount: number;
 	description: string;
-	cid: string;
-	aid: string;
-	gtid: string;
+	uid: string;
+	serviceName?: GroupTransactionServiceName;
+	purchasedQty?: string;
+	currency?: string;
+}
+
+export interface IGetPaymentLinkHttpPayload {
+	status: string;
+	url: string;
 }
 
 export interface IGetPaymentLinkResponse {
@@ -26,8 +33,7 @@ export interface IGetPaymentLinkResponse {
 export interface IHashData {
 	amount: number;
 	orderId: number;
-	cid: string;
-	aid: string;
+	uid: string;
 	gtid: string;
 }
 

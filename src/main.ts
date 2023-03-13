@@ -16,7 +16,7 @@ import { SessionService } from './storage/session.class.js';
 import { Kysely, MysqlDialect } from 'kysely';
 import { IDatabase, IDbServices } from './storage/mysql.interface.js';
 import { createPool } from 'mysql2';
-import { UsersSrorageService } from './storage/users.class.js';
+import { UsersStorageService } from './storage/users.class.js';
 import { IUtils, Utils } from './utils/utils.class.js';
 import { BroadcastService } from './broadcast/bc.service.js';
 import { IHttpService } from './http/http.interface.js';
@@ -58,7 +58,7 @@ const bootstap = async () => {
 	const utils: IUtils = new Utils(logger);
 
 	const dbServices: IDbServices = {
-		usersDbService: new UsersSrorageService(dbConnection, logger, utils)
+		usersDbService: new UsersStorageService(dbConnection, logger, utils)
 	};
 
 	const broadcastService = new BroadcastService(logger, dbServices, utils);
@@ -111,14 +111,12 @@ const bootstap = async () => {
 	 * Check Robokassa
 	 */
 
-	const robokassaService = new RobokassaService(configService, logger, utils, httpService);
+	const robokassaService = new RobokassaService(configService, logger, utils, httpService, dbServices);
 
 	const paramsRobokassa: IGetPaymentLinkParams = {
 		amount: 150,
-		description: 'GPT service payment (100 requests)',
-		cid: 'cidXXX',
-		aid: 'aidYYY',
-		gtid: 'gtidZZZ'
+		description: 'Подписка на GPT сервис (10 запросов)',
+		uid: '8f149f57-9f04-4bff-b34a-781dc6439bec'
 	};
 	const result = await robokassaService.getPaymentLink(paramsRobokassa);
 

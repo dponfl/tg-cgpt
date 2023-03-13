@@ -1,7 +1,7 @@
 import fetch, { Response } from 'node-fetch';
 import { ILogger } from '../logger/logger.interface.js';
 import { IUtils } from '../utils/utils.class.js';
-import { HttpDataFormat, HttpResponseStatus, IHttpRequest, IHttpResponse, IHttpService } from './http.interface.js';
+import { HttpDataFormat, HttpResponseStatus, IHttpPayloadGeneric, IHttpRequest, IHttpResponse, IHttpService } from './http.interface.js';
 
 export class HttpService implements IHttpService {
 
@@ -25,7 +25,7 @@ export class HttpService implements IHttpService {
 
 			return {
 				status: res.status === 200 ? HttpResponseStatus.SUCCESS : HttpResponseStatus.ERROR,
-				payload: data,
+				payload: data as IHttpPayloadGeneric,
 			};
 		} catch (error) {
 			throw new Error(this.utils.errorLog(error, methodName));
@@ -55,7 +55,7 @@ export class HttpService implements IHttpService {
 
 			return {
 				status: HttpResponseStatus.SUCCESS,
-				payload: data,
+				payload: data as IHttpPayloadGeneric,
 			};
 		} catch (error) {
 			throw new Error(this.utils.errorLog(error, methodName));

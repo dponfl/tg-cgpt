@@ -1,4 +1,5 @@
 import { BodyInit, RequestInit } from 'node-fetch';
+import { IGetPaymentLinkHttpPayload } from '../payments/payments.interface.js';
 
 export enum HttpResponseStatus {
 	SUCCESS = 'SUCCESS',
@@ -32,9 +33,19 @@ export interface IHttpRequest {
 	options?: IHttpGetRequestOptions | IHttpPostRequestOptions;
 }
 
+export interface IHttpPayloadGeneric {
+	// tslint:disable-next-line: no-any
+	[key: string]: any;
+}
+
+export type IHttpResponsePayload =
+	string
+	| IHttpPayloadGeneric
+	| IGetPaymentLinkHttpPayload;
+
 export interface IHttpResponse {
 	status: HttpResponseStatus;
-	payload?: unknown;
+	payload: IHttpResponsePayload;
 }
 
 export interface IHttpService {

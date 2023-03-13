@@ -4,7 +4,7 @@ import { DbResponseStatus, IDatabase, IDbServiceResponse, IUsersTable } from './
 import { ILogger } from '../logger/logger.interface.js';
 import { IUtils } from '../utils/utils.class.js';
 
-export class UsersSrorageService implements IUserStorageSevice {
+export class UsersStorageService implements IUserStorageSevice {
 	constructor(
 		private readonly dbConnection: Kysely<IDatabase>,
 		private readonly logger: ILogger,
@@ -13,12 +13,13 @@ export class UsersSrorageService implements IUserStorageSevice {
 
 	public async create(data: IUsersTable): Promise<IDbServiceResponse> {
 
-		const payload = Object(data);
-
-		let res;
+		const methodName = 'create';
 
 		try {
-			res = await this.dbConnection
+
+			const payload = Object(data);
+
+			const res = await this.dbConnection
 				.insertInto('users')
 				.values(payload)
 				.execute();
@@ -29,15 +30,7 @@ export class UsersSrorageService implements IUserStorageSevice {
 			};
 
 		} catch (error) {
-			let errMsg = '';
-			if (error instanceof Error) {
-				errMsg = `Error (createUser): ${error.message}`;
-				this.logger.error(errMsg);
-
-			} else {
-				errMsg = `Unknown error (createUser)`;
-			}
-
+			const errMsg = this.utils.errorLog(error, methodName);
 			return {
 				status: DbResponseStatus.ERROR,
 				payload: errMsg
@@ -62,11 +55,11 @@ export class UsersSrorageService implements IUserStorageSevice {
 			};
 
 		} catch (error) {
-			this.utils.errorLog(error, methodName);
+			const errMsg = this.utils.errorLog(error, methodName);
 
 			return {
 				status: DbResponseStatus.ERROR,
-				payload: 'Error'
+				payload: errMsg
 			};
 		}
 	}
