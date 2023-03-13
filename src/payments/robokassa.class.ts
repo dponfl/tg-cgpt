@@ -42,9 +42,9 @@ export class RobokassaService implements IPaymentService {
 			const hashData: IHashData = {
 				amount: params.amount,
 				orderId, // paymentGroupRec.id,
-				cid: 'cidXXX', // client.guid,
-				aid: 'aidXXX', // currentAccount.guid,
-				gtid: 'gtid', // paymentGroupRec.guid,
+				cid: params.cid, // client.guid,
+				aid: params.aid, // currentAccount.guid,
+				gtid: params.gtid, // paymentGroupRec.guid,
 			};
 
 			const signature = await this.calculateHash(hashData);
