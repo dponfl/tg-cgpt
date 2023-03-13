@@ -1,4 +1,4 @@
-import fetch, { Headers, Response } from 'node-fetch';
+import fetch, { Response } from 'node-fetch';
 import { ILogger } from '../logger/logger.interface.js';
 import { IUtils } from '../utils/utils.class.js';
 import { HttpDataFormat, HttpResponseStatus, IHttpRequest, IHttpResponse, IHttpService } from './http.interface.js';
@@ -35,13 +35,7 @@ export class HttpService implements IHttpService {
 			let res: Response;
 			if (params.options) {
 				if (params.options.dataFormat === HttpDataFormat.json) {
-					params.options.headers = {
-						'Content-Type': 'text/xml',
-						'Accept': '123'
-					};
-					this.logger.info(`params.options.headers [1]: ${JSON.stringify(params.options.headers, null, 2)}`);
 					params.options.headers = { ...params.options.headers, ...{ 'Content-Type': 'application/json' } };
-					this.logger.info(`params.options.headers [2]: ${JSON.stringify(params.options.headers, null, 2)}`);
 				}
 				res = await fetch(params.url, params.options);
 			} else {

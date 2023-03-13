@@ -19,9 +19,11 @@ import { createPool } from 'mysql2';
 import { UsersSrorageService } from './storage/users.class.js';
 import { IUtils, Utils } from './utils/utils.class.js';
 import { BroadcastService } from './broadcast/bc.service.js';
-import { HttpDataFormat, HttpRequestMethod, IHttpPostRequestOptions, IHttpRequest, IHttpService } from './http/http.interface.js';
+import { IHttpService } from './http/http.interface.js';
 import { HttpService } from './http/http.class.js';
 import { exit } from 'process';
+import { RobokassaService } from './payments/robokassa.class.js';
+import { IGetPaymentLinkParams } from './payments/payments.interface.js';
 
 
 const bootstap = async () => {
@@ -85,24 +87,42 @@ const bootstap = async () => {
 
 	const httpService: IHttpService = new HttpService(logger, utils);
 
-	const payload = {
-		a: 1,
-		t: 'some text'
-	};
+	// const payload = {
+	// 	a: 1,
+	// 	t: 'some text'
+	// };
 
-	const options: IHttpPostRequestOptions = {
-		body: JSON.stringify(payload),
-		method: HttpRequestMethod.POST,
-		dataFormat: HttpDataFormat.json,
-	};
+	// const options: IHttpPostRequestOptions = {
+	// 	body: JSON.stringify(payload),
+	// 	method: HttpRequestMethod.POST,
+	// 	dataFormat: HttpDataFormat.json,
+	// };
 
-	const params: IHttpRequest = {
-		url: 'https://httpbin.org/post',
-		options,
-	};
-	const res = await httpService.post(params);
+	// const params: IHttpRequest = {
+	// 	url: 'https://httpbin.org/post',
+	// 	options,
+	// };
+	// const res = await httpService.post(params);
 
-	logger.info(`Res: ${JSON.stringify(res, null, 2)}`);
+	// logger.info(`Res: ${JSON.stringify(res, null, 2)}`);
+
+
+	/**
+	 * Check Robokassa
+	 */
+
+	const robokassaService = new RobokassaService(configService, logger, utils, httpService);
+
+	const paramsRobokassa: IGetPaymentLinkParams = {
+		amount: 150,
+		description: 'GPT service payment (100 requests)',
+		cid: 'cidXXX',
+		aid: 'aidYYY',
+		gtid: 'gtidZZZ'
+	};
+	const result = await robokassaService.getPaymentLink(paramsRobokassa);
+
+	logger.info(`Result: ${JSON.stringify(result, null, 2)}`);
 
 	exit;
 

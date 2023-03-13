@@ -1,8 +1,10 @@
 import { createHash } from 'crypto';
 import { IConfigService } from '../config/config.interface.js';
+import { HttpDataFormat, HttpRequestMethod, IHttpPostRequestOptions, IHttpRequest, IHttpService } from '../http/http.interface.js';
+import { ILogger } from '../logger/logger.interface.js';
 import { GeneralServiceResponseStatus } from '../types.js';
 import { IUtils } from '../utils/utils.class.js';
-import { IGetPaymentLinkRequest, IHashData, IPaymentResponse, IPaymentService } from './payments.interface.js';
+import { IGetPaymentLinkHttpRequest, IGetPaymentLinkParams, IHashData, IPaymentResponse, IPaymentService } from './payments.interface.js';
 
 export class RobokassaService implements IPaymentService {
 
@@ -13,14 +15,16 @@ export class RobokassaService implements IPaymentService {
 
 	constructor(
 		private readonly configService: IConfigService,
-		private readonly utils: IUtils
+		private readonly logger: ILogger,
+		private readonly utils: IUtils,
+		private readonly httpService: IHttpService
 	) {
 		this.baseUrl = configService.get('PAYMENT_MS_URL');
 		this.apiName = 'robokassa';
 		this.apiAction = 'payment';
 		this.hashingAlgorithm = 'md5';
 	}
-	async getPaymentLink(params: IGetPaymentLinkRequest): Promise<IPaymentResponse> {
+	async getPaymentLink(params: IGetPaymentLinkParams): Promise<IPaymentResponse> {
 		try {
 			const res: IPaymentResponse = Object();
 
@@ -32,9 +36,11 @@ export class RobokassaService implements IPaymentService {
 			 * Делаем запрос на получение платёжного линка
 			 */
 
+			const orderId: number = 5000;
+
 			const hashData: IHashData = {
 				amount: params.amount,
-				orderId: 5000, // paymentGroupRec.id,
+				orderId, // paymentGroupRec.id,
 				cid: 'cidXXX', // client.guid,
 				aid: 'aidXXX', // currentAccount.guid,
 				gtid: 'gtid', // paymentGroupRec.guid,
@@ -42,17 +48,27 @@ export class RobokassaService implements IPaymentService {
 
 			const signature = await this.calculateHash(hashData);
 
-			const requestParams: IGetPaymentLinkRequest = {
+			const requestParams: IGetPaymentLinkHttpRequest = {
 				signature,
 				amount: params.amount,
 				description: params.description,
-				orderId: 5000,
+				orderId,
 				cid: params.cid,
 				aid: params.aid,
 				gtid: params.gtid,
-				isTest: true
+				isTest: true,
 			};
 
+			const options: IHttpPostRequestOptions = {
+				method: HttpRequestMethod.POST,
+				body: JSON.stringify(requestParams),
+				dataFormat: HttpDataFormat.json
+			};
+
+			const httpParams: IHttpRequest = {
+				url: `${this.baseUrl}/${this.apiName}/${this.apiAction}`,
+				options,
+			};
 
 
 			return res;

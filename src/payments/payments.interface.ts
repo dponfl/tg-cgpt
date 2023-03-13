@@ -5,15 +5,18 @@ export interface IPaymentResponse extends IGeneralServiceResponse {
 	payload?: IGetPaymentLinkResponse;
 }
 
-export interface IGetPaymentLinkRequest {
+export interface IGetPaymentLinkHttpRequest extends IGetPaymentLinkParams {
 	signature: string;
+	orderId: number;
+	isTest: boolean;
+}
+
+export interface IGetPaymentLinkParams {
 	amount: number;
 	description: string;
-	orderId: number;
 	cid: string;
 	aid: string;
 	gtid: string;
-	isTest: boolean;
 }
 
 export interface IGetPaymentLinkResponse {
@@ -29,6 +32,6 @@ export interface IHashData {
 }
 
 export interface IPaymentService {
-	getPaymentLink(params: IGetPaymentLinkRequest): Promise<IPaymentResponse>;
+	getPaymentLink(params: IGetPaymentLinkParams): Promise<IPaymentResponse>;
 	calculateHash(params: IHashData): Promise<string>;
 }
