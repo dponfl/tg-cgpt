@@ -66,6 +66,9 @@ export class RobokassaService implements IPaymentService {
 
 			const { id } = gtRaw?.payload[0];
 
+			this.logger.warn(`gtRaw: ${JSON.stringify(gtRaw, null, 2)}`);
+			this.logger.warn(`id: ${id}`);
+
 			/**
 			 * Делаем запрос на получение платёжного линка
 			 */
@@ -90,6 +93,8 @@ export class RobokassaService implements IPaymentService {
 				gtid: guid,
 				isTest: true,
 			};
+
+			this.logger.warn(`requestParams: ${requestParams}`);
 
 			const options: IHttpPostRequestOptions = {
 				method: HttpRequestMethod.POST,
