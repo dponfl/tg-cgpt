@@ -3,7 +3,7 @@ import { IBotContext } from '../bot/bot.interface.js';
 import { ILogger } from '../logger/logger.interface.js';
 import { MyBotCommand } from './command.class.js';
 import { Messenger } from '../types.js';
-import { DbResponseStatus, IDatabase, IDbServices, IUsersTable } from '../storage/mysql.interface.js';
+import { DbResponseStatus, IDatabase, IDbServices, IServiceUsageTable, IUsersTable } from '../storage/mysql.interface.js';
 import { randomUUID } from 'crypto';
 import { IUtils } from '../utils/utils.class.js';
 import moment from 'moment';
@@ -43,7 +43,49 @@ export class StartCommand extends MyBotCommand {
 
 				if (ctx.session.botUserSession.userGuid) {
 					await ctx.scene.enter('startNext');
+				} else {
+
+					/**
+					 * Проверяем наличие записи пользователя в БД
+					 * и если такая запись есть - восстанавливаем botUserSession.userGuid
+					 */
+
+					// tslint:disable-next-line: no-shadowed-variable
+					const { fromId, chatId } = this.utils.getChatIdObj(ctx);
+
+					if (!fromId || !chatId) {
+						throw new Error(`ERROR: missing fromId or chatId: fromId=${fromId}, chatId=${chatId}`);
+					}
+
+					const userRecRaw = await this.dbConnection
+						.selectFrom('users')
+						.select('guid')
+						.where('fromId', '=', fromId)
+						.where('chatId', '=', chatId)
+						.execute();
+
+					if (
+						userRecRaw
+						&& Array.isArray(userRecRaw)
+						&& userRecRaw.length > 0
+					) {
+
+						// tslint:disable-next-line: no-shadowed-variable
+						const { guid } = userRecRaw[0];
+
+						ctx.session.botUserSession.userGuid = guid;
+
+						this.sessionService.updateSession(ctx);
+
+						await ctx.scene.enter('startNext');
+
+					}
+
 				}
+
+				/**
+				 * Создаём запись пользователя в БД
+				 */
 
 				const guid = randomUUID();
 
@@ -95,6 +137,46 @@ export class StartCommand extends MyBotCommand {
 
 				if (!resRaw) {
 					throw new Error(`ERROR: could not create user record for guid=${guid} fromId=${fromId} chatId=${chatId}`);
+				}
+
+				/**
+				 * Создаём запись использования сервисами для этого пользователя
+				 */
+
+				const serviceUsageGuid = randomUUID();
+
+				const createServiceUsage: IServiceUsageTable = {
+					createdAt: moment().utc().format(),
+					updatedAt: moment().utc().format(),
+					guid: serviceUsageGuid,
+					userGuid: ctx.session.botUserSession.userGuid,
+					gptPurchased: 0,
+					gptUsed: 0,
+					gptLeft: 0,
+					gptFreeUsed: 0,
+					gptFreeLeft: 3,
+					mjPurchased: 0,
+					mjUsed: 0,
+					mjLeft: 0,
+					mjFreeUsed: 0,
+					mjFreeLeft: 3,
+				};
+
+				const createServiceUsageRec = Object(createServiceUsage);
+
+				await this.dbConnection
+					.insertInto('serviceUsage')
+					.values(createServiceUsageRec)
+					.execute();
+
+				const serviceUsageRec = await this.dbConnection
+					.selectFrom('serviceUsage')
+					.selectAll()
+					.where('guid', '=', serviceUsageGuid)
+					.execute();
+
+				if (!serviceUsageRec) {
+					throw new Error(`ERROR: could not create service usage record for userGuid=${ctx.session.botUserSession.userGuid} fromId=${fromId} chatId=${chatId}`);
 				}
 
 				await ctx.scene.enter('startIntro');

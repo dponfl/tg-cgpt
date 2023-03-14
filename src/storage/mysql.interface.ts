@@ -95,9 +95,13 @@ export interface IServiceUsageTable {
 	gptPurchased: number;
 	gptUsed: number;
 	gptLeft: number;
+	gptFreeUsed: number;
+	gptFreeLeft: number;
 	mjPurchased: number;
 	mjUsed: number;
 	mjLeft: number;
+	mjFreeUsed: number;
+	mjFreeLeft: number;
 }
 
 export interface IDatabase {
