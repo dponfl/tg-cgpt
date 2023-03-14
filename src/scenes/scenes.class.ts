@@ -1,7 +1,6 @@
+import { Kysely } from 'kysely';
 import { Markup } from 'telegraf';
-import RedisSession from 'telegraf-session-redis-upd';
 import { BaseScene } from 'telegraf/scenes';
-import { BotCommand } from 'typegram';
 import { MySceneCommand } from '../commands/base_scenes/command.class.js';
 import { GptCommand } from '../commands/base_scenes/gpt.command.js';
 import { HelpCommand } from '../commands/base_scenes/help.command.js';
@@ -12,6 +11,8 @@ import { StartCommand } from '../commands/base_scenes/start.command.js';
 import { StatsCommand } from '../commands/base_scenes/stats.command.js';
 import { IMainController } from '../controller/controller.interface.js';
 import { ILogger } from '../logger/logger.interface.js';
+import { IGetPaymentLinkParams, IGetPaymentLinkResponse, IPaymentService } from '../payments/payments.interface.js';
+import { GroupTransactionServiceName, IDatabase } from '../storage/mysql.interface.js';
 import { ISessionService } from '../storage/session.interface.js';
 import { IUtils } from '../utils/utils.class.js';
 import { ISceneGenerator } from './scenes.interface.js';
@@ -23,9 +24,10 @@ export class ScenesGenerator implements ISceneGenerator {
 	constructor(
 		private readonly logger: ILogger,
 		private readonly mainController: IMainController,
-		private readonly redisSession: RedisSession,
 		private readonly sessionService: ISessionService,
-		private readonly utils: IUtils
+		private readonly utils: IUtils,
+		private readonly dbConnection: Kysely<IDatabase>,
+		private readonly robokassaService: IPaymentService
 	) { }
 
 	public async getScenes(): Promise<BaseScene[] | unknown[]> {
@@ -544,7 +546,8 @@ export class ScenesGenerator implements ISceneGenerator {
 
 		await this.activateCommands(paymentScene);
 
-		paymentScene.enter(async (ctx) => {
+		// tslint:disable-next-line: no-any
+		paymentScene.enter(async (ctx: any) => {
 
 			const text =
 				`
@@ -557,15 +560,86 @@ export class ScenesGenerator implements ISceneGenerator {
 	3)10 запросов для <b>искусственного интеллекта (GPT)</b> + 10 запросов для <b>Midjourney</b> — 250₽
 	`;
 
+			/**
+			 * Build payment links
+			 */
+
+			/**
+			 * Check if the user have unused payment links
+			 */
+
+			if (!ctx.session.botUserSession.userGuid) {
+				this.logger.error(`ERROR: No botUserSession.userGuid: ${JSON.stringify(ctx.session.botUserSession, null, 2)}`);
+
+				/**
+				 * Получаем запись пользователя и обновляем данные
+				 */
+
+				const { fromId, chatId } = this.utils.getChatIdObj(ctx);
+
+				if (!fromId || !chatId) {
+					throw new Error(`ERROR: missing fromId or chatId: fromId=${fromId}, chatId=${chatId}`);
+				}
+
+				const userRecRaw = await this.dbConnection
+					.selectFrom('users')
+					.select('guid')
+					.where('fromId', '=', fromId)
+					.where('chatId', '=', chatId)
+					.execute();
+
+				if (!userRecRaw) {
+					throw new Error(`ERROR: No user rec for fromId=${fromId} and chatId=${chatId}`);
+				}
+
+				const { guid } = userRecRaw[0];
+
+				ctx.session.botUserSession.userGuid = guid;
+
+				this.sessionService.updateSession(ctx);
+
+			}
+
+			const gptParamsRobokassa: IGetPaymentLinkParams = {
+				amount: 150,
+				description: 'Подписка на GPT сервис (10 запросов)',
+				uid: ctx.session.botUserSession.userGuid,
+				serviceName: GroupTransactionServiceName.GPT,
+				purchasedQty: JSON.stringify({ gpt: 10 }),
+			};
+
+			const mjParamsRobokassa: IGetPaymentLinkParams = {
+				amount: 150,
+				description: 'Подписка на Midjourney сервис (10 запросов)',
+				uid: ctx.session.botUserSession.userGuid,
+				serviceName: GroupTransactionServiceName.MJ,
+				purchasedQty: JSON.stringify({ mj: 10 }),
+			};
+
+			const gptAndMjParamsRobokassa: IGetPaymentLinkParams = {
+				amount: 250,
+				description: 'Подписка на GPT сервис (10 запросов) + Midjourney сервис (10 запросов)',
+				uid: ctx.session.botUserSession.userGuid,
+				serviceName: GroupTransactionServiceName.GPT_MJ,
+				purchasedQty: JSON.stringify({ gpt: 10, mj: 10 }),
+			};
+
+			const { url: gptUrl } = await this.robokassaService.getPaymentLink(gptParamsRobokassa) as IGetPaymentLinkResponse;
+
+			const { url: mjUrl } = await this.robokassaService.getPaymentLink(mjParamsRobokassa) as IGetPaymentLinkResponse;
+
+			// tslint:disable-next-line: max-line-length
+			const { url: gptAndMjUrl } = await this.robokassaService.getPaymentLink(gptAndMjParamsRobokassa) as IGetPaymentLinkResponse;
+
 			await ctx.replyWithHTML(text, Markup.inlineKeyboard([
 				[
-					Markup.button.callback('1) 🤖 Gpt 150₽', 'pay_gpt')
+					Markup.button.url('1) 🤖 Gpt 150₽', gptUrl)
 				],
 				[
-					Markup.button.callback('2) 🎑 Midjourney 150₽', 'pay_mj')
+					Markup.button.url('2) 🎑 Midjourney 150₽', mjUrl)
 				],
 				[
-					Markup.button.callback('3) 🔝 GPT + Midjourney 250₽', 'pay_gpt_mj')
+					Markup.button.url('3) 🔝 GPT + Midjourney 250₽', gptAndMjUrl)
 				],
 				[
 					Markup.button.callback('Вернуться в меню  🔙', 'menu')

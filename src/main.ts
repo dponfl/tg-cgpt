@@ -23,7 +23,7 @@ import { IHttpService } from './http/http.interface.js';
 import { HttpService } from './http/http.class.js';
 import { exit } from 'process';
 import { RobokassaService } from './payments/robokassa.class.js';
-import { IGetPaymentLinkParams } from './payments/payments.interface.js';
+import { IGetPaymentLinkParams, IPaymentService } from './payments/payments.interface.js';
 import { GtStorageService } from './storage/gt.class.js';
 
 
@@ -65,12 +65,18 @@ const bootstap = async () => {
 
 	const broadcastService = new BroadcastService(logger, dbServices, utils);
 
+	const httpService: IHttpService = new HttpService(logger, utils);
+
+	// tslint:disable-next-line: max-line-length
+	const robokassaService: IPaymentService = new RobokassaService(configService, logger, utils, httpService, dbConnection);
+
 	const scenesGenerator: ISceneGenerator = new ScenesGenerator(
 		logger,
 		mainController,
-		redisSession,
 		sessionService,
-		utils
+		utils,
+		dbConnection,
+		robokassaService
 	);
 
 	const app = new App(
@@ -80,14 +86,14 @@ const bootstap = async () => {
 			configService,
 			scenesGenerator,
 			redisSession,
-			dbServices,
+			// dbServices,
+			dbConnection,
 			sessionService,
 			utils,
 			broadcastService
 		),
 	);
 
-	const httpService: IHttpService = new HttpService(logger, utils);
 
 	// const payload = {
 	// 	a: 1,
@@ -113,21 +119,21 @@ const bootstap = async () => {
 	 * Check Robokassa
 	 */
 
-	const robokassaService = new RobokassaService(configService, logger, utils, httpService, dbConnection);
+	// const robokassaService = new RobokassaService(configService, logger, utils, httpService, dbConnection);
 
-	const paramsRobokassa: IGetPaymentLinkParams = {
-		amount: 150,
-		currency: GroupTransactionCurrency.RUB,
-		description: 'Подписка на GPT сервис (10 запросов)',
-		uid: '8f149f57-9f04-4bff-b34a-781dc6439bec',
-		serviceName: GroupTransactionServiceName.GPT,
-		purchasedQty: '10'
-	};
-	const result = await robokassaService.getPaymentLink(paramsRobokassa);
+	// const paramsRobokassa: IGetPaymentLinkParams = {
+	// 	amount: 150,
+	// 	currency: GroupTransactionCurrency.RUB,
+	// 	description: 'Подписка на GPT сервис (10 запросов)',
+	// 	uid: '8f149f57-9f04-4bff-b34a-781dc6439bec',
+	// 	serviceName: GroupTransactionServiceName.GPT,
+	// 	purchasedQty: '10'
+	// };
+	// const result = await robokassaService.getPaymentLink(paramsRobokassa);
 
-	logger.info(`Result: ${JSON.stringify(result, null, 2)}`);
+	// logger.info(`Result: ${JSON.stringify(result, null, 2)}`);
 
-	exit;
+	// exit;
 
 	await app.init();
 

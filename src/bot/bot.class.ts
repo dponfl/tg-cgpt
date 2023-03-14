@@ -15,10 +15,11 @@ import { MjCommand } from '../commands/mj.command.js';
 import { StatsCommand } from '../commands/stats.command.js';
 import { HelpCommand } from '../commands/help.command.js';
 import RedisSession from 'telegraf-session-redis-upd';
-import { IDbServices } from '../storage/mysql.interface.js';
+import { IDatabase, IDbServices } from '../storage/mysql.interface.js';
 import { ISessionService } from '../storage/session.interface.js';
 import { BroadcaseMsgCategory, IUtils } from '../utils/utils.class.js';
 import { IBroadcastService } from '../broadcast/bc.interface.js';
+import { Kysely } from 'kysely';
 
 export class BotService implements IBotService {
 
@@ -33,7 +34,8 @@ export class BotService implements IBotService {
 		public readonly configService: IConfigService,
 		public readonly scenesGenerator: ISceneGenerator,
 		public readonly redisSession: RedisSession,
-		public readonly dbServices: IDbServices,
+		// public readonly dbServices: IDbServices,
+		private readonly dbConnection: Kysely<IDatabase>,
 		private readonly sessionService: ISessionService,
 		public readonly utils: IUtils,
 		private readonly broadcastService: IBroadcastService
@@ -113,13 +115,13 @@ export class BotService implements IBotService {
 		 */
 
 		this.commands = [
-			new StartCommand(this.bot, this.logger, this.sessionService, this.dbServices, this.utils),
-			new GptCommand(this.bot, this.logger, this.dbServices, this.utils),
-			new MjCommand(this.bot, this.logger, this.dbServices, this.utils),
-			new MenuCommand(this.bot, this.logger, this.dbServices, this.utils),
-			new PaymentCommand(this.bot, this.logger, this.dbServices, this.utils),
-			new StatsCommand(this.bot, this.logger, this.dbServices, this.utils),
-			new HelpCommand(this.bot, this.logger, this.dbServices, this.utils),
+			new StartCommand(this.bot, this.logger, this.sessionService, this.dbConnection, this.utils),
+			new GptCommand(this.bot, this.logger, this.dbConnection, this.utils),
+			new MjCommand(this.bot, this.logger, this.dbConnection, this.utils),
+			new MenuCommand(this.bot, this.logger, this.dbConnection, this.utils),
+			new PaymentCommand(this.bot, this.logger, this.dbConnection, this.utils),
+			new StatsCommand(this.bot, this.logger, this.dbConnection, this.utils),
+			new HelpCommand(this.bot, this.logger, this.dbConnection, this.utils),
 		];
 
 		for (const command of this.commands) {

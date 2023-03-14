@@ -24,7 +24,6 @@ export class RobokassaService implements IPaymentService {
 		private readonly logger: ILogger,
 		private readonly utils: IUtils,
 		private readonly httpService: IHttpService,
-		// public readonly dbServices: IDbServices,
 		private readonly dbConnection: Kysely<IDatabase>,
 	) {
 		this.baseUrl = configService.get('PAYMENT_MS_URL');
@@ -131,7 +130,10 @@ export class RobokassaService implements IPaymentService {
 
 			this.dbConnection
 				.updateTable('groupTransactions')
-				.set({ paymentLink: url })
+				.set({
+					paymentLink: url,
+					updatedAt: moment().utc().format()
+				})
 				.where('guid', '=', guid)
 				.execute();
 

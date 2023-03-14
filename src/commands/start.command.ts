@@ -3,24 +3,27 @@ import { IBotContext } from '../bot/bot.interface.js';
 import { ILogger } from '../logger/logger.interface.js';
 import { MyBotCommand } from './command.class.js';
 import { Messenger } from '../types.js';
-import { DbResponseStatus, IDbServices, IUsersTable } from '../storage/mysql.interface.js';
+import { DbResponseStatus, IDatabase, IDbServices, IUsersTable } from '../storage/mysql.interface.js';
 import { randomUUID } from 'crypto';
 import { IUtils } from '../utils/utils.class.js';
 import moment from 'moment';
 import { ISessionService } from '../storage/session.interface.js';
+import { Kysely } from 'kysely';
 
 export class StartCommand extends MyBotCommand {
 	constructor(
 		public readonly bot: Telegraf<IBotContext>,
 		public readonly logger: ILogger,
 		private readonly sessionService: ISessionService,
-		public readonly dbServices: IDbServices,
+		// public readonly dbServices: IDbServices,
+		public readonly dbConnection: Kysely<IDatabase>,
 		public readonly utils: IUtils
 	) {
 		super(
 			bot,
 			logger,
-			dbServices,
+			// dbServices,
+			dbConnection,
 			utils
 		);
 	}
@@ -73,10 +76,25 @@ export class StartCommand extends MyBotCommand {
 					lang: ctx.from?.language_code ?? 'ru',
 				};
 
-				const resRaw = await this.dbServices.usersDbService?.create(userRec);
+				// const resRaw = await this.dbServices.usersDbService?.create(userRec);
 
-				if (resRaw?.status === DbResponseStatus.ERROR) {
-					throw new Error(`Error: cannot create user record`);
+				const createUserRec = Object(userRec);
+
+				await this.dbConnection
+					.insertInto('users')
+					.values(createUserRec)
+					.execute();
+
+				const resRaw = this.dbConnection
+					.selectFrom('users')
+					.selectAll()
+					.where('guid', '=', guid)
+					.execute();
+
+				const { fromId, chatId } = this.utils.getChatIdObj(ctx);
+
+				if (!resRaw) {
+					throw new Error(`ERROR: could not create user record for guid=${guid} fromId=${fromId} chatId=${chatId}`);
 				}
 
 				await ctx.scene.enter('startIntro');

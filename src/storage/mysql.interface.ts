@@ -86,7 +86,22 @@ export interface IGroupTransactionTable {
 	comments: string;
 }
 
+export interface IServiceUsageTable {
+	id?: Generated<number>;
+	createdAt: string;
+	updatedAt: string;
+	guid: string;
+	userGuid: string;
+	gptPurchased: number;
+	gptUsed: number;
+	gptLeft: number;
+	mjPurchased: number;
+	mjUsed: number;
+	mjLeft: number;
+}
+
 export interface IDatabase {
 	users: IUsersTable;
 	groupTransactions: IGroupTransactionTable;
+	serviceUsage: IServiceUsageTable;
 }
