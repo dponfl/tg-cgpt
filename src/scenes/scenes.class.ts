@@ -569,7 +569,7 @@ export class ScenesGenerator implements ISceneGenerator {
 			 */
 
 			if (!ctx.session.botUserSession.userGuid) {
-				this.logger.error(`ERROR: No botUserSession.userGuid: ${JSON.stringify(ctx.session.botUserSession, null, 2)}`);
+				this.logger.error(`ERROR: No botUserSession.userGuid: ${JSON.stringify(ctx.session.botUserSession, null, 2)}, will try to restore data.`);
 
 				/**
 				 * Получаем запись пользователя и обновляем данные

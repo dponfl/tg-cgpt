@@ -37,6 +37,39 @@ export class RobokassaService implements IPaymentService {
 			const res: IGetPaymentLinkResponse = Object();
 
 			/**
+			 * Проверяем наличие неиспользованных платёжных линков для переиспользования
+			 */
+
+			const gtRecs = await this.dbConnection
+				.selectFrom('groupTransactions')
+				.selectAll()
+				.where('userGuid', '=', params.uid)
+				.where('status', '=', GroupTransactionPaymentStatus.PROCESSING)
+				.where('serviceName', '=', params.serviceName as string)
+				.where('purchasedQty', '=', params.purchasedQty as string)
+				.where('amount', '=', params.amount)
+				.where('currency', '=', params.currency as string)
+				.where('type', '=', GroupTransactionType.DEPOSIT)
+				.execute();
+
+			if (
+				gtRecs
+				&& Array.isArray(gtRecs)
+				&& gtRecs.length > 0
+			) {
+				const { paymentLink } = gtRecs[gtRecs.length - 1];
+
+				if (!paymentLink) {
+					this.logger.error(`ERROR: No paymentLink at gt rec: ${gtRecs[gtRecs.length - 1]}`);
+				} else {
+					res.url = paymentLink;
+					return res;
+				}
+			}
+
+
+
+			/**
 			 * Создаём записи в таблицах платежей
 			 */
 
