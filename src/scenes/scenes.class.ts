@@ -621,7 +621,7 @@ export class ScenesGenerator implements ISceneGenerator {
 			const gptAndMjParamsRobokassa: IGetPaymentLinkParams = {
 				amount: 250,
 				currency: GroupTransactionCurrency.RUB,
-				description: 'Подписка на GPT сервис (10 запросов) + Midjourney сервис (10 запросов)',
+				description: 'Подписка на GPT сервис (10 запросов) и Midjourney сервис (10 запросов)',
 				uid: ctx.session.botUserSession.userGuid,
 				serviceName: GroupTransactionServiceName.GPT_MJ,
 				purchasedQty: JSON.stringify({ gpt: 10, mj: 10 }),
