@@ -95,8 +95,6 @@ export class RobokassaService implements IPaymentService {
 				isTest: true,
 			};
 
-			this.logger.warn(`requestParams: ${requestParams}`);
-
 			const options: IHttpPostRequestOptions = {
 				method: HttpRequestMethod.POST,
 				body: JSON.stringify(requestParams),

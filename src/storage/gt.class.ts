@@ -24,7 +24,7 @@ export class GtStorageService implements IGTStorageService {
 
 			const resultRaw = await this.dbConnection
 				.selectFrom('groupTransactions')
-				.select('id')
+				.selectAll()
 				.where('guid', '=', data.guid)
 				.execute();
 
