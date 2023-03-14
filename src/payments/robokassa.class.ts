@@ -49,7 +49,7 @@ export class RobokassaService implements IPaymentService {
 				// .where('purchasedQty', '=', params.purchasedQty as string)
 				// .where('amount', '=', params.amount)
 				// .where('currency', '=', params.currency as string)
-				// .where('type', '=', GroupTransactionType.DEPOSIT)
+				.where('type', '=', GroupTransactionType.DEPOSIT)
 				.execute();
 
 			// TODO: delete
