@@ -79,13 +79,7 @@ export class RobokassaService implements IPaymentService {
 				throw new Error(`ERROR: create groupTransaction record error`);
 			}
 
-			// TODO: delete
-			this.logger.warn(`resultRaw: ${JSON.stringify(resultRaw, null, 2)}`);
-
 			const { id } = resultRaw[0];
-
-			// TODO: delete
-			this.logger.warn(`id: ${id}`);
 
 			/**
 			 * Делаем запрос на получение платёжного линка

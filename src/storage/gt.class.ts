@@ -28,9 +28,6 @@ export class GtStorageService implements IGTStorageService {
 				.where('guid', '=', data.guid)
 				.execute();
 
-			// TODO: delete
-			this.logger.warn(`resultRaw: ${JSON.stringify(resultRaw, null, 2)}`);
-
 			if (resultRaw) {
 				return {
 					status: DbResponseStatus.SUCCESS,
