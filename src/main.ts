@@ -113,7 +113,7 @@ const bootstap = async () => {
 	 * Check Robokassa
 	 */
 
-	const robokassaService = new RobokassaService(configService, logger, utils, httpService, dbServices);
+	const robokassaService = new RobokassaService(configService, logger, utils, httpService, dbConnection);
 
 	const paramsRobokassa: IGetPaymentLinkParams = {
 		amount: 150,

@@ -1,11 +1,12 @@
 import { createHash, randomUUID } from 'crypto';
+import { Kysely } from 'kysely';
 import moment from 'moment';
 import { IConfigService } from '../config/config.interface.js';
 // tslint:disable-next-line: max-line-length
 import { HttpDataFormat, HttpRequestMethod, HttpResponseStatus, IHttpPostRequestOptions, IHttpRequest, IHttpService } from '../http/http.interface.js';
 import { ILogger } from '../logger/logger.interface.js';
 // tslint:disable-next-line: max-line-length
-import { DbResponseStatus, GroupTransactionPaymentProvider, GroupTransactionPaymentStatus, GroupTransactionType, IDbServices, IGroupTransactionTable } from '../storage/mysql.interface.js';
+import { DbResponseStatus, GroupTransactionPaymentProvider, GroupTransactionPaymentStatus, GroupTransactionType, IDatabase, IDbServices, IGroupTransactionTable } from '../storage/mysql.interface.js';
 import { GeneralServiceResponseStatus, Messenger } from '../types.js';
 import { IUtils } from '../utils/utils.class.js';
 // tslint:disable-next-line: max-line-length
@@ -23,7 +24,8 @@ export class RobokassaService implements IPaymentService {
 		private readonly logger: ILogger,
 		private readonly utils: IUtils,
 		private readonly httpService: IHttpService,
-		public readonly dbServices: IDbServices,
+		// public readonly dbServices: IDbServices,
+		private readonly dbConnection: Kysely<IDatabase>,
 	) {
 		this.baseUrl = configService.get('PAYMENT_MS_URL');
 		this.apiName = 'robokassa';
@@ -58,21 +60,40 @@ export class RobokassaService implements IPaymentService {
 				comments: ''
 			};
 
-			const gtRaw = await this.dbServices.gtDbService?.create(gtCreateParams);
+			// const gtRaw = await this.dbServices.gtDbService?.create(gtCreateParams);
 
-			if (gtRaw?.status !== DbResponseStatus.SUCCESS) {
+			const createRecParams = Object(gtCreateParams);
+
+			await this.dbConnection
+				.insertInto('groupTransactions')
+				.values(createRecParams)
+				.execute();
+
+			const resultRaw = await this.dbConnection
+				.selectFrom('groupTransactions')
+				.selectAll()
+				.where('guid', '=', guid)
+				.execute();
+
+			if (!resultRaw) {
 				throw new Error(`ERROR: create groupTransaction record error`);
 			}
 
-			this.logger.warn(`gtRaw: ${JSON.stringify(gtRaw, null, 2)}`);
+			// TODO: delete
+			this.logger.warn(`resultRaw: ${JSON.stringify(resultRaw, null, 2)}`);
 
-			const { id } = gtRaw?.payload[0];
+			const { id } = resultRaw[0];
 
+			// TODO: delete
 			this.logger.warn(`id: ${id}`);
 
 			/**
 			 * Делаем запрос на получение платёжного линка
 			 */
+
+			if (!id) {
+				throw new Error(`ERROR: No "id" at create rec result: ${resultRaw[0]}`);
+			}
 
 			const orderId: number = id;
 
