@@ -52,6 +52,9 @@ export class RobokassaService implements IPaymentService {
 				.where('type', '=', GroupTransactionType.DEPOSIT)
 				.execute();
 
+			// TODO: delete
+			this.logger.warn(`gtRecs: ${JSON.stringify(gtRecs, null, 2)}`);
+
 			if (
 				gtRecs
 				&& Array.isArray(gtRecs)
