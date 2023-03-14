@@ -5,6 +5,8 @@ import express, { Express } from 'express';
 import { Server } from 'http';
 import { PaymentProcessingController } from './api/payment.controller.js';
 import { IConfigService } from './config/config.interface.js';
+import bodyParser from 'body-parser';
+
 
 export class App {
 
@@ -50,6 +52,7 @@ export class App {
 	}
 
 	public async initApi(): Promise<void> {
+		this.app.use(bodyParser.json());
 		this.useRoutes();
 		this.server = this.app.listen(this.port);
 		this.logger.info(`Express server launched at port=${this.port}`);
