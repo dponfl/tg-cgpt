@@ -44,7 +44,7 @@ export class RobokassaService implements IPaymentService {
 				.selectFrom('groupTransactions')
 				.selectAll()
 				.where('userGuid', '=', params.uid)
-				// .where('status', '=', GroupTransactionPaymentStatus.PROCESSING)
+				.where('status', '=', GroupTransactionPaymentStatus.PROCESSING)
 				// .where('serviceName', '=', params.serviceName as string)
 				// .where('purchasedQty', '=', params.purchasedQty as string)
 				// .where('amount', '=', params.amount)
@@ -53,6 +53,7 @@ export class RobokassaService implements IPaymentService {
 				.execute();
 
 			// TODO: delete
+			this.logger.warn(`params: ${JSON.stringify(params, null, 2)}`);
 			this.logger.warn(`gtRecs: ${JSON.stringify(gtRecs, null, 2)}`);
 
 			if (
