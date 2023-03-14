@@ -1,17 +1,35 @@
 import { ILogger } from './logger/logger.interface.js';
 import { IBotContext, IBotService } from './bot/bot.interface.js';
 import { Telegraf } from 'telegraf';
+import express, { Express } from 'express';
+import { Server } from 'http';
+import { PaymentProcessingController } from './api/payment.controller.js';
+import { IConfigService } from './config/config.interface.js';
 
 export class App {
 
 	private bot: Telegraf<IBotContext> = <Telegraf<IBotContext>>{};
+	private app: Express;
+	private server: Server | undefined;
+	private port: number;
+
 
 	constructor(
 		private readonly logger: ILogger,
+		private readonly configService: IConfigService,
 		private readonly botService: IBotService,
-	) { }
+		private readonly paymentProcessingController: PaymentProcessingController
+	) {
+		this.app = express();
+		this.port = Number(configService.get('PORT'));
 
-	public async init(): Promise<void> {
+	}
+
+	private useRoutes() {
+		this.app.use('/payment', this.paymentProcessingController.router);
+	}
+
+	public async initBot(): Promise<void> {
 
 		this.bot = await this.botService.init();
 
@@ -29,5 +47,11 @@ export class App {
 
 		this.logger.info('App.init() started');
 
+	}
+
+	public async initApi(): Promise<void> {
+		this.useRoutes();
+		this.server = this.app.listen(this.port);
+		this.logger.info(`Express server launched at port=${this.port}`);
 	}
 }

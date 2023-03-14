@@ -37,6 +37,11 @@ export interface IHashData {
 	gtid: string;
 }
 
+export interface IPaymentProcessingService {
+	processSuccessfulPayment(): any;
+	processFailedPayment(): any;
+}
+
 export interface IPaymentService {
 	getPaymentLink(params: IGetPaymentLinkParams): Promise<IGetPaymentLinkResponse | undefined>;
 	calculateHash(params: IHashData): Promise<string>;

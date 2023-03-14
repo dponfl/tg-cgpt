@@ -25,6 +25,8 @@ import { exit } from 'process';
 import { RobokassaService } from './payments/robokassa.class.js';
 import { IGetPaymentLinkParams, IPaymentService } from './payments/payments.interface.js';
 import { GtStorageService } from './storage/gt.class.js';
+import { IRouter, Router } from 'express';
+import { PaymentProcessingController } from './api/payment.controller.js';
 
 
 const bootstap = async () => {
@@ -79,8 +81,12 @@ const bootstap = async () => {
 		robokassaService
 	);
 
+	const paymentProcessingController: PaymentProcessingController = new PaymentProcessingController(logger);
+
+
 	const app = new App(
 		logger,
+		configService,
 		new BotService(
 			logger,
 			configService,
@@ -92,6 +98,7 @@ const bootstap = async () => {
 			utils,
 			broadcastService
 		),
+		paymentProcessingController
 	);
 
 
@@ -135,7 +142,8 @@ const bootstap = async () => {
 
 	// exit;
 
-	await app.init();
+	await app.initBot();
+	await app.initApi();
 
 };
 
