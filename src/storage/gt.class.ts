@@ -17,11 +17,16 @@ export class GtStorageService implements IGTStorageService {
 
 		try {
 			const payload = Object(data);
-			const resultRaw = await this.dbConnection
+			await this.dbConnection
 				.insertInto('groupTransactions')
 				.values(payload)
-				.returning('id')
-				.executeTakeFirstOrThrow();
+				.execute();
+
+			const resultRaw = await this.dbConnection
+				.selectFrom('groupTransactions')
+				.select('id')
+				.where('guid', '=', data.guid)
+				.execute();
 
 			// TODO: delete
 			this.logger.warn(`resultRaw: ${JSON.stringify(resultRaw, null, 2)}`);
