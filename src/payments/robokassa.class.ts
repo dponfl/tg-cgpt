@@ -45,16 +45,12 @@ export class RobokassaService implements IPaymentService {
 				.selectAll()
 				.where('userGuid', '=', params.uid)
 				.where('status', '=', GroupTransactionPaymentStatus.PROCESSING)
-				// .where('serviceName', '=', params.serviceName as string)
-				// .where('purchasedQty', '=', params.purchasedQty as string)
-				// .where('amount', '=', params.amount)
-				// .where('currency', '=', params.currency as string)
+				.where('serviceName', '=', params.serviceName as string)
+				.where('purchasedQty', '=', params.purchasedQty as string)
+				.where('amount', '=', params.amount)
+				.where('currency', '=', params.currency as string)
 				.where('type', '=', GroupTransactionType.DEPOSIT)
 				.execute();
-
-			// TODO: delete
-			this.logger.warn(`params: ${JSON.stringify(params, null, 2)}`);
-			this.logger.warn(`gtRecs: ${JSON.stringify(gtRecs, null, 2)}`);
 
 			if (
 				gtRecs

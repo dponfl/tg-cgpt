@@ -12,7 +12,7 @@ import { StatsCommand } from '../commands/base_scenes/stats.command.js';
 import { IMainController } from '../controller/controller.interface.js';
 import { ILogger } from '../logger/logger.interface.js';
 import { IGetPaymentLinkParams, IGetPaymentLinkResponse, IPaymentService } from '../payments/payments.interface.js';
-import { GroupTransactionServiceName, IDatabase } from '../storage/mysql.interface.js';
+import { GroupTransactionCurrency, GroupTransactionServiceName, IDatabase } from '../storage/mysql.interface.js';
 import { ISessionService } from '../storage/session.interface.js';
 import { IUtils } from '../utils/utils.class.js';
 import { ISceneGenerator } from './scenes.interface.js';
@@ -602,6 +602,7 @@ export class ScenesGenerator implements ISceneGenerator {
 
 			const gptParamsRobokassa: IGetPaymentLinkParams = {
 				amount: 150,
+				currency: GroupTransactionCurrency.RUB,
 				description: 'Подписка на GPT сервис (10 запросов)',
 				uid: ctx.session.botUserSession.userGuid,
 				serviceName: GroupTransactionServiceName.GPT,
@@ -610,6 +611,7 @@ export class ScenesGenerator implements ISceneGenerator {
 
 			const mjParamsRobokassa: IGetPaymentLinkParams = {
 				amount: 150,
+				currency: GroupTransactionCurrency.RUB,
 				description: 'Подписка на Midjourney сервис (10 запросов)',
 				uid: ctx.session.botUserSession.userGuid,
 				serviceName: GroupTransactionServiceName.MJ,
@@ -618,6 +620,7 @@ export class ScenesGenerator implements ISceneGenerator {
 
 			const gptAndMjParamsRobokassa: IGetPaymentLinkParams = {
 				amount: 250,
+				currency: GroupTransactionCurrency.RUB,
 				description: 'Подписка на GPT сервис (10 запросов) + Midjourney сервис (10 запросов)',
 				uid: ctx.session.botUserSession.userGuid,
 				serviceName: GroupTransactionServiceName.GPT_MJ,
