@@ -135,6 +135,12 @@ export class RobokassaService implements IPaymentService {
 
 			const { url } = resRaw.payload as IGetPaymentLinkHttpPayload;
 
+			this.dbConnection
+				.updateTable('groupTransactions')
+				.set({ paymentLink: url })
+				.where('guid', '=', guid)
+				.execute();
+
 			res.url = url;
 
 			return res;
