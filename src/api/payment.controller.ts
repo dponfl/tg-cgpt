@@ -16,6 +16,8 @@ export class PaymentProcessingController extends BaseController {
 	public success(req: Request, res: Response, next: NextFunction) {
 		this.logger.info(`success() of PaymentProcessingController`);
 
+		this.logger.warn(`req.body: ${JSON.stringify(req.body, null, 2)}`);
+
 		res.setHeader('Content-Type', 'text/plain');
 		res.write('you posted:\n');
 		res.end(JSON.stringify(req.body, null, 2));
