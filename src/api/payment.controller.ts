@@ -18,9 +18,13 @@ export class PaymentProcessingController extends BaseController {
 
 		this.logger.warn(`req.body: ${JSON.stringify(req.body, null, 2)}`);
 
-		res.setHeader('Content-Type', 'text/plain');
-		res.write('you posted:\n');
-		res.end(JSON.stringify(req.body, null, 2));
+		return res.json({
+			status: 'success',
+		});
+
+		// res.setHeader('Content-Type', 'text/plain');
+		// res.write('you posted:\n');
+		// res.end(JSON.stringify(req.body, null, 2));
 
 		// const body = req.body;
 		// const bodyJson = JSON.parse(req.body);
@@ -32,6 +36,10 @@ export class PaymentProcessingController extends BaseController {
 	public fail(req: Request, res: Response, next: NextFunction) {
 		this.logger.info(`fail() of PaymentProcessingController`);
 		res.send(`fail() of PaymentProcessingController`);
+
+		return res.json({
+			status: 'success',
+		});
 	}
 
 }
