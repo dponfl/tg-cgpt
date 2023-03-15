@@ -143,7 +143,7 @@ export class RobokassaService implements IPaymentService {
 				orderId,
 				uid: params.uid,
 				gtid: guid,
-				isTest: true,
+				isTest: this.configService.get('PAYMENT_ENV').toLowerCase() !== 'prod',
 			};
 
 			const options: IHttpPostRequestOptions = {
