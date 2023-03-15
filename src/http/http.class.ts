@@ -10,7 +10,7 @@ export class HttpService implements IHttpService {
 		private readonly utils: IUtils
 	) { }
 
-	async get(params: IHttpRequest): Promise<IHttpResponse> {
+	async get(params: IHttpRequest): Promise<IHttpResponse | undefined> {
 		const methodName = 'get';
 		try {
 			let res: Response;
@@ -28,10 +28,10 @@ export class HttpService implements IHttpService {
 				payload: data as IHttpPayloadGeneric,
 			};
 		} catch (error) {
-			throw new Error(this.utils.errorLog(error, methodName));
+			this.utils.errorLog(this, error, methodName);
 		}
 	}
-	async post(params: IHttpRequest): Promise<IHttpResponse> {
+	async post(params: IHttpRequest): Promise<IHttpResponse | undefined> {
 		const methodName = 'post';
 		try {
 			let res: Response;
@@ -58,7 +58,7 @@ export class HttpService implements IHttpService {
 				payload: data as IHttpPayloadGeneric,
 			};
 		} catch (error) {
-			throw new Error(this.utils.errorLog(error, methodName));
+			this.utils.errorLog(this, error, methodName);
 		}
 	}
 

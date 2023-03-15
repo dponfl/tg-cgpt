@@ -12,7 +12,8 @@ export enum BroadcaseMsgCategory {
 }
 
 export interface IUtils {
-	errorLog(err: unknown, methodName: string): string;
+	// tslint:disable-next-line: no-any
+	errorLog(that: any, err: unknown, methodName: string): string;
 	isObject(data: unknown): boolean;
 	clearSpecialChars(str: string): string;
 	getChatIdStr(ctx: IBotContext): string;
@@ -25,14 +26,15 @@ export class Utils implements IUtils {
 		private readonly logger: ILogger,
 	) { }
 
-	errorLog(err: unknown, methodName: string): string {
+	// tslint:disable-next-line: no-any
+	errorLog(that: any, err: unknown, methodName: string): string {
 		let str: string;
 
 		if (err instanceof Error) {
-			str = `Error in [${this.constructor.name}:${methodName}]: ${err.message}`;
+			str = `Error in [${that.constructor.name}:${methodName}]: ${err.message}`;
 			this.logger.error(str);
 		} else {
-			str = `Error in [${this.constructor.name}:${methodName}]`;
+			str = `Error in [${that.constructor.name}:${methodName}]`;
 			this.logger.error(str);
 		}
 

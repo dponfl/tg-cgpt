@@ -20,41 +20,29 @@ export class PaymentProcessingController extends BaseController {
 	public success(req: Request, res: Response, next: NextFunction): void {
 
 		try {
-			this.logger.warn(`Successful payment: ${JSON.stringify(req.body, null, 2)}`);
+			this.logger.warn(`Successful payment:\n${JSON.stringify(req.body, null, 2)}`);
 
 			const promise = new Promise(async (resolve, reject) => {
 				const paramsCheckResult = await this.checkParams(req.body);
 
 				if (!paramsCheckResult) {
-					// this.logger.error(`ERROR: Check payment result params failed`);
-					// Notify user about failed payment
-					reject(new Error(`ERROR: Check payment result params failed`));
+					reject(new Error(`ERROR: Check payment result params failed, details:\n${req.body}`));
 				} else {
-
 					await this.paymentProcessingService.processSuccessfulPayment(req.body);
-
 					resolve('done');
 				}
-
 			});
 
 			promise
 				.then(
 					(result) => {
-						this.logger.info(`Resolve: ${result}`);
-
-						this.logger.info(`Sending success response to PG`);
-
 						return res.json({
 							status: 'success',
 						});
 					},
 					(error) => {
 						if (error instanceof Error) {
-							this.logger.error(`Reject: ${error.message}`);
-
-							this.logger.info(`Sending fail response to PG`);
-
+							this.logger.error(error.message);
 							return res.json({
 								status: 'fail',
 							});

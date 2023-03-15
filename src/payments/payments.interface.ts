@@ -52,5 +52,5 @@ export interface IPaymentProcessingService {
 
 export interface IPaymentService {
 	getPaymentLink(params: IGetPaymentLinkParams): Promise<IGetPaymentLinkResponse | undefined>;
-	calculateHash(params: IHashData): Promise<string>;
+	calculateHash(params: IHashData): Promise<string | undefined>;
 }

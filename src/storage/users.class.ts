@@ -30,7 +30,7 @@ export class UsersStorageService implements IUserStorageSevice {
 			};
 
 		} catch (error) {
-			const errMsg = this.utils.errorLog(error, methodName);
+			const errMsg = this.utils.errorLog(this, error, methodName);
 			return {
 				status: DbResponseStatus.ERROR,
 				payload: errMsg
@@ -55,7 +55,7 @@ export class UsersStorageService implements IUserStorageSevice {
 			};
 
 		} catch (error) {
-			const errMsg = this.utils.errorLog(error, methodName);
+			const errMsg = this.utils.errorLog(this, error, methodName);
 
 			return {
 				status: DbResponseStatus.ERROR,

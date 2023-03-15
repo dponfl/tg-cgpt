@@ -49,6 +49,6 @@ export interface IHttpResponse {
 }
 
 export interface IHttpService {
-	get(params: IHttpRequest): Promise<IHttpResponse>;
-	post(params: IHttpRequest): Promise<IHttpResponse>;
+	get(params: IHttpRequest): Promise<IHttpResponse | undefined>;
+	post(params: IHttpRequest): Promise<IHttpResponse | undefined>;
 }

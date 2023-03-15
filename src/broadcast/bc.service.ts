@@ -17,6 +17,7 @@ export class BroadcastService implements IBroadcastService {
 		const methodName = 'broadcastMsg';
 
 		const broadcastAllUsers = async (bs: Telegraf<IBotContext>, text: string): Promise<void> => {
+			// tslint:disable-next-line: no-shadowed-variable
 			const methodName = 'broadcastAllUsers';
 			try {
 
@@ -33,7 +34,7 @@ export class BroadcastService implements IBroadcastService {
 				}
 
 			} catch (error) {
-				this.utils.errorLog(error, methodName);
+				this.utils.errorLog(this, error, methodName);
 			}
 		};
 
@@ -48,7 +49,7 @@ export class BroadcastService implements IBroadcastService {
 			}
 
 		} catch (error) {
-			this.utils.errorLog(error, methodName);
+			this.utils.errorLog(this, error, methodName);
 		}
 	}
 }

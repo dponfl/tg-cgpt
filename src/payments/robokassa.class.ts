@@ -132,6 +132,10 @@ export class RobokassaService implements IPaymentService {
 
 			const signature = await this.calculateHash(hashData);
 
+			if (!signature) {
+				throw new Error(`Error at signature calculation`);
+			}
+
 			const requestParams: IGetPaymentLinkHttpRequest = {
 				signature,
 				amount: params.amount,
@@ -155,7 +159,7 @@ export class RobokassaService implements IPaymentService {
 
 			const resRaw = await this.httpService.post(httpParams);
 
-			if (resRaw.status !== HttpResponseStatus.SUCCESS) {
+			if (!resRaw || resRaw.status !== HttpResponseStatus.SUCCESS) {
 				return undefined;
 			}
 
@@ -177,13 +181,13 @@ export class RobokassaService implements IPaymentService {
 		} catch (error) {
 			return Object({
 				status: GeneralServiceResponseStatus.ERROR,
-				payload: this.utils.errorLog(error, methodName)
+				payload: this.utils.errorLog(this, error, methodName)
 			});
 		}
 
 	}
 
-	async calculateHash(params: IHashData): Promise<string> {
+	async calculateHash(params: IHashData): Promise<string | undefined> {
 		const methodName = 'calculateHash';
 		try {
 
@@ -208,7 +212,7 @@ export class RobokassaService implements IPaymentService {
 			return calculatedHash;
 
 		} catch (error) {
-			throw new Error(this.utils.errorLog(error, methodName));
+			this.utils.errorLog(this, error, methodName);
 		}
 	}
 

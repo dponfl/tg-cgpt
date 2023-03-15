@@ -73,7 +73,11 @@ const bootstap = async () => {
 	// tslint:disable-next-line: max-line-length
 	const robokassaService: IPaymentService = new RobokassaService(configService, logger, utils, httpService, dbConnection);
 
-	const paymentProcessingService: IPaymentProcessingService = new PaymentService(logger);
+	const paymentProcessingService: IPaymentProcessingService = new PaymentService(
+		logger,
+		utils,
+		dbConnection
+	);
 
 	const scenesGenerator: ISceneGenerator = new ScenesGenerator(
 		logger,
