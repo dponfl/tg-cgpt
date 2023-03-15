@@ -17,39 +17,53 @@ export class PaymentProcessingController extends BaseController {
 		]);
 	}
 
-	public success(req: Request, res: Response, next: NextFunction): Response {
+	public success(req: Request, res: Response, next: NextFunction): void {
 
 		try {
 			this.logger.warn(`Successful payment: ${JSON.stringify(req.body, null, 2)}`);
 
-			new Promise(async (resolve) => {
+			const promise = new Promise(async (resolve, reject) => {
 				const paramsCheckResult = await this.checkParams(req.body);
 
 				if (!paramsCheckResult) {
 					// this.logger.error(`ERROR: Check payment result params failed`);
 					// Notify user about failed payment
-					throw new Error(`ERROR: Check payment result params failed`);
+					reject(new Error(`ERROR: Check payment result params failed`));
 				}
 
 				await this.paymentProcessingService.processSuccessfulPayment(req.body);
-				// .then(resolve('success'));
+
+				resolve('done');
 			});
 
-			this.logger.info(`Sending success response to PG`);
+			promise
+				.then(
+					(result) => {
+						this.logger.info(`Resolve: ${result}`);
 
-			return res.json({
-				status: 'success',
-			});
+						this.logger.info(`Sending success response to PG`);
+
+						return res.json({
+							status: 'success',
+						});
+					},
+					(error) => {
+						if (error instanceof Error) {
+							this.logger.error(`Reject: ${error.name}:${error.message}`);
+
+							this.logger.info(`Sending fail response to PG`);
+
+							return res.json({
+								status: 'fail',
+							});
+						}
+					}
+				);
+
 		} catch (error) {
 			if (error instanceof Error) {
 				this.logger.error(`ERROR: ${error.message}`);
 			}
-
-			this.logger.info(`Sending fail response to PG`);
-
-			return res.json({
-				status: 'fail',
-			});
 		}
 
 	}
