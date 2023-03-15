@@ -1,12 +1,14 @@
 import { ILogger } from '../logger/logger.interface.js';
 import { BaseController } from './base.controller.js';
 import { NextFunction, Request, Response } from 'express';
-import { IPaymentProcessingParams, IPaymentProcessingService } from '../payments/payments.interface.js';
+// tslint:disable-next-line: max-line-length
+import { IHashData, IPaymentProcessingParams, IPaymentProcessingService, IPaymentService } from '../payments/payments.interface.js';
 
 export class PaymentProcessingController extends BaseController {
 	constructor(
 		public readonly logger: ILogger,
-		private readonly paymentProcessingService: IPaymentProcessingService
+		private readonly paymentProcessingService: IPaymentProcessingService,
+		private readonly robokassaService: IPaymentService
 	) {
 		super(logger);
 		this.bindRoutes([
@@ -19,9 +21,17 @@ export class PaymentProcessingController extends BaseController {
 
 		this.logger.warn(`Successful payment: ${JSON.stringify(req.body, null, 2)}`);
 
-		new Promise((resolve) => {
-			this.paymentProcessingService.processSuccessfulPayment(req.body)
-				.then(resolve('success'));
+		new Promise(async (resolve) => {
+			const paramsCheckResult = await this.checkParams(req.body);
+
+			if (!paramsCheckResult) {
+				this.logger.error(`ERROR: Check payment result params failed`);
+				// Notify user about failed payment
+				throw new Error(`ERROR: Check payment result params failed`);
+			}
+
+			await this.paymentProcessingService.processSuccessfulPayment(req.body);
+			// .then(resolve('success'));
 		});
 
 		this.logger.info(`Sending response to PG`);
@@ -39,7 +49,7 @@ export class PaymentProcessingController extends BaseController {
 		});
 	}
 
-	private checkParams(params: IPaymentProcessingParams): boolean {
+	private async checkParams(params: IPaymentProcessingParams): Promise<boolean> {
 
 		const { signature, amount, orderId, uid, gtid } = params;
 
@@ -73,7 +83,16 @@ export class PaymentProcessingController extends BaseController {
 			return false;
 		}
 
-		return true;
+		const hashData: IHashData = {
+			amount,
+			orderId: Number(orderId),
+			uid,
+			gtid
+		};
+
+		const calculatedHash = await this.robokassaService.calculateHash(hashData);
+
+		return signature === calculatedHash;
 	}
 
 }

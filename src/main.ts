@@ -86,7 +86,8 @@ const bootstap = async () => {
 
 	const paymentProcessingController: PaymentProcessingController = new PaymentProcessingController(
 		logger,
-		paymentProcessingService
+		paymentProcessingService,
+		robokassaService
 	);
 
 
