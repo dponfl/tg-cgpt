@@ -1,7 +1,8 @@
 import { Context, Telegraf } from 'telegraf';
 
 export interface IBotService {
-	init(): Promise<Telegraf<IBotContext>>;
+	init: () => Promise<Telegraf<IBotContext>>;
+	bot: Telegraf<IBotContext>;
 }
 
 export interface IBotSessionData {

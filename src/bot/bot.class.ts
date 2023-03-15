@@ -23,7 +23,7 @@ import { Kysely } from 'kysely';
 
 export class BotService implements IBotService {
 
-	private bot: Telegraf<IBotContext>;
+	private _bot: Telegraf<IBotContext>;
 
 	private commands: MyBotCommand[] = [];
 	// tslint:disable-next-line: no-any
@@ -40,7 +40,11 @@ export class BotService implements IBotService {
 		public readonly utils: IUtils,
 		private readonly broadcastService: IBroadcastService
 	) {
-		this.bot = new Telegraf<IBotContext>(configService.get('TELEGRAM_TOKEN'));
+		this._bot = new Telegraf<IBotContext>(configService.get('TELEGRAM_TOKEN'));
+	}
+
+	get bot(): Telegraf<IBotContext> {
+		return this._bot;
 	}
 
 	/**

@@ -1,5 +1,6 @@
 import { Kysely } from 'kysely';
 import moment from 'moment';
+import { IBotService } from '../bot/bot.interface.js';
 import { ILogger } from '../logger/logger.interface.js';
 import { GroupTransactionPaymentStatus, GroupTransactionServiceName, IDatabase } from '../storage/mysql.interface.js';
 import { IUtils } from '../utils/utils.class.js';
@@ -9,7 +10,8 @@ export class PaymentService implements IPaymentProcessingService {
 	constructor(
 		private readonly logger: ILogger,
 		private readonly utils: IUtils,
-		private readonly dbConnection: Kysely<IDatabase>
+		private readonly dbConnection: Kysely<IDatabase>,
+		private readonly botService: IBotService
 	) { }
 
 	public async processSuccessfulPayment(params: IPaymentProcessingParams): Promise<void> {
@@ -157,9 +159,6 @@ export class PaymentService implements IPaymentProcessingService {
 				default:
 					throw new Error(`Unknown GT service name`);
 			}
-
-
-
 
 		} catch (error) {
 			this.utils.errorLog(this, error, methodName);

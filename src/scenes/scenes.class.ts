@@ -1,6 +1,7 @@
 import { Kysely } from 'kysely';
 import { Markup } from 'telegraf';
 import { BaseScene } from 'telegraf/scenes';
+import { IBotContext } from '../bot/bot.interface.js';
 import { MySceneCommand } from '../commands/base_scenes/command.class.js';
 import { GptCommand } from '../commands/base_scenes/gpt.command.js';
 import { HelpCommand } from '../commands/base_scenes/help.command.js';
@@ -14,6 +15,7 @@ import { ILogger } from '../logger/logger.interface.js';
 import { IGetPaymentLinkParams, IGetPaymentLinkResponse, IPaymentService } from '../payments/payments.interface.js';
 import { GroupTransactionCurrency, GroupTransactionServiceName, IDatabase } from '../storage/mysql.interface.js';
 import { ISessionService } from '../storage/session.interface.js';
+import { ChatSceneNames } from '../types.js';
 import { IUtils } from '../utils/utils.class.js';
 import { ISceneGenerator } from './scenes.interface.js';
 
@@ -42,7 +44,9 @@ export class ScenesGenerator implements ISceneGenerator {
 			this.startIntro(),
 			this.startNext(),
 			this.mainGptScene(),
+			this.afterPaymentGptScene(),
 			this.mainMJScene(),
+			this.afterPaymentMJScene(),
 			this.menuScene(),
 			this.paymentScene(),
 			this.pushToPaymentScene(),
@@ -73,6 +77,26 @@ export class ScenesGenerator implements ISceneGenerator {
 
 		for (const command of this.commands) {
 			await command.handle();
+		}
+
+	}
+
+	private async moveToRespectiveChat(ctx: IBotContext): Promise<void> {
+
+		switch (ctx.session.botUserSession.chatName) {
+			case ChatSceneNames.mainGptScene:
+			case ChatSceneNames.afterPaymentGptScene:
+				await ctx.scene.enter(ChatSceneNames.afterPaymentGptScene);
+				break;
+
+			case ChatSceneNames.mainMJScene:
+			case ChatSceneNames.afterPaymentMJScene:
+				await ctx.scene.enter(ChatSceneNames.afterPaymentMJScene);
+				break;
+
+			default:
+				this.logger.error(`Unknown scene at ctx.session.botUserSession.chatName=${ctx.session.botUserSession.chatName}`);
+				await ctx.scene.enter(ChatSceneNames.afterPaymentGptScene);
 		}
 
 	}
@@ -206,6 +230,7 @@ export class ScenesGenerator implements ISceneGenerator {
 			const { message_id: messageId } = await ctx.replyWithHTML(textMain);
 
 			ctx.session.botUserSession.pinnedMessage = messageId;
+			ctx.session.botUserSession.chatName = ChatSceneNames.mainGptScene;
 			this.sessionService.updateSession(ctx);
 
 			await ctx.pinChatMessage(messageId);
@@ -339,6 +364,114 @@ export class ScenesGenerator implements ISceneGenerator {
 		return mainGptScene;
 	}
 
+	private async afterPaymentGptScene(): Promise<BaseScene> {
+
+		const afterPaymentGptScene = new BaseScene('afterPaymentGptScene');
+
+		await this.activateCommands(afterPaymentGptScene);
+
+		const textOnMessage =
+			`
+Работаю над вашим вопросом ⏳
+
+`;
+
+		// 		const textOnMessage01 =
+		// 			`
+		// Работаю над вашим вопросом 🔄
+		// `;
+
+		// 		const textOnMessage02 =
+		// 			`
+		// Работаю над вашим вопросом 🔃
+		// `;
+
+		// tslint:disable-next-line: no-any
+		afterPaymentGptScene.enter(async (ctx: any) => {
+
+			ctx.session.botUserSession.chatName = ChatSceneNames.afterPaymentGptScene;
+			this.sessionService.updateSession(ctx);
+
+		});
+
+
+		// tslint:disable-next-line: no-any
+		afterPaymentGptScene.on('message', async (ctx: any) => {
+
+			if (ctx.session.botUserSession.pendingChatGptRequest) {
+
+				const secondRequestText =
+					`
+<b>В данный момент я обрабатываю ваш предыдущий запрос</b> 🔄
+
+После моего ответа, вы сможете задать следующий вопрос 👌🏼
+
+`;
+
+				// tslint:disable-next-line: no-shadowed-variable
+				const { message_id } = await ctx.replyWithHTML(secondRequestText);
+				setTimeout(() => {
+					ctx.deleteMessage(message_id);
+				}, 5000);
+
+			} else {
+
+				const { message_id } = await ctx.replyWithHTML(textOnMessage);
+
+				const text = ctx.message.text;
+
+				ctx.session.botUserSession.pendingChatGptRequest = true;
+
+				this.sessionService.updateSession(ctx);
+
+				this.mainController.cgptTextRequest(text)
+					.then(
+						async (result) => {
+
+							ctx.session.botUserSession.pendingChatGptRequest = false;
+
+							this.sessionService.updateSession(ctx);
+
+							const resText = result?.join('\n\n');
+							await ctx.deleteMessage(message_id);
+							await ctx.replyWithHTML(resText,
+								{ reply_to_message_id: ctx.update.message.message_id });
+
+						},
+						async (error) => {
+
+							this.logger.error(`Error response from cgptTextRequest: ${error}`);
+
+							const errorResponseText =
+								`
+К сожалению что-то пошло не так 😔
+
+Пожалуйста, повторите ваш вопрос 🙏🏾
+
+`;
+
+							ctx.session.botUserSession.pendingChatGptRequest = false;
+
+							this.sessionService.updateSession(ctx);
+
+							await ctx.deleteMessage(message_id);
+							await ctx.replyWithHTML(errorResponseText,
+								{ reply_to_message_id: ctx.update.message.message_id });
+
+						}
+					);
+
+			}
+
+		});
+
+		// tslint:disable-next-line: no-any
+		afterPaymentGptScene.leave(async (ctx: any) => {
+		});
+
+		return afterPaymentGptScene;
+	}
+
 	private async mainMJScene(): Promise<BaseScene> {
 
 		const mainMJScene = new BaseScene('mainMJScene');
@@ -368,6 +501,7 @@ export class ScenesGenerator implements ISceneGenerator {
 			const { message_id: messageId } = await ctx.replyWithHTML(textMain);
 
 			ctx.session.botUserSession.pinnedMessage = messageId;
+			ctx.session.botUserSession.chatName = ChatSceneNames.mainMJScene;
 
 			this.sessionService.updateSession(ctx);
 
@@ -453,6 +587,98 @@ export class ScenesGenerator implements ISceneGenerator {
 		// this.mainMJSceneProp = mainMJScene;
 
 		return mainMJScene;
+	}
+
+	private async afterPaymentMJScene(): Promise<BaseScene> {
+
+		const afterPaymentMJScene = new BaseScene('afterPaymentMJScene');
+
+		await this.activateCommands(afterPaymentMJScene);
+
+		const textOnMessage =
+			`
+Работаю над вашим вопросом ⏳
+
+`;
+
+		// tslint:disable-next-line: no-any
+		afterPaymentMJScene.enter(async (ctx: any) => {
+
+			ctx.session.botUserSession.chatName = ChatSceneNames.mainMJScene;
+
+			this.sessionService.updateSession(ctx);
+		});
+
+
+		// tslint:disable-next-line: no-any
+		afterPaymentMJScene.on('message', async (ctx: any) => {
+
+			if (ctx.session.botUserSession.pendingMjRequest) {
+
+				const secondRequestText =
+					`
+<b>В данный момент я обрабатываю ваш предыдущий запрос</b> 🔄
+
+После моего ответа, вы сможете задать следующий вопрос 👌🏼
+
+`;
+
+				// tslint:disable-next-line: no-shadowed-variable
+				const { message_id } = await ctx.replyWithHTML(secondRequestText);
+				setTimeout(() => {
+					ctx.deleteMessage(message_id);
+				}, 5000);
+
+			} else {
+
+				const { message_id } = await ctx.replyWithHTML(textOnMessage);
+
+				const text = ctx.message.text;
+
+				ctx.session.botUserSession.pendingMjRequest = true;
+
+				this.sessionService.updateSession(ctx);
+
+				this.mainController.mjImgRequest(text)
+					.then(
+						async (result) => {
+							ctx.session.botUserSession.pendingMjRequest = false;
+							this.sessionService.updateSession(ctx);
+							const resText = result?.join('\n\n');
+							await ctx.deleteMessage(message_id);
+							await ctx.replyWithHTML(resText,
+								{ reply_to_message_id: ctx.update.message.message_id });
+						},
+						async (error) => {
+
+							this.logger.error(`Error response from mjImgRequest: ${error}`);
+
+							const errorResponseText =
+								`
+К сожалению что-то пошло не так 😔
+
+Пожалуйста, повторите ваш вопрос 🙏🏾
+
+`;
+
+							ctx.session.botUserSession.pendingMjRequest = false;
+
+							this.sessionService.updateSession(ctx);
+
+							await ctx.deleteMessage(message_id);
+							await ctx.replyWithHTML(errorResponseText,
+								{ reply_to_message_id: ctx.update.message.message_id });
+						}
+					);
+
+			}
+		});
+
+		// tslint:disable-next-line: no-any
+		afterPaymentMJScene.leave(async (ctx: any) => {
+		});
+
+		return afterPaymentMJScene;
 	}
 
 	private async menuScene(): Promise<BaseScene> {
@@ -649,6 +875,7 @@ export class ScenesGenerator implements ISceneGenerator {
 				],
 			]));
 
+			await this.moveToRespectiveChat(ctx);
 		});
 
 		// tslint:disable-next-line: no-any
