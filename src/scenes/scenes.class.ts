@@ -870,19 +870,9 @@ export class ScenesGenerator implements ISceneGenerator {
 				[
 					Markup.button.url('3) 🔝 GPT + Midjourney 250₽', gptAndMjUrl)
 				],
-				[
-					Markup.button.callback('Вернуться в меню  🔙', 'menu')
-				],
 			]));
 
 			await this.moveToRespectiveChat(ctx);
-		});
-
-		// tslint:disable-next-line: no-any
-		paymentScene.action('menu', async (ctx: any) => {
-			await ctx.answerCbQuery('Переход в "Меню"');
-			await ctx.deleteMessage();
-			await ctx.scene.enter('menuScene');
 		});
 
 		paymentScene.on('message', async (ctx) => {
