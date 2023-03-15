@@ -122,9 +122,7 @@ export class PaymentProcessingController extends BaseController {
 
 		const calculatedHash = await this.robokassaService.calculateHash(hashData);
 
-		return false;
-
-		// return signature === calculatedHash;
+		return signature === calculatedHash;
 	}
 
 }
