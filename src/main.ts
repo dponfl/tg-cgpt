@@ -23,10 +23,11 @@ import { IHttpService } from './http/http.interface.js';
 import { HttpService } from './http/http.class.js';
 import { exit } from 'process';
 import { RobokassaService } from './payments/robokassa.class.js';
-import { IGetPaymentLinkParams, IPaymentService } from './payments/payments.interface.js';
+import { IGetPaymentLinkParams, IPaymentProcessingService, IPaymentService } from './payments/payments.interface.js';
 import { GtStorageService } from './storage/gt.class.js';
 import { IRouter, Router } from 'express';
 import { PaymentProcessingController } from './api/payment.controller.js';
+import { PaymentService } from './payments/payment.class.js';
 
 
 const bootstap = async () => {
@@ -72,6 +73,8 @@ const bootstap = async () => {
 	// tslint:disable-next-line: max-line-length
 	const robokassaService: IPaymentService = new RobokassaService(configService, logger, utils, httpService, dbConnection);
 
+	const paymentProcessingService: IPaymentProcessingService = new PaymentService(logger);
+
 	const scenesGenerator: ISceneGenerator = new ScenesGenerator(
 		logger,
 		mainController,
@@ -81,7 +84,10 @@ const bootstap = async () => {
 		robokassaService
 	);
 
-	const paymentProcessingController: PaymentProcessingController = new PaymentProcessingController(logger);
+	const paymentProcessingController: PaymentProcessingController = new PaymentProcessingController(
+		logger,
+		paymentProcessingService
+	);
 
 
 	const app = new App(

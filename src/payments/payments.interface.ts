@@ -37,9 +37,17 @@ export interface IHashData {
 	gtid: string;
 }
 
+export interface IPaymentProcessingParams {
+	signature?: string;
+	amount: number;
+	orderId: string;
+	uid: string;
+	gtid: string;
+}
+
 export interface IPaymentProcessingService {
-	processSuccessfulPayment(): any;
-	processFailedPayment(): any;
+	processSuccessfulPayment(params: IPaymentProcessingParams): any;
+	processFailedPayment(params: IPaymentProcessingParams): any;
 }
 
 export interface IPaymentService {
