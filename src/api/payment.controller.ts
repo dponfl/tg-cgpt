@@ -29,11 +29,13 @@ export class PaymentProcessingController extends BaseController {
 					// this.logger.error(`ERROR: Check payment result params failed`);
 					// Notify user about failed payment
 					reject(new Error(`ERROR: Check payment result params failed`));
+				} else {
+
+					await this.paymentProcessingService.processSuccessfulPayment(req.body);
+
+					resolve('done');
 				}
 
-				await this.paymentProcessingService.processSuccessfulPayment(req.body);
-
-				resolve('done');
 			});
 
 			promise
@@ -49,7 +51,7 @@ export class PaymentProcessingController extends BaseController {
 					},
 					(error) => {
 						if (error instanceof Error) {
-							this.logger.error(`Reject: ${error.name}:${error.message}`);
+							this.logger.error(`Reject: ${error.message}`);
 
 							this.logger.info(`Sending fail response to PG`);
 
