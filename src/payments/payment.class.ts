@@ -160,15 +160,160 @@ export class PaymentService implements IPaymentProcessingService {
 					throw new Error(`Unknown GT service name`);
 			}
 
+			/**
+			 * Отправляем пользователю сообщение об успешной оплате
+			 */
+
+			const successfulPaymentMsg =
+				`
+<b>Оплата прошла успешно</b> ✅
+
+Теперь вы можете пользоваться сервисом 🔥
+
+`;
+
+			const userRecRaw = await this.dbConnection
+				.selectFrom('users')
+				.selectAll()
+				.where('guid', '=', uid)
+				.execute();
+
+			if (
+				!userRecRaw
+				|| !Array.isArray(userRecRaw)
+				|| userRecRaw.length !== 1
+			) {
+				throw new Error(`Cannot get user rec or several recs for uid=${uid}`);
+			}
+
+			const { chatId } = userRecRaw[0];
+
+			this.botService.bot.telegram.sendMessage(
+				chatId,
+				successfulPaymentMsg,
+				{
+					parse_mode: 'HTML',
+				}
+			);
+
 		} catch (error) {
 			this.utils.errorLog(this, error, methodName);
 		}
-
-
-	}
-	processFailedPayment(params: IPaymentProcessingParams) {
-		throw new Error('Method not implemented.');
 	}
 
+	public async processFailedPayment(params: IPaymentProcessingParams): Promise<void> {
+
+		const methodName = 'processFailedPayment';
+
+		try {
+
+			const { signature, amount, orderId, uid, gtid } = params;
+
+			/**
+			 * Выполняем серию проверок на корректность данных
+			 */
+
+			const gtRecRaw = await this.dbConnection
+				.selectFrom('groupTransactions')
+				.selectAll()
+				.where('guid', '=', gtid)
+				.execute();
+
+			if (
+				!gtRecRaw
+				|| !Array.isArray(gtRecRaw)
+				|| gtRecRaw.length !== 1
+			) {
+				throw new Error(`Cannot get gt rec or several recs for gtid=${gtid}`);
+			}
+
+			const {
+				userGuid: gtUserGuid,
+				amount: gtAmount,
+				id: gtOrderId,
+				serviceName,
+				purchasedQty,
+			} = gtRecRaw[0];
+
+
+			if (gtUserGuid !== uid) {
+				throw new Error(`Mismatch userId: uid=${uid} gtUserGuid=${gtUserGuid}`);
+			}
+
+			if (gtAmount !== amount) {
+				throw new Error(`Mismatch amount: amount=${amount} gtAmount=${gtAmount}`);
+			}
+
+			if (gtOrderId?.toString() !== orderId) {
+				throw new Error(`Mismatch id: orderId=${orderId} gtOrderId=${gtOrderId}`);
+			}
+
+			/**
+			 * Обновляем статус неуспешной транзакции
+			 */
+
+			await this.dbConnection
+				.updateTable('groupTransactions')
+				.set({
+					updatedAt: moment().utc().format(),
+					status: GroupTransactionPaymentStatus.FAILED
+				})
+				.where('guid', '=', gtid)
+				.execute();
+
+			/**
+			 * Обновляем статусы оставшихся транзакций того же пользователя
+			 */
+
+			await this.dbConnection
+				.updateTable('groupTransactions')
+				.set({
+					updatedAt: moment().utc().format(),
+					status: GroupTransactionPaymentStatus.DECLINED
+				})
+				.where('userGuid', '=', uid)
+				.where('status', '=', GroupTransactionPaymentStatus.PROCESSING)
+				.execute();
+
+			/**
+			 * Отправляем пользователю сообщение о неуспешной оплате
+			 */
+
+			const failedPaymentMsg =
+				`
+<i>Что-то пошло нет так</i> 😔
+
+<b>Пожалуйста повторите ваш платёж</b> 💳
+
+`;
+
+			const userRecRaw = await this.dbConnection
+				.selectFrom('users')
+				.selectAll()
+				.where('guid', '=', uid)
+				.execute();
+
+			if (
+				!userRecRaw
+				|| !Array.isArray(userRecRaw)
+				|| userRecRaw.length !== 1
+			) {
+				throw new Error(`Cannot get user rec or several recs for uid=${uid}`);
+			}
+
+			const { chatId } = userRecRaw[0];
+
+			this.botService.bot.telegram.sendMessage(
+				chatId,
+				failedPaymentMsg,
+				{
+					parse_mode: 'HTML',
+				}
+			);
+
+		} catch (error) {
+			this.utils.errorLog(this, error, methodName);
+		}
+	}
 
 }
