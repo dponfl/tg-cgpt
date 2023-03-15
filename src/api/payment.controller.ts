@@ -25,7 +25,7 @@ export class PaymentProcessingController extends BaseController {
 			const paramsCheckResult = await this.checkParams(req.body);
 
 			if (!paramsCheckResult) {
-				this.logger.error(`ERROR: Check payment result params failed`);
+				// this.logger.error(`ERROR: Check payment result params failed`);
 				// Notify user about failed payment
 				throw new Error(`ERROR: Check payment result params failed`);
 			}
@@ -92,7 +92,9 @@ export class PaymentProcessingController extends BaseController {
 
 		const calculatedHash = await this.robokassaService.calculateHash(hashData);
 
-		return signature === calculatedHash;
+		return false;
+
+		// return signature === calculatedHash;
 	}
 
 }
