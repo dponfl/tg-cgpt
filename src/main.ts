@@ -184,8 +184,8 @@ const bootstap = async () => {
 
 	await redis.set('test', JSON.stringify(obj));
 
-	// await utils.appendRedis('test', ['key02'], 'newKey', 321);
-	// const res = await utils.appendRedis('test', ['key01', 'key01_03'], 'anotherNewKey', {
+	// await utils.updateRedis('test', ['key02'], 'newKey', 321);
+	// const res = await utils.updateRedis('test', ['key01', 'key01_03'], 'anotherNewKey', {
 	// 	key01_AnotherNewKey: 111,
 	// 	key02_AnotherNewKey: 'string',
 	// 	key03_AnotherNewKey: {
@@ -193,14 +193,16 @@ const bootstap = async () => {
 	// 	}
 	// });
 
-	const res = await utils.appendRedis('test', [], 'key03',
-		{
-			key03_01: 'text',
-			key03_02: 123,
-			key03_03: {
-				add: 'Hello World'
-			}
-		});
+	// const res = await utils.updateRedis('test', [], 'key03',
+	// 	{
+	// 		key03_01: 'text',
+	// 		key03_02: 123,
+	// 		key03_03: {
+	// 			add: 'Hello World'
+	// 		}
+	// 	});
+
+	const res = await utils.updateRedis('test', ['key02'], 'testKey', 'testValue');
 
 	logger.info(`res:\n${JSON.stringify(res)}`);
 

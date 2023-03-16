@@ -20,7 +20,7 @@ export interface IUtils {
 	clearSpecialChars: (str: string) => string;
 	getChatIdStr: (ctx: IBotContext) => string;
 	getChatIdObj: (ctx: IBotContext) => GetChatIdObjResult;
-	appendRedis: (redisKey: string, target: string[], key: string, value: unknown) => Promise<void>;
+	updateRedis: (redisKey: string, target: string[], key: string, value: unknown) => Promise<void>;
 }
 
 export class Utils implements IUtils {
@@ -64,7 +64,7 @@ export class Utils implements IUtils {
 		return { fromId, chatId };
 	}
 
-	async appendRedis(redisKey: string, targetObject: string[], valueKey: string, value: unknown): Promise<void> {
+	async updateRedis(redisKey: string, targetObject: string[], valueKey: string, value: unknown): Promise<void> {
 		const methodName = 'appendRedis';
 		try {
 
