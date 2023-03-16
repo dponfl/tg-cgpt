@@ -164,7 +164,8 @@ const bootstap = async () => {
 	if (sessionRec) {
 		const sessionRecJson = JSON.parse(sessionRec);
 		logger.info(`Redis session data:\n${sessionRec}`);
-		logger.info(`Redis session data (json 1):\n${JSON.stringify(sessionRecJson, null, 2)}`);
+		const str = JSON.stringify(sessionRecJson, null, 2);
+		logger.info(`Redis session data (json 1):\n${str}`);
 		logger.info(`Redis session data (json 2):\n${sessionRecJson}`);
 	}
 
