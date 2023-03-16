@@ -203,8 +203,14 @@ const bootstap = async () => {
 	// 	});
 
 	const res = await utils.updateRedis('test', ['key02'], 'testKey', 'testValue');
+	const res2 = await utils.getValRedis('test', ['key01', 'key01_03']);
+	const res3 = await utils.getValRedis('test', ['key01']);
+	const res4 = await utils.getValRedis('test', []);
 
 	logger.info(`res:\n${JSON.stringify(res)}`);
+	logger.info(`res2:\n${JSON.stringify(res2)}`);
+	logger.info(`res3:\n${JSON.stringify(res3)}`);
+	logger.info(`res4:\n${JSON.stringify(res4)}`);
 
 	exit;
 

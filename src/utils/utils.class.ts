@@ -20,7 +20,8 @@ export interface IUtils {
 	clearSpecialChars: (str: string) => string;
 	getChatIdStr: (ctx: IBotContext) => string;
 	getChatIdObj: (ctx: IBotContext) => GetChatIdObjResult;
-	updateRedis: (redisKey: string, target: string[], key: string, value: unknown) => Promise<void>;
+	updateRedis: (redisKey: string, targetObject: string[], key: string, value: unknown) => Promise<void>;
+	getValRedis: (redisKey: string, targetObject: string[]) => Promise<unknown>
 }
 
 export class Utils implements IUtils {
@@ -84,8 +85,6 @@ export class Utils implements IUtils {
 				return acc[elem];
 			}, dataObj);
 
-			// this.logger.info(`dataObj:\n${JSON.stringify(dataObj)}\n\ntargetObj:\n${JSON.stringify(targetObj)}`);
-
 			targetObj[valueKey] = value;
 
 			if (targetObj.length > 0) {
@@ -95,6 +94,33 @@ export class Utils implements IUtils {
 			await this.redis.set(redisKey, JSON.stringify(dataObj));
 
 			return dataObj;
+
+		} catch (error) {
+			this.errorLog(this, error, methodName);
+		}
+	}
+
+	async getValRedis(redisKey: string, targetObject: string[]): Promise<unknown> {
+		const methodName = 'appendRedis';
+		try {
+
+			const dataStr = await this.redis.get(redisKey);
+
+			if (!dataStr) {
+				throw new Error(`Redis: no data by key=${redisKey}`);
+			}
+
+			const dataObj = JSON.parse(dataStr);
+
+			if (!this.isObject(dataObj)) {
+				throw new Error(`Redis: data by key=${redisKey} is not an object`);
+			}
+
+			const targetObj = targetObject.reduce((acc, elem) => {
+				return acc[elem];
+			}, dataObj);
+
+			return targetObj;
 
 		} catch (error) {
 			this.errorLog(this, error, methodName);
