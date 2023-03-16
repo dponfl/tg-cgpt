@@ -10,7 +10,7 @@ import { MenuCommand } from '../commands/base_scenes/menu.command.js';
 import { MjCommand } from '../commands/base_scenes/mj.command.js';
 import { PaymentCommand } from '../commands/base_scenes/payment.command.js';
 import { StartCommand } from '../commands/base_scenes/start.command.js';
-import { StatsCommand } from '../commands/base_scenes/stats.command.js';
+import { InfoCommand } from '../commands/base_scenes/info.command.js';
 import { IConfigService } from '../config/config.interface.js';
 import { IMainController } from '../controller/controller.interface.js';
 import { ILogger } from '../logger/logger.interface.js';
@@ -53,7 +53,7 @@ export class ScenesGenerator implements ISceneGenerator {
 			this.menuScene(),
 			this.paymentScene(),
 			this.pushToPaymentScene(),
-			this.statsScene(),
+			this.infoScene(),
 			this.helpScene()
 		]);
 	}
@@ -74,7 +74,7 @@ export class ScenesGenerator implements ISceneGenerator {
 			new PaymentCommand(scene, this.logger),
 			new GptCommand(scene, this.logger),
 			new MjCommand(scene, this.logger),
-			new StatsCommand(scene, this.logger),
+			new InfoCommand(scene, this.logger),
 			new HelpCommand(scene, this.logger),
 		];
 
@@ -703,7 +703,7 @@ export class ScenesGenerator implements ISceneGenerator {
 					Markup.button.callback('Оплатить запросы ✅', 'make_payment')
 				],
 				[
-					Markup.button.callback('Информация ℹ️', 'stats')
+					Markup.button.callback('Информация ℹ️', 'info')
 				],
 				[
 					Markup.button.callback('Помощь 👨🏻🔧', 'help')
@@ -723,10 +723,10 @@ export class ScenesGenerator implements ISceneGenerator {
 		});
 
 		// tslint:disable-next-line: no-any
-		menuScene.action('stats', async (ctx: any) => {
+		menuScene.action('info', async (ctx: any) => {
 			await ctx.answerCbQuery('Переход в "Статистику"');
 			await ctx.deleteMessage();
-			await ctx.scene.enter('statsScene');
+			await ctx.scene.enter('infoScene');
 		});
 
 		// tslint:disable-next-line: no-any
@@ -998,13 +998,13 @@ export class ScenesGenerator implements ISceneGenerator {
 		return pushToPaymentScene;
 	}
 
-	private async statsScene(): Promise<BaseScene> {
+	private async infoScene(): Promise<BaseScene> {
 
-		const statsScene = new BaseScene('statsScene');
+		const infoScene = new BaseScene('infoScene');
 
-		await this.activateCommands(statsScene);
+		await this.activateCommands(infoScene);
 
-		statsScene.enter(async (ctx) => {
+		infoScene.enter(async (ctx) => {
 
 			const usedFree = Math.floor(Math.random() * 10);
 			const usedGpt = Math.floor(Math.random() * 10);
@@ -1028,13 +1028,13 @@ export class ScenesGenerator implements ISceneGenerator {
 		});
 
 		// tslint:disable-next-line: no-any
-		statsScene.action('menu', async (ctx: any) => {
+		infoScene.action('menu', async (ctx: any) => {
 			await ctx.answerCbQuery('Переход в "Меню"');
 			await ctx.deleteMessage();
 			await ctx.scene.enter('menuScene');
 		});
 
-		statsScene.on('message', async (ctx) => {
+		infoScene.on('message', async (ctx) => {
 
 			const text =
 				`
@@ -1057,9 +1057,7 @@ export class ScenesGenerator implements ISceneGenerator {
 		});
 
 
-		// const statsSceneProp = statsScene;
-
-		return statsScene;
+		return infoScene;
 	}
 
 	private async helpScene(): Promise<BaseScene> {

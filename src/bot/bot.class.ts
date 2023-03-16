@@ -12,7 +12,7 @@ import { MenuCommand } from '../commands/menu.command.js';
 import { PaymentCommand } from '../commands/payment.command.js';
 import { GptCommand } from '../commands/gpt.command.js';
 import { MjCommand } from '../commands/mj.command.js';
-import { StatsCommand } from '../commands/stats.command.js';
+import { InfoCommand } from '../commands/info.command.js';
 import { HelpCommand } from '../commands/help.command.js';
 import RedisSession from 'telegraf-session-redis-upd';
 import { IDatabase, IDbServices } from '../storage/mysql.interface.js';
@@ -34,7 +34,6 @@ export class BotService implements IBotService {
 		public readonly configService: IConfigService,
 		public readonly scenesGenerator: ISceneGenerator,
 		public readonly redisSession: RedisSession,
-		// public readonly dbServices: IDbServices,
 		private readonly dbConnection: Kysely<IDatabase>,
 		private readonly sessionService: ISessionService,
 		public readonly utils: IUtils,
@@ -69,7 +68,7 @@ export class BotService implements IBotService {
 			description: 'Оплатить запросы',
 		},
 		{
-			command: 'stats',
+			command: 'info',
 			description: 'Статистика по запросам',
 		},
 		{
@@ -124,7 +123,7 @@ export class BotService implements IBotService {
 			new MjCommand(this.bot, this.logger, this.dbConnection, this.utils),
 			new MenuCommand(this.bot, this.logger, this.dbConnection, this.utils),
 			new PaymentCommand(this.bot, this.logger, this.dbConnection, this.utils),
-			new StatsCommand(this.bot, this.logger, this.dbConnection, this.utils),
+			new InfoCommand(this.bot, this.logger, this.dbConnection, this.utils),
 			new HelpCommand(this.bot, this.logger, this.dbConnection, this.utils),
 		];
 
