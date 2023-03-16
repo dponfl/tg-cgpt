@@ -46,7 +46,7 @@ const bootstap = async () => {
 			url: configService.get('REDIS_URL')
 		}
 	});
-	const redis = new Redis(configService.get('REDIS_URL'));
+	const redis: Redis = new Redis(configService.get('REDIS_URL'));
 
 	const sessionService = new SessionService(redisSession);
 
@@ -61,7 +61,7 @@ const bootstap = async () => {
 		})
 	});
 
-	const utils: IUtils = new Utils(logger);
+	const utils: IUtils = new Utils(logger, redis);
 
 	const dbServices: IDbServices = {
 		usersDbService: new UsersStorageService(dbConnection, logger, utils),
@@ -160,15 +160,33 @@ const bootstap = async () => {
 
 	// exit;
 
-	const sessionRec = await redis.get('372204823:372204823');
-	if (sessionRec) {
-		const sessionRecJson = JSON.parse(sessionRec);
-		logger.info(`Redis session data:\n${sessionRec}`);
-		const str = JSON.stringify(sessionRecJson);
-		logger.info(`Redis session data (json 1):\n${str}`);
-		logger.info(`Redis session data (json 2):\n${sessionRecJson}`);
-	}
+	// const sessionRec = await redis.get('372204823:372204823');
+	// if (sessionRec) {
+	// 	const sessionRecJson = JSON.parse(sessionRec);
+	// 	logger.info(`Redis session data:\n${sessionRec}`);
+	// 	const str = JSON.stringify(sessionRecJson);
+	// 	logger.info(`Redis session data (json 1):\n${str}`);
+	// 	logger.info(`Redis session data (json 2):\n${sessionRecJson}`);
+	// }
 
+	const obj = {
+		key01: {
+			key01_01: 'some string',
+			key01_02: 123,
+			key01_03: {
+				key01_03_01: 'some another string'
+			}
+		},
+		key02: {
+			key01_01: 'text'
+		}
+	};
+
+	await redis.set('test', JSON.stringify(obj));
+
+	const res = await utils.appendRedis('test', ['key02'], 'testKey', 321);
+
+	logger.info(`res:\n${JSON.stringify(res)}`);
 
 	exit;
 

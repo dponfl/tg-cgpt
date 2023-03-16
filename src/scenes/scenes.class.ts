@@ -1,3 +1,4 @@
+import { Redis } from 'ioredis';
 import { Kysely } from 'kysely';
 import { Markup } from 'telegraf';
 import { BaseScene } from 'telegraf/scenes';
@@ -860,7 +861,7 @@ export class ScenesGenerator implements ISceneGenerator {
 			// tslint:disable-next-line: max-line-length
 			const { url: gptAndMjUrl } = await this.robokassaService.getPaymentLink(gptAndMjParamsRobokassa) as IGetPaymentLinkResponse;
 
-			await ctx.replyWithHTML(text, Markup.inlineKeyboard([
+			const { message_id: messageId } = await ctx.replyWithHTML(text, Markup.inlineKeyboard([
 				[
 					Markup.button.url('1) 🤖 Gpt 150₽', gptUrl)
 				],
@@ -871,6 +872,10 @@ export class ScenesGenerator implements ISceneGenerator {
 					Markup.button.url('3) 🔝 GPT + Midjourney 250₽', gptAndMjUrl)
 				],
 			]));
+
+			if (messageId) {
+				ctx.session.botUserSession.paymentMessageId = messageId;
+			}
 
 			await this.moveToRespectiveChat(ctx);
 		});
