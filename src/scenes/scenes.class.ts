@@ -1004,19 +1004,40 @@ export class ScenesGenerator implements ISceneGenerator {
 
 		await this.activateCommands(infoScene);
 
-		infoScene.enter(async (ctx) => {
+		// tslint:disable-next-line: no-any
+		infoScene.enter(async (ctx: any) => {
 
-			const usedFree = Math.floor(Math.random() * 10);
-			const usedGpt = Math.floor(Math.random() * 10);
-			const usedMJ = Math.floor(Math.random() * 10);
+			if (!ctx.session.botUserSession.userGuid) {
+				throw new Error(`No ctx.session.botUserSession.userGuid`);
+			}
+
+			const serviceUsageData = await this.utils.getServiceUsageInfo(ctx.session.botUserSession.userGuid);
+
+			if (!serviceUsageData) {
+				throw new Error(`Could not get service usage data`);
+			}
+			const {
+				gptPurchased,
+				gptLeft,
+				mjPurchased,
+				mjLeft,
+				gptFreeReceived,
+				gptFreeLeft,
+				mjFreeReceived,
+				mjFreeLeft,
+			} = serviceUsageData;
 
 			const text =
 				`
-<i>Бесплатных запросов:</i> <b>${usedFree}</b> из <b>5</b>
+<i>Бесплатных запросов <b>Gpt</b> (доступно):</i> <b>${gptFreeLeft}</b> из <b>${gptFreeReceived}</b>
 
-<i>Платных</i> <b>запросов Gpt</b>: <b>${usedGpt}</b> из <b>10</b>
+<i>Бесплатных запросов <b>Midjourney</b> (доступно):</i> <b>${mjFreeLeft}</b> из <b>${mjFreeReceived}</b>
 
-<i>Платных</i> <b>запросов Midjourney</b>: <b>${usedMJ}</b> из <b>10</b>
+———————————————
+
+<i>Платных</i> <b>запросов Gpt</b> (доступно): <b>${gptLeft}</b> из <b>${gptPurchased}</b>
+
+<i>Платных</i> <b>запросов Midjourney</b> (доступно): <b>${mjLeft}</b> из <b>${mjPurchased}</b>
 	
 	`;
 

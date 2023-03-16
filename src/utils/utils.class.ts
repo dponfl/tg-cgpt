@@ -1,6 +1,8 @@
 import { Redis } from 'ioredis';
+import { Kysely } from 'kysely';
 import { IBotContext } from '../bot/bot.interface.js';
 import { ILogger } from '../logger/logger.interface.js';
+import { IDatabase } from '../storage/mysql.interface.js';
 
 type GetChatIdObjResult = {
 	fromId: number | undefined,
@@ -10,6 +12,17 @@ type GetChatIdObjResult = {
 export enum BroadcaseMsgCategory {
 	all = 'all',
 	inactive = 'inactive',
+}
+
+export interface IServiceUsageInfo {
+	gptPurchased: number;
+	gptLeft: number;
+	mjPurchased: number;
+	mjLeft: number;
+	gptFreeLeft: number;
+	mjFreeLeft: number;
+	gptFreeReceived: number;
+	mjFreeReceived: number;
 }
 
 export interface IUtils {
@@ -22,12 +35,14 @@ export interface IUtils {
 	updateRedis: (redisKey: string, targetObject: string[], key: string, value: unknown) => Promise<void>;
 	// tslint:disable-next-line: no-any
 	getValRedis: (redisKey: string, targetObject: string[]) => Promise<any>;
+	getServiceUsageInfo: (uid: string) => Promise<IServiceUsageInfo | undefined>;
 }
 
 export class Utils implements IUtils {
 
 	constructor(
 		private readonly logger: ILogger,
+		private readonly dbConnection: Kysely<IDatabase>,
 		private readonly redis: Redis
 	) { }
 
@@ -122,6 +137,42 @@ export class Utils implements IUtils {
 			}, dataObj);
 
 			return targetObj;
+
+		} catch (error) {
+			this.errorLog(this, error, methodName);
+		}
+	}
+
+	async getServiceUsageInfo(uid: string): Promise<IServiceUsageInfo | undefined> {
+		const methodName = 'getServiceUsageInfo';
+		try {
+
+			const serviceUsageRecRaw = await this.dbConnection
+				.selectFrom('serviceUsage')
+				.selectAll()
+				.where('userGuid', '=', uid)
+				.execute();
+
+			if (
+				!serviceUsageRecRaw
+				|| !Array.isArray(serviceUsageRecRaw)
+				|| serviceUsageRecRaw.length !== 1
+			) {
+				throw new Error(`No or several serviceUsage recs for userGuid=${uid}`);
+			}
+
+			const res: IServiceUsageInfo = {
+				gptPurchased: serviceUsageRecRaw[0].gptPurchased,
+				gptLeft: serviceUsageRecRaw[0].gptLeft,
+				mjPurchased: serviceUsageRecRaw[0].mjPurchased,
+				mjLeft: serviceUsageRecRaw[0].mjLeft,
+				gptFreeReceived: serviceUsageRecRaw[0].gptFreeReceived,
+				gptFreeLeft: serviceUsageRecRaw[0].gptFreeLeft,
+				mjFreeReceived: serviceUsageRecRaw[0].mjFreeReceived,
+				mjFreeLeft: serviceUsageRecRaw[0].mjFreeLeft,
+			};
+
+			return res;
 
 		} catch (error) {
 			this.errorLog(this, error, methodName);

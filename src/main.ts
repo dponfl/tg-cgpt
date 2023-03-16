@@ -61,7 +61,7 @@ const bootstap = async () => {
 		})
 	});
 
-	const utils: IUtils = new Utils(logger, redis);
+	const utils: IUtils = new Utils(logger, dbConnection, redis);
 
 	const dbServices: IDbServices = {
 		usersDbService: new UsersStorageService(dbConnection, logger, utils),

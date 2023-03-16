@@ -9,10 +9,12 @@ import { IUtils } from '../utils/utils.class.js';
 import moment from 'moment';
 import { ISessionService } from '../storage/session.interface.js';
 import { Kysely } from 'kysely';
+import { IConfigService } from '../config/config.interface.js';
 
 export class StartCommand extends MyBotCommand {
 	constructor(
 		public readonly bot: Telegraf<IBotContext>,
+		public readonly configService: IConfigService,
 		public readonly logger: ILogger,
 		private readonly sessionService: ISessionService,
 		// public readonly dbServices: IDbServices,
@@ -153,13 +155,15 @@ export class StartCommand extends MyBotCommand {
 					gptPurchased: 0,
 					gptUsed: 0,
 					gptLeft: 0,
+					gptFreeReceived: Number(this.configService.get('PACKAGE_GPT_FREE_QTY')),
 					gptFreeUsed: 0,
-					gptFreeLeft: 3,
+					gptFreeLeft: 0,
 					mjPurchased: 0,
 					mjUsed: 0,
 					mjLeft: 0,
+					mjFreeReceived: Number(this.configService.get('PACKAGE_MJ_FREE_QTY')),
 					mjFreeUsed: 0,
-					mjFreeLeft: 3,
+					mjFreeLeft: 0,
 				};
 
 				const createServiceUsageRec = Object(createServiceUsage);

@@ -118,7 +118,7 @@ export class BotService implements IBotService {
 		 */
 
 		this.commands = [
-			new StartCommand(this.bot, this.logger, this.sessionService, this.dbConnection, this.utils),
+			new StartCommand(this.bot, this.configService, this.logger, this.sessionService, this.dbConnection, this.utils),
 			new GptCommand(this.bot, this.logger, this.dbConnection, this.utils),
 			new MjCommand(this.bot, this.logger, this.dbConnection, this.utils),
 			new MenuCommand(this.bot, this.logger, this.dbConnection, this.utils),
