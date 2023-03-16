@@ -178,13 +178,13 @@ const bootstap = async () => {
 			}
 		},
 		key02: {
-			key01_01: 'text'
+			key02_01: 'text'
 		}
 	};
 
 	await redis.set('test', JSON.stringify(obj));
 
-	const res = await utils.appendRedis('test', ['key02'], 'testKey', 321);
+	const res = await utils.appendRedis('test', ['key02'], 'newKey', 321);
 
 	logger.info(`res:\n${JSON.stringify(res)}`);
 

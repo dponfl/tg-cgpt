@@ -84,7 +84,11 @@ export class Utils implements IUtils {
 				return acc[elem];
 			}, dataObj);
 
-			this.logger.info(`dataObj:\n${JSON.stringify(dataObj)}\n\ntargetObj:\n${JSON.stringify(targetObj)}`);
+			// this.logger.info(`dataObj:\n${JSON.stringify(dataObj)}\n\ntargetObj:\n${JSON.stringify(targetObj)}`);
+
+			targetObj[valueKey] = value;
+
+			await this.redis.set(redisKey, JSON.stringify(targetObj));
 
 			return targetObj;
 
