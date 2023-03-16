@@ -111,14 +111,15 @@ export class PaymentService implements IPaymentProcessingService {
 			switch (serviceName) {
 				case GroupTransactionServiceName.GPT:
 
-					const { gptPurchased } = serviceUsageRec;
+					const { gptPurchased, gptLeft } = serviceUsageRec;
 					const { gpt: gptNewPurchased } = JSON.parse(purchasedQty);
 
 					await this.dbConnection
 						.updateTable('serviceUsage')
 						.set({
 							updatedAt: moment().utc().format(),
-							gptPurchased: gptPurchased + gptNewPurchased
+							gptPurchased: gptPurchased + gptNewPurchased,
+							gptLeft: gptLeft + gptNewPurchased,
 						})
 						.where('guid', '=', serviceUsageRec.guid)
 						.execute();
@@ -126,14 +127,15 @@ export class PaymentService implements IPaymentProcessingService {
 					break;
 				case GroupTransactionServiceName.MJ:
 
-					const { mjPurchased } = serviceUsageRec;
+					const { mjPurchased, mjLeft } = serviceUsageRec;
 					const { mj: mjNewPurchased } = JSON.parse(purchasedQty);
 
 					await this.dbConnection
 						.updateTable('serviceUsage')
 						.set({
 							updatedAt: moment().utc().format(),
-							mjPurchased: mjPurchased + mjNewPurchased
+							mjPurchased: mjPurchased + mjNewPurchased,
+							mjLeft: mjLeft + mjNewPurchased,
 						})
 						.where('guid', '=', serviceUsageRec.guid)
 						.execute();
@@ -141,8 +143,12 @@ export class PaymentService implements IPaymentProcessingService {
 					break;
 				case GroupTransactionServiceName.GPT_MJ:
 
-					const { gptPurchased: gptP } = serviceUsageRec;
-					const { mjPurchased: mjP } = serviceUsageRec;
+					const {
+						gptPurchased: gptP,
+						gptLeft: gptL,
+						mjPurchased: mjP,
+						mjLeft: mjL
+					} = serviceUsageRec;
 					const { gpt: gptNewP, mj: mjNewP } = JSON.parse(purchasedQty);
 
 					await this.dbConnection
@@ -150,7 +156,9 @@ export class PaymentService implements IPaymentProcessingService {
 						.set({
 							updatedAt: moment().utc().format(),
 							gptPurchased: gptP + gptNewP,
-							mjPurchased: mjP + mjNewP
+							mjPurchased: mjP + mjNewP,
+							gptLeft: gptL + gptNewP,
+							mjLeft: mjL + mjNewP,
 						})
 						.where('guid', '=', serviceUsageRec.guid)
 						.execute();

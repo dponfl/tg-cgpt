@@ -157,13 +157,13 @@ export class StartCommand extends MyBotCommand {
 					gptLeft: 0,
 					gptFreeReceived: Number(this.configService.get('PACKAGE_GPT_FREE_QTY')),
 					gptFreeUsed: 0,
-					gptFreeLeft: 0,
+					gptFreeLeft: Number(this.configService.get('PACKAGE_GPT_FREE_QTY')),
 					mjPurchased: 0,
 					mjUsed: 0,
 					mjLeft: 0,
 					mjFreeReceived: Number(this.configService.get('PACKAGE_MJ_FREE_QTY')),
 					mjFreeUsed: 0,
-					mjFreeLeft: 0,
+					mjFreeLeft: Number(this.configService.get('PACKAGE_MJ_FREE_QTY')),
 				};
 
 				const createServiceUsageRec = Object(createServiceUsage);
