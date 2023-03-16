@@ -88,9 +88,13 @@ export class Utils implements IUtils {
 
 			targetObj[valueKey] = value;
 
-			await this.redis.set(redisKey, JSON.stringify(targetObj));
+			if (targetObj.length > 0) {
+				dataObj[targetObject[0]] = targetObj;
+			}
 
-			return targetObj;
+			await this.redis.set(redisKey, JSON.stringify(dataObj));
+
+			return dataObj;
 
 		} catch (error) {
 			this.errorLog(this, error, methodName);
