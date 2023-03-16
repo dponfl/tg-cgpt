@@ -161,16 +161,8 @@ export class PaymentService implements IPaymentProcessingService {
 			}
 
 			/**
-			 * Отправляем пользователю сообщение об успешной оплате
+			 * Удаляем блок с кнопками для оплаты
 			 */
-
-			const successfulPaymentMsg =
-				`
-<b>Оплата прошла успешно</b> ✅
-
-Вы можете продолжать пользоваться сервисом 🔥
-
-`;
 
 			const userRecRaw = await this.dbConnection
 				.selectFrom('users')
@@ -186,7 +178,29 @@ export class PaymentService implements IPaymentProcessingService {
 				throw new Error(`Cannot get user rec or several recs for uid=${uid}`);
 			}
 
-			const { chatId } = userRecRaw[0];
+			const { fromId, chatId } = userRecRaw[0];
+
+			const sessionKey = `${fromId}:${chatId}`;
+
+			const botUserSessionObj = await this.utils.getValRedis(sessionKey, ['botUserSession']);
+
+			if (botUserSessionObj.paymentMessageId) {
+				this.botService.bot.telegram.deleteMessage(chatId, botUserSessionObj.paymentMessageId);
+				await this.utils.updateRedis(sessionKey, ['botUserSession',], 'paymentMessageId', 0);
+			}
+
+
+			/**
+			 * Отправляем пользователю сообщение об успешной оплате
+			 */
+
+			const successfulPaymentMsg =
+				`
+<b>Оплата прошла успешно</b> ✅
+
+Вы можете продолжать пользоваться сервисом 🔥
+
+`;
 
 			this.botService.bot.telegram.sendMessage(
 				chatId,

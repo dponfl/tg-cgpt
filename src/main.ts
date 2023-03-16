@@ -119,100 +119,112 @@ const bootstap = async () => {
 		paymentProcessingController
 	);
 
-
-	// const payload = {
-	// 	a: 1,
-	// 	t: 'some text'
-	// };
-
-	// const options: IHttpPostRequestOptions = {
-	// 	body: JSON.stringify(payload),
-	// 	method: HttpRequestMethod.POST,
-	// 	dataFormat: HttpDataFormat.json,
-	// };
-
-	// const params: IHttpRequest = {
-	// 	url: 'https://httpbin.org/post',
-	// 	options,
-	// };
-	// const res = await httpService.post(params);
-
-	// logger.info(`Res: ${JSON.stringify(res, null, 2)}`);
-
-
 	/**
-	 * Check Robokassa
+	 * IIF to test certain functionality
 	 */
 
-	// const robokassaService = new RobokassaService(configService, logger, utils, httpService, dbConnection);
+	(() => {
 
-	// const paramsRobokassa: IGetPaymentLinkParams = {
-	// 	amount: 150,
-	// 	currency: GroupTransactionCurrency.RUB,
-	// 	description: 'Подписка на GPT сервис (10 запросов)',
-	// 	uid: '8f149f57-9f04-4bff-b34a-781dc6439bec',
-	// 	serviceName: GroupTransactionServiceName.GPT,
-	// 	purchasedQty: '10'
-	// };
-	// const result = await robokassaService.getPaymentLink(paramsRobokassa);
+		// const payload = {
+		// 	a: 1,
+		// 	t: 'some text'
+		// };
 
-	// logger.info(`Result: ${JSON.stringify(result, null, 2)}`);
+		// const options: IHttpPostRequestOptions = {
+		// 	body: JSON.stringify(payload),
+		// 	method: HttpRequestMethod.POST,
+		// 	dataFormat: HttpDataFormat.json,
+		// };
 
-	// exit;
+		// const params: IHttpRequest = {
+		// 	url: 'https://httpbin.org/post',
+		// 	options,
+		// };
+		// const res = await httpService.post(params);
 
-	// const sessionRec = await redis.get('372204823:372204823');
-	// if (sessionRec) {
-	// 	const sessionRecJson = JSON.parse(sessionRec);
-	// 	logger.info(`Redis session data:\n${sessionRec}`);
-	// 	const str = JSON.stringify(sessionRecJson);
-	// 	logger.info(`Redis session data (json 1):\n${str}`);
-	// 	logger.info(`Redis session data (json 2):\n${sessionRecJson}`);
-	// }
+		// logger.info(`Res: ${JSON.stringify(res, null, 2)}`);
 
-	const obj = {
-		key01: {
-			key01_01: 'some string',
-			key01_02: 123,
-			key01_03: {
-				key01_03_01: 'some another string'
-			}
-		},
-		key02: {
-			key02_01: 'text'
-		}
-	};
 
-	await redis.set('test', JSON.stringify(obj));
+		/**
+		 * Check Robokassa
+		 */
 
-	// await utils.updateRedis('test', ['key02'], 'newKey', 321);
-	// const res = await utils.updateRedis('test', ['key01', 'key01_03'], 'anotherNewKey', {
-	// 	key01_AnotherNewKey: 111,
-	// 	key02_AnotherNewKey: 'string',
-	// 	key03_AnotherNewKey: {
-	// 		key: 'value'
-	// 	}
-	// });
+		// const robokassaService = new RobokassaService(configService, logger, utils, httpService, dbConnection);
 
-	// const res = await utils.updateRedis('test', [], 'key03',
-	// 	{
-	// 		key03_01: 'text',
-	// 		key03_02: 123,
-	// 		key03_03: {
-	// 			add: 'Hello World'
-	// 		}
-	// 	});
+		// const paramsRobokassa: IGetPaymentLinkParams = {
+		// 	amount: 150,
+		// 	currency: GroupTransactionCurrency.RUB,
+		// 	description: 'Подписка на GPT сервис (10 запросов)',
+		// 	uid: '8f149f57-9f04-4bff-b34a-781dc6439bec',
+		// 	serviceName: GroupTransactionServiceName.GPT,
+		// 	purchasedQty: '10'
+		// };
+		// const result = await robokassaService.getPaymentLink(paramsRobokassa);
 
-	const res = await utils.updateRedis('test', ['key02'], 'testKey', 'testValue');
-	const res2 = await utils.getValRedis('test', ['key01', 'key01_03']);
-	const res3 = await utils.getValRedis('test', ['key01']);
-	const res4 = await utils.getValRedis('test', []);
+		// logger.info(`Result: ${JSON.stringify(result, null, 2)}`);
 
-	logger.info(`res:\n${JSON.stringify(res)}`);
-	logger.info(`res2:\n${JSON.stringify(res2)}`);
-	logger.info(`res3:\n${JSON.stringify(res3)}`);
-	logger.info(`res4:\n${JSON.stringify(res4)}`);
+		// exit;
 
-	exit;
+		// const sessionRec = await redis.get('372204823:372204823');
+		// if (sessionRec) {
+		// 	const sessionRecJson = JSON.parse(sessionRec);
+		// 	logger.info(`Redis session data:\n${sessionRec}`);
+		// 	const str = JSON.stringify(sessionRecJson);
+		// 	logger.info(`Redis session data (json 1):\n${str}`);
+		// 	logger.info(`Redis session data (json 2):\n${sessionRecJson}`);
+		// }
+
+		/**
+		 * Check created redis methods
+		 */
+
+		// const obj = {
+		// 	key01: {
+		// 		key01_01: 'some string',
+		// 		key01_02: 123,
+		// 		key01_03: {
+		// 			key01_03_01: 'some another string'
+		// 		}
+		// 	},
+		// 	key02: {
+		// 		key02_01: 'text'
+		// 	}
+		// };
+
+		// await redis.set('test', JSON.stringify(obj));
+
+		// await utils.updateRedis('test', ['key02'], 'newKey', 321);
+		// const res = await utils.updateRedis('test', ['key01', 'key01_03'], 'anotherNewKey', {
+		// 	key01_AnotherNewKey: 111,
+		// 	key02_AnotherNewKey: 'string',
+		// 	key03_AnotherNewKey: {
+		// 		key: 'value'
+		// 	}
+		// });
+
+		// const res = await utils.updateRedis('test', [], 'key03',
+		// 	{
+		// 		key03_01: 'text',
+		// 		key03_02: 123,
+		// 		key03_03: {
+		// 			add: 'Hello World'
+		// 		}
+		// 	});
+
+		// const res = await utils.updateRedis('test', ['key02'], 'testKey', 'testValue');
+		// const res2 = await utils.getValRedis('test', ['key01', 'key01_03']);
+		// const res3 = await utils.getValRedis('test', ['key01']);
+		// const res4 = await utils.getValRedis('test', []);
+
+		// logger.info(`res:\n${JSON.stringify(res)}`);
+		// logger.info(`res2:\n${JSON.stringify(res2)}`);
+		// logger.info(`res3:\n${JSON.stringify(res3)}`);
+		// logger.info(`res4:\n${JSON.stringify(res4)}`);
+
+		// exit;
+
+	})();
+
 
 	await app.initBot();
 	await app.initApi();

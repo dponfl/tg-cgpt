@@ -1,5 +1,4 @@
 import { Redis } from 'ioredis';
-import { LOG_LEVELS } from 'kysely';
 import { IBotContext } from '../bot/bot.interface.js';
 import { ILogger } from '../logger/logger.interface.js';
 
@@ -21,7 +20,8 @@ export interface IUtils {
 	getChatIdStr: (ctx: IBotContext) => string;
 	getChatIdObj: (ctx: IBotContext) => GetChatIdObjResult;
 	updateRedis: (redisKey: string, targetObject: string[], key: string, value: unknown) => Promise<void>;
-	getValRedis: (redisKey: string, targetObject: string[]) => Promise<unknown>
+	// tslint:disable-next-line: no-any
+	getValRedis: (redisKey: string, targetObject: string[]) => Promise<any>;
 }
 
 export class Utils implements IUtils {
@@ -100,7 +100,8 @@ export class Utils implements IUtils {
 		}
 	}
 
-	async getValRedis(redisKey: string, targetObject: string[]): Promise<unknown> {
+	// tslint:disable-next-line: no-any
+	async getValRedis(redisKey: string, targetObject: string[]): Promise<any> {
 		const methodName = 'appendRedis';
 		try {
 

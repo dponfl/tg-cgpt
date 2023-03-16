@@ -875,6 +875,7 @@ export class ScenesGenerator implements ISceneGenerator {
 
 			if (messageId) {
 				ctx.session.botUserSession.paymentMessageId = messageId;
+				this.sessionService.updateSession(ctx);
 			}
 
 			await this.moveToRespectiveChat(ctx);
