@@ -28,6 +28,7 @@ import { GtStorageService } from './storage/gt.class.js';
 import { IRouter, Router } from 'express';
 import { PaymentProcessingController } from './api/payment.controller.js';
 import { PaymentService } from './payments/payment.class.js';
+import { Redis } from 'ioredis';
 
 
 const bootstap = async () => {
@@ -45,6 +46,7 @@ const bootstap = async () => {
 			url: configService.get('REDIS_URL')
 		}
 	});
+	const redis = new Redis(configService.get('REDIS_URL'));
 
 	const sessionService = new SessionService(redisSession);
 
@@ -157,6 +159,11 @@ const bootstap = async () => {
 	// logger.info(`Result: ${JSON.stringify(result, null, 2)}`);
 
 	// exit;
+
+	const sessionRec = await redis.get('372204823:372204823');
+	logger.info(`Redis session data:\n${sessionRec}`);
+
+	exit;
 
 	await app.initBot();
 	await app.initApi();
