@@ -77,6 +77,7 @@ const bootstap = async () => {
 
 	const scenesGenerator: ISceneGenerator = new ScenesGenerator(
 		logger,
+		configService,
 		mainController,
 		sessionService,
 		utils,

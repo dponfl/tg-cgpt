@@ -11,6 +11,7 @@ import { MjCommand } from '../commands/base_scenes/mj.command.js';
 import { PaymentCommand } from '../commands/base_scenes/payment.command.js';
 import { StartCommand } from '../commands/base_scenes/start.command.js';
 import { StatsCommand } from '../commands/base_scenes/stats.command.js';
+import { IConfigService } from '../config/config.interface.js';
 import { IMainController } from '../controller/controller.interface.js';
 import { ILogger } from '../logger/logger.interface.js';
 import { IGetPaymentLinkParams, IGetPaymentLinkResponse, IPaymentService } from '../payments/payments.interface.js';
@@ -26,6 +27,7 @@ export class ScenesGenerator implements ISceneGenerator {
 
 	constructor(
 		private readonly logger: ILogger,
+		private readonly configService: IConfigService,
 		private readonly mainController: IMainController,
 		private readonly sessionService: ISessionService,
 		private readonly utils: IUtils,
@@ -776,15 +778,28 @@ export class ScenesGenerator implements ISceneGenerator {
 		// tslint:disable-next-line: no-any
 		paymentScene.enter(async (ctx: any) => {
 
+			const gptPrice = this.configService.get('PACKAGE_GPT_PRICE');
+			const gptQty = this.configService.get('PACKAGE_GPT_QTY');
+			const gptService = this.configService.get('PACKAGE_GPT_SERVICE');
+
+			const mjPrice = this.configService.get('PACKAGE_MJ_PRICE');
+			const mjQty = this.configService.get('PACKAGE_MJ_QTY');
+			const mjService = this.configService.get('PACKAGE_MJ_SERVICE');
+
+			const gpt_mjPrice = this.configService.get('PACKAGE_GPT_MJ_PRICE');
+			const gpt_mj_gptQty = this.configService.get('PACKAGE_GPT_MJ_GPT_QTY');
+			const gpt_mj_mjQty = this.configService.get('PACKAGE_GPT_MJ_MJ_QTY');
+			const gpt_mj_mjService = this.configService.get('PACKAGE_GPT_MJ_SERVICE');
+
 			const text =
 				`
 	Для того, чтобы пользоваться всем функционалом необходимо оплатить запросы 👇 
 	
-	1)10 запросов <b>для искусственного интеллекта (GPT)</b> — 150₽
+	1) ${gptQty} запросов <b>для искусственного интеллекта (GPT)</b> — ${gptPrice}₽
 	
-	2)10 запросов для <b>Midjourney</b> — 150₽
+	2) ${mjQty} запросов для <b>Midjourney</b> — ${mjPrice}₽
 	
-	3)10 запросов для <b>искусственного интеллекта (GPT)</b> + 10 запросов для <b>Midjourney</b> — 250₽
+	3) ${gpt_mj_gptQty} запросов для <b>искусственного интеллекта (GPT)</b> + ${gpt_mj_mjQty} запросов для <b>Midjourney</b> — ${gpt_mjPrice}₽
 	`;
 
 			/**
@@ -828,30 +843,30 @@ export class ScenesGenerator implements ISceneGenerator {
 			}
 
 			const gptParamsRobokassa: IGetPaymentLinkParams = {
-				amount: 150,
+				amount: Number(gptPrice),
 				currency: GroupTransactionCurrency.RUB,
-				description: 'Подписка на GPT сервис (10 запросов)',
+				description: `Подписка на GPT сервис (${gptQty} запросов)`,
 				uid: ctx.session.botUserSession.userGuid,
 				serviceName: GroupTransactionServiceName.GPT,
-				purchasedQty: JSON.stringify({ gpt: 10 }),
+				purchasedQty: gptService,
 			};
 
 			const mjParamsRobokassa: IGetPaymentLinkParams = {
-				amount: 150,
+				amount: Number(mjPrice),
 				currency: GroupTransactionCurrency.RUB,
-				description: 'Подписка на Midjourney сервис (10 запросов)',
+				description: `Подписка на Midjourney сервис (${mjQty} запросов)`,
 				uid: ctx.session.botUserSession.userGuid,
 				serviceName: GroupTransactionServiceName.MJ,
-				purchasedQty: JSON.stringify({ mj: 10 }),
+				purchasedQty: mjService,
 			};
 
 			const gptAndMjParamsRobokassa: IGetPaymentLinkParams = {
-				amount: 250,
+				amount: Number(gpt_mjPrice),
 				currency: GroupTransactionCurrency.RUB,
-				description: 'Подписка на GPT сервис (10 запросов) и Midjourney сервис (10 запросов)',
+				description: `Подписка на GPT сервис (${gpt_mj_gptQty} запросов) и Midjourney сервис (${gpt_mj_mjQty} запросов)`,
 				uid: ctx.session.botUserSession.userGuid,
 				serviceName: GroupTransactionServiceName.GPT_MJ,
-				purchasedQty: JSON.stringify({ gpt: 10, mj: 10 }),
+				purchasedQty: gpt_mj_mjService,
 			};
 
 			const { url: gptUrl } = await this.robokassaService.getPaymentLink(gptParamsRobokassa) as IGetPaymentLinkResponse;
@@ -863,13 +878,13 @@ export class ScenesGenerator implements ISceneGenerator {
 
 			const { message_id: messageId } = await ctx.replyWithHTML(text, Markup.inlineKeyboard([
 				[
-					Markup.button.url('1) 🤖 Gpt 150₽', gptUrl)
+					Markup.button.url(`1) 🤖 Gpt ${gptPrice}₽`, gptUrl)
 				],
 				[
-					Markup.button.url('2) 🎑 Midjourney 150₽', mjUrl)
+					Markup.button.url(`2) 🎑 Midjourney ${mjPrice}₽`, mjUrl)
 				],
 				[
-					Markup.button.url('3) 🔝 GPT + Midjourney 250₽', gptAndMjUrl)
+					Markup.button.url(`3) 🔝 GPT + Midjourney ${gpt_mjPrice}₽`, gptAndMjUrl)
 				],
 			]));
 
