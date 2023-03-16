@@ -49,7 +49,7 @@ export class HttpService implements IHttpService {
 			if (res.status !== 200) {
 				return {
 					status: HttpResponseStatus.ERROR,
-					payload: `Error: Http response failed: ${JSON.stringify(data, null, 2)}`
+					payload: `Error: Http response failed: ${JSON.stringify(data)}`
 				};
 			}
 

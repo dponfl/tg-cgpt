@@ -273,6 +273,7 @@ export class PaymentService implements IPaymentProcessingService {
 					status: GroupTransactionPaymentStatus.FAILED
 				})
 				.where('guid', '=', gtid)
+				.where('status', '=', GroupTransactionPaymentStatus.PROCESSING)
 				.execute();
 
 			/**
@@ -290,16 +291,8 @@ export class PaymentService implements IPaymentProcessingService {
 				.execute();
 
 			/**
-			 * Отправляем пользователю сообщение о неуспешной оплате
+			 * Удаляем блок с кнопками для оплаты
 			 */
-
-			const failedPaymentMsg =
-				`
-<i>Что-то пошло нет так</i> 😔
-
-<b>Пожалуйста повторите ваш платёж</b> 💳
-
-`;
 
 			const userRecRaw = await this.dbConnection
 				.selectFrom('users')
@@ -315,7 +308,28 @@ export class PaymentService implements IPaymentProcessingService {
 				throw new Error(`Cannot get user rec or several recs for uid=${uid}`);
 			}
 
-			const { chatId } = userRecRaw[0];
+			const { fromId, chatId } = userRecRaw[0];
+
+			const sessionKey = `${fromId}:${chatId}`;
+
+			const botUserSessionObj = await this.utils.getValRedis(sessionKey, ['botUserSession']);
+
+			if (botUserSessionObj.paymentMessageId) {
+				this.botService.bot.telegram.deleteMessage(chatId, botUserSessionObj.paymentMessageId);
+				await this.utils.updateRedis(sessionKey, ['botUserSession',], 'paymentMessageId', 0);
+			}
+
+			/**
+			 * Отправляем пользователю сообщение о неуспешной оплате
+			 */
+
+			const failedPaymentMsg =
+				`
+<i>Что-то пошло нет так</i> 😔
+
+<b>Пожалуйста повторите ваш платёж используя команду /pay</b> 💳
+
+`;
 
 			this.botService.bot.telegram.sendMessage(
 				chatId,

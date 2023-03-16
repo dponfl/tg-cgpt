@@ -20,7 +20,7 @@ export class PaymentProcessingController extends BaseController {
 	public success(req: Request, res: Response, next: NextFunction): void {
 
 		try {
-			this.logger.warn(`Successful payment:\n${JSON.stringify(req.body, null, 2)}`);
+			this.logger.warn(`Successful payment:\n${JSON.stringify(req.body)}`);
 
 			const promise = new Promise(async (resolve, reject) => {
 				const paramsCheckResult = await this.checkParams(req.body);
@@ -61,7 +61,7 @@ export class PaymentProcessingController extends BaseController {
 	public fail(req: Request, res: Response, next: NextFunction): void {
 
 		try {
-			this.logger.warn(`Failed payment:\n${JSON.stringify(req.body, null, 2)}`);
+			this.logger.warn(`Failed payment:\n${JSON.stringify(req.body)}`);
 
 			const promise = new Promise(async (resolve, reject) => {
 				const paramsCheckResult = await this.checkParams(req.body);
