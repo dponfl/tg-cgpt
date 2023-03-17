@@ -14,7 +14,7 @@ import { ISceneGenerator } from './scenes/scenes.interface.js';
 import RedisSession from 'telegraf-session-redis-upd';
 import { SessionService } from './storage/session.class.js';
 import { Kysely, MysqlDialect } from 'kysely';
-import { GroupTransactionCurrency, GroupTransactionServiceName, IDatabase, IDbServices } from './storage/mysql.interface.js';
+import { IDatabase, IDbServices } from './storage/mysql.interface.js';
 import { createPool } from 'mysql2';
 import { UsersStorageService } from './storage/users.class.js';
 import { IUtils, Utils } from './utils/utils.class.js';
@@ -23,12 +23,12 @@ import { IHttpService } from './http/http.interface.js';
 import { HttpService } from './http/http.class.js';
 import { exit } from 'process';
 import { RobokassaService } from './payments/robokassa.class.js';
-import { IGetPaymentLinkParams, IPaymentProcessingService, IPaymentService } from './payments/payments.interface.js';
+import { IPaymentProcessingService, IPaymentService } from './payments/payments.interface.js';
 import { GtStorageService } from './storage/gt.class.js';
-import { IRouter, Router } from 'express';
 import { PaymentProcessingController } from './api/payment.controller.js';
 import { PaymentService } from './payments/payment.class.js';
 import { Redis } from 'ioredis';
+import { OpenAiChatService } from './ai/open_ai/chat.service.js';
 
 
 const bootstap = async () => {
@@ -36,9 +36,8 @@ const bootstap = async () => {
 
 	const logger: ILogger = new UseLogger();
 	const configService: IConfigService = new ConfigService(logger);
-	const cgptService: IAIText = new ChatGPTService();
-	const mjService: IAIImg = new MjService();
-	const mainController: IMainController = new MainController(logger, cgptService, mjService);
+
+
 	const redisSession: RedisSession = new RedisSession({
 		store: {
 			host: configService.get('REDIS_HOST'),
@@ -62,6 +61,21 @@ const bootstap = async () => {
 	});
 
 	const utils: IUtils = new Utils(logger, dbConnection, redis);
+
+	// const cgptService: IAIText = new ChatGPTService();
+	const chatOpenAiService: IAIText = new OpenAiChatService(
+		logger,
+		configService,
+		utils
+	);
+	const mjService: IAIImg = new MjService();
+
+	const mainController: IMainController = new MainController(
+		logger,
+		// cgptService,
+		chatOpenAiService,
+		mjService
+	);
 
 	const dbServices: IDbServices = {
 		usersDbService: new UsersStorageService(dbConnection, logger, utils),
@@ -124,7 +138,7 @@ const bootstap = async () => {
 	 * IIF to test certain functionality
 	 */
 
-	(() => {
+	(async () => {
 
 		// const payload = {
 		// 	a: 1,
@@ -222,7 +236,11 @@ const bootstap = async () => {
 		// logger.info(`res3:\n${JSON.stringify(res3)}`);
 		// logger.info(`res4:\n${JSON.stringify(res4)}`);
 
-		// exit;
+		const prompt = '';
+		const res = await mainController.openAiChatRequest(prompt);
+		logger.info(`mainController.openAiChatRequest:\n${res}`);
+
+		exit;
 
 	})();
 

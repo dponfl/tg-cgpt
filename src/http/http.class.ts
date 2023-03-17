@@ -49,7 +49,8 @@ export class HttpService implements IHttpService {
 			if (res.status !== 200) {
 				return {
 					status: HttpResponseStatus.ERROR,
-					payload: `Error: Http response failed: ${JSON.stringify(data)}`
+					statusCode: res.status,
+					payload: `Http response failed:\nStatus text:${res.statusText}\nResponse data:${JSON.stringify(data)}`
 				};
 			}
 

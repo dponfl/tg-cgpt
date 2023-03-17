@@ -310,7 +310,7 @@ export class ScenesGenerator implements ISceneGenerator {
 
 				this.sessionService.updateSession(ctx);
 
-				this.mainController.cgptTextRequest(text)
+				this.mainController.openAiChatRequest(text)
 					.then(
 						async (result) => {
 
@@ -427,7 +427,7 @@ export class ScenesGenerator implements ISceneGenerator {
 
 				this.sessionService.updateSession(ctx);
 
-				this.mainController.cgptTextRequest(text)
+				this.mainController.openAiChatRequest(text)
 					.then(
 						async (result) => {
 

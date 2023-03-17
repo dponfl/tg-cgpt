@@ -45,6 +45,7 @@ export type IHttpResponsePayload =
 
 export interface IHttpResponse {
 	status: HttpResponseStatus;
+	statusCode?: number;
 	payload: IHttpResponsePayload;
 }
 

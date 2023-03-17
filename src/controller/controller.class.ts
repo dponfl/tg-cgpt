@@ -1,7 +1,7 @@
 import { IAIImg, IAIText } from '../ai/ai.interface.js';
 import { ILogger } from '../logger/logger.interface.js';
 // tslint:disable-next-line: max-line-length
-import { AiImgRequest, AiImgResponsePayload, AiResponseStatus, AiTextRequest, AiTextResponse, AiTextResponsePayload, IMainController } from './controller.interface.js';
+import { AiImgResponsePayload, AiResponseStatus, AiTextResponse, AiTextResponsePayload, IMainController } from './controller.interface.js';
 
 export class MainController implements IMainController {
 
@@ -11,9 +11,9 @@ export class MainController implements IMainController {
 		private readonly mjService: IAIImg
 	) { }
 
-	public async cgptTextRequest(str: AiTextRequest): Promise<AiTextResponsePayload> {
+	public async openAiChatRequest(prompt: string): Promise<AiTextResponsePayload> {
 
-		const resRaw: AiTextResponse = await this.chatGptService.textRequest(str);
+		const resRaw: AiTextResponse = await this.chatGptService.textRequest(prompt);
 
 		if (resRaw.status !== AiResponseStatus.SUCCESS) {
 			throw new Error('ChatGPT error response');
@@ -22,8 +22,8 @@ export class MainController implements IMainController {
 		}
 	}
 
-	public async mjImgRequest(str: AiImgRequest): Promise<AiImgResponsePayload> {
-		const resRaw: AiTextResponse = await this.mjService.imgRequest(str);
+	public async mjImgRequest(prompt: string): Promise<AiImgResponsePayload> {
+		const resRaw: AiTextResponse = await this.mjService.imgRequest(prompt);
 
 		if (resRaw.status !== AiResponseStatus.SUCCESS) {
 			throw new Error('MidJourney error response');

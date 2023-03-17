@@ -26,6 +26,6 @@ export type AiImgResponse = {
 };
 
 export interface IMainController {
-	cgptTextRequest(str: AiTextRequest): Promise<AiTextResponsePayload>;
-	mjImgRequest(str: AiImgRequest): Promise<AiImgResponsePayload>;
+	openAiChatRequest(prompt: string): Promise<AiTextResponsePayload>;
+	mjImgRequest(prompt: string): Promise<AiImgResponsePayload>;
 }

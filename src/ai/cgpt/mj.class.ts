@@ -2,7 +2,7 @@ import { AiImgRequest, AiImgResponse, AiResponseStatus } from '../../controller/
 import { IAIImg } from '../ai.interface.js';
 
 export class MjService implements IAIImg {
-	public async imgRequest(str: AiImgRequest): Promise<AiImgResponse> {
+	public async imgRequest(str: string): Promise<AiImgResponse> {
 
 		/**
 		 * Mock API responce cases

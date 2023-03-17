@@ -24,7 +24,7 @@
     "moment": "^2.29.4",
     "mysql2": "^3.2.0",
     "node-fetch": "^3.3.1",
-    "openai": "^3.1.0",
+    "openai": "^3.2.1",
     "telegraf": "^4.11.2",
     "telegraf-session-redis-upd": "^5.1.4",
     "tslog": "^4.7.4",

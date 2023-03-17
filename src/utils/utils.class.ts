@@ -36,6 +36,7 @@ export interface IUtils {
 	// tslint:disable-next-line: no-any
 	getValRedis: (redisKey: string, targetObject: string[]) => Promise<any>;
 	getServiceUsageInfo: (uid: string) => Promise<IServiceUsageInfo | undefined>;
+	sleep: (milliseconds: number) => Promise<unknown>;
 }
 
 export class Utils implements IUtils {
@@ -177,6 +178,10 @@ export class Utils implements IUtils {
 		} catch (error) {
 			this.errorLog(this, error, methodName);
 		}
+	}
+
+	async sleep(milliseconds: number): Promise<unknown> {
+		return new Promise(resolve => setTimeout(resolve, milliseconds));
 	}
 
 }

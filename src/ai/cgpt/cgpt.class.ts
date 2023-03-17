@@ -2,7 +2,7 @@ import { AiResponseStatus, AiTextRequest, AiTextResponse } from '../../controlle
 import { IAIText } from '../ai.interface.js';
 
 export class ChatGPTService implements IAIText {
-	public async textRequest(str: AiTextRequest): Promise<AiTextResponse> {
+	public async textRequest(str: string): Promise<AiTextResponse> {
 
 		/**
 		 * Mock API responce cases
