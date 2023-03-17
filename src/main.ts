@@ -236,11 +236,11 @@ const bootstap = async () => {
 		// logger.info(`res3:\n${JSON.stringify(res3)}`);
 		// logger.info(`res4:\n${JSON.stringify(res4)}`);
 
-		const prompt = 'Кто ты?';
-		const res = await mainController.openAiChatRequest(prompt);
-		logger.info(`mainController.openAiChatRequest:\n${JSON.stringify(res)}`);
+		// const prompt = 'Кто ты?';
+		// const res = await mainController.openAiChatRequest(prompt);
+		// logger.info(`mainController.openAiChatRequest:\n${JSON.stringify(res)}`);
 
-		exit;
+		// exit;
 
 	})();
 
