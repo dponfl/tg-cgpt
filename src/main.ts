@@ -238,7 +238,7 @@ const bootstap = async () => {
 
 		const prompt = '';
 		const res = await mainController.openAiChatRequest(prompt);
-		logger.info(`mainController.openAiChatRequest:\n${res}`);
+		logger.info(`mainController.openAiChatRequest:\n${JSON.stringify(res)}`);
 
 		exit;
 

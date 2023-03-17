@@ -50,7 +50,7 @@ export class OpenAiChatService implements IAIText {
 
 			const response = await this.openai.createChatCompletion(requestParams);
 
-			this.logger.info(`openai.createChatCompletion response:\n${JSON.stringify(response)}`);
+			this.logger.info(`openai.createChatCompletion response:\nStatus: ${response.status} Status text: ${response.statusText} Data: ${JSON.stringify(response.data)}`);
 
 			requestCompleted = true;
 
