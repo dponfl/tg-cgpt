@@ -449,11 +449,21 @@ export class ScenesGenerator implements ISceneGenerator {
 
 							this.sessionService.updateSession(ctx);
 
-							const resText = result?.join('\n\n');
+							let msgText = '';
 							await ctx.deleteMessage(message_id);
-							await ctx.replyWithHTML(resText,
-								{ reply_to_message_id: ctx.update.message.message_id });
 
+							let i = 1;
+
+							if (result) {
+								for (const txt of result) {
+									msgText = result.length > 1
+										? `<b>Ответ ${i} 👇</b>\n\n${txt}`
+										: txt;
+									i++;
+									await ctx.replyWithHTML(msgText,
+										{ reply_to_message_id: ctx.update.message.message_id });
+								}
+							}
 						},
 						async (error) => {
 
