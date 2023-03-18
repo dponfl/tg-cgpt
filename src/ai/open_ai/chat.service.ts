@@ -46,6 +46,19 @@ export class OpenAiChatService implements IAIText {
 				messages: [message]
 			};
 
+			const max_tokens = Number(this.configService.get('MAX_TOKENS'));
+
+			// TODO: delete
+			this.logger.warn(`max_tokens:\n${max_tokens}`);
+
+
+			if (max_tokens) {
+				requestParams.max_tokens = max_tokens;
+			}
+
+			// TODO: delete
+			this.logger.warn(`requestParams:\n${JSON.stringify(requestParams)}`);
+
 			let requestCompleted: boolean = false;
 
 			const response = await this.openai.createChatCompletion(requestParams);
