@@ -158,6 +158,7 @@ export class OpenAiChatService implements IAIText {
 									payload: [textResponseStr]
 								}
 							)
+							return;
 						}
 
 						const parsed = JSON.parse(data);
