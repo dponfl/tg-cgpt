@@ -20,7 +20,7 @@ export class MainController implements IMainController {
 		const resStreamRaw: AiTextResponse = await this.chatGptService.textStreamRequest(user, prompt);
 
 		if (resRaw.status !== AiResponseStatus.SUCCESS) {
-			throw new Error('ChatGPT error response');
+			this.logger.error(`User: ${user}, ChatGPT error response`);
 		} else if (resRaw.payload) {
 			resPayload.push(resRaw.payload[0]);
 		} else {
@@ -28,14 +28,18 @@ export class MainController implements IMainController {
 		}
 
 		if (resStreamRaw.status !== AiResponseStatus.SUCCESS) {
-			throw new Error('ChatGPT (stream) error response');
+			this.logger.error(`User: ${user}, ChatGPT (stream) error response`);
 		} else if (resStreamRaw.payload) {
 			resPayload.push(resStreamRaw.payload[0]);
 		} else {
 			this.logger.error(`User: ${user}, resStreamRaw.payload is undefined`)
 		}
 
-		return resPayload;
+		if (resPayload.length === 0) {
+			throw new Error(`User: ${user}, response data is empty`);
+		} else {
+			return resPayload;
+		}
 
 	}
 
