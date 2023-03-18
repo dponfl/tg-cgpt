@@ -90,7 +90,7 @@ export class OpenAiChatService implements IAIText {
 
 	public async textStreamRequest(user: string, prompt: string): Promise<AiTextResponse> {
 
-		const methodName = 'testStreamRequest';
+		const methodName = 'textStreamRequest';
 
 		let textResponse: string[] = [];
 		let textResponseStr: string = '';
@@ -120,13 +120,13 @@ export class OpenAiChatService implements IAIText {
 			}
 
 			// TODO: delete
-			this.logger.warn(`User: ${user}, requestParams:\n${JSON.stringify(requestParams)}`);
+			this.logger.warn(`User: ${user}, stream requestParams:\n${JSON.stringify(requestParams)}`);
 
 			let requestCompleted: boolean = false;
 
 			const response: AxiosResponse = await this.openai.createChatCompletion(requestParams, this.options);
 
-			this.logger.info(`User: ${user}, openai.createChatCompletion response:\nStatus: ${response.status} Status text: ${response.statusText} Data: ${JSON.stringify(response.data)}`);
+			this.logger.info(`User: ${user}, stream openai.createChatCompletion response:\nStatus: ${response.status} Status text: ${response.statusText}`);
 
 
 			response.data.on('data', (data: string): void => {
