@@ -9,7 +9,6 @@ import { IChatRequestParams, IOpenAiChatMessage, OpenAiChatModels, OpenAiChatRol
 
 export class OpenAiChatService implements IAIText {
 	private readonly configuration: Configuration;
-	private options: AxiosRequestConfig;
 	private readonly openai: OpenAIApi;
 
 	constructor(
@@ -23,10 +22,6 @@ export class OpenAiChatService implements IAIText {
 		});
 
 		this.openai = new OpenAIApi(this.configuration);
-
-		this.options = {
-			responseType: 'stream'
-		};
 	}
 
 	public async textRequest(user: string, prompt: string): Promise<AiTextResponse> {
@@ -99,6 +94,11 @@ export class OpenAiChatService implements IAIText {
 
 		try {
 
+			const options: AxiosRequestConfig = {
+				responseType: 'stream'
+			};
+
+
 			const message: IOpenAiChatMessage = {
 				role: OpenAiChatRoles.USER,
 				content: prompt
@@ -125,14 +125,14 @@ export class OpenAiChatService implements IAIText {
 
 			let requestCompleted: boolean = false;
 
-			const response: AxiosResponse = await this.openai.createChatCompletion(requestParams, this.options);
+			const response: AxiosResponse = await this.openai.createChatCompletion(requestParams, options);
 
 			this.logger.info(`User: ${user}, stream openai.createChatCompletion response:\nStatus: ${response.status} Status text: ${response.statusText}`);
 
 
 			response.data.on('data', (data: string): void => {
 
-				this.logger.info(`User: ${user}, data chunk received: ${data}`);
+				// this.logger.info(`User: ${user}, data chunk received: ${data}`);
 
 				const lines: string[] = data.toString().split('\n').filter((line: string) => line.trim() !== '');
 
@@ -152,16 +152,11 @@ export class OpenAiChatService implements IAIText {
 
 					this.logger.info(`User: ${user}, parsed data:\n${JSON.stringify(parsed)}`);
 
-					// if (parsed.choices[0].message.content
-					// 	&& typeof parsed.choices[0].message.content === 'string'
-					// ) {
-					// 	textResponse.push(parsed.choices[0].message.content);
-
-					// 	this.logger.info(`User: ${user}, parsed data:\n${JSON.stringify(parsed)}`);
-
-					// } else {
-					// 	this.logger.error(`User: ${user}, received "choices[0].message.content" undefined or not a string, data:\n${JSON.stringify(parsed)}`);
-					// }
+					if (parsed.choices[0].delta?.content
+						&& typeof parsed.choices[0].delta.content === 'string'
+					) {
+						textResponse.push(parsed.choices[0].delta.content);
+					}
 
 				}
 			});
