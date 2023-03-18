@@ -310,7 +310,7 @@ export class ScenesGenerator implements ISceneGenerator {
 
 				this.sessionService.updateSession(ctx);
 
-				this.mainController.openAiChatRequest(text)
+				this.mainController.textRequest(text)
 					.then(
 						async (result) => {
 
@@ -326,7 +326,7 @@ export class ScenesGenerator implements ISceneGenerator {
 						},
 						async (error) => {
 
-							this.logger.error(`Error response from cgptTextRequest: ${error}`);
+							this.logger.error(`Error response from mainController.textRequest: ${error}`);
 
 							const errorResponseText =
 								`
@@ -427,7 +427,7 @@ export class ScenesGenerator implements ISceneGenerator {
 
 				this.sessionService.updateSession(ctx);
 
-				this.mainController.openAiChatRequest(text)
+				this.mainController.textRequest(text)
 					.then(
 						async (result) => {
 
@@ -443,7 +443,7 @@ export class ScenesGenerator implements ISceneGenerator {
 						},
 						async (error) => {
 
-							this.logger.error(`Error response from cgptTextRequest: ${error}`);
+							this.logger.error(`Error response from mainController.textRequest: ${error}`);
 
 							const errorResponseText =
 								`
@@ -541,7 +541,7 @@ export class ScenesGenerator implements ISceneGenerator {
 
 				this.sessionService.updateSession(ctx);
 
-				this.mainController.mjImgRequest(text)
+				this.mainController.imgRequest(text)
 					.then(
 						async (result) => {
 							ctx.session.botUserSession.pendingMjRequest = false;
@@ -642,7 +642,7 @@ export class ScenesGenerator implements ISceneGenerator {
 
 				this.sessionService.updateSession(ctx);
 
-				this.mainController.mjImgRequest(text)
+				this.mainController.imgRequest(text)
 					.then(
 						async (result) => {
 							ctx.session.botUserSession.pendingMjRequest = false;

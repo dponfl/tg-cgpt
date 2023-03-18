@@ -11,7 +11,7 @@ export class MainController implements IMainController {
 		private readonly mjService: IAIImg
 	) { }
 
-	public async openAiChatRequest(prompt: string): Promise<AiTextResponsePayload> {
+	public async textRequest(prompt: string): Promise<AiTextResponsePayload> {
 
 		const resRaw: AiTextResponse = await this.chatGptService.textRequest(prompt);
 
@@ -22,7 +22,7 @@ export class MainController implements IMainController {
 		}
 	}
 
-	public async mjImgRequest(prompt: string): Promise<AiImgResponsePayload> {
+	public async imgRequest(prompt: string): Promise<AiImgResponsePayload> {
 		const resRaw: AiTextResponse = await this.mjService.imgRequest(prompt);
 
 		if (resRaw.status !== AiResponseStatus.SUCCESS) {
