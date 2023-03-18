@@ -2,7 +2,7 @@ import { AxiosRequestConfig, AxiosResponse } from 'axios';
 import { Configuration, OpenAIApi } from 'openai';
 import { resolve } from 'path';
 import { IConfigService } from '../../config/config.interface.js';
-import { AiTextResponse, AiResponseStatus } from '../../controller/controller.interface.js';
+import { AiTextResponse, AiResponseStatus, OpenAiChatFinishReason } from '../../controller/controller.interface.js';
 import { ILogger } from '../../logger/logger.interface.js';
 import { IUtils } from '../../utils/utils.class.js';
 import { IAIText } from '../ai.interface.js';
@@ -67,6 +67,7 @@ export class OpenAiChatService implements IAIText {
 			if (response.data.choices[0].message) {
 				return {
 					status: AiResponseStatus.SUCCESS,
+					finishReason: response.data.choices[0].finish_reason ?? null,
 					payload: [response.data.choices[0].message.content]
 				};
 			} else {
@@ -136,7 +137,7 @@ export class OpenAiChatService implements IAIText {
 							payload: [`Timeout on request`]
 						}
 					)
-				}, 30000);
+				}, 3000);
 
 				response.data.on('data', (data: string): void => {
 
@@ -155,6 +156,7 @@ export class OpenAiChatService implements IAIText {
 							resolve(
 								{
 									status: AiResponseStatus.SUCCESS,
+									finishReason: OpenAiChatFinishReason.stop,
 									payload: [textResponseStr]
 								}
 							)
