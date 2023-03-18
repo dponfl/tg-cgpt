@@ -150,16 +150,18 @@ export class OpenAiChatService implements IAIText {
 
 					const parsed = JSON.parse(data);
 
-					if (parsed.choices[0].message.content
-						&& typeof parsed.choices[0].message.content === 'string'
-					) {
-						textResponse.push(parsed.choices[0].message.content);
+					this.logger.info(`User: ${user}, parsed data:\n${JSON.stringify(parsed)}`);
 
-						this.logger.info(`User: ${user}, parsed data:\n${JSON.stringify(parsed)}`);
+					// if (parsed.choices[0].message.content
+					// 	&& typeof parsed.choices[0].message.content === 'string'
+					// ) {
+					// 	textResponse.push(parsed.choices[0].message.content);
 
-					} else {
-						this.logger.error(`User: ${user}, received "choices[0].message.content" undefined or not a string, data:\n${JSON.stringify(parsed)}`);
-					}
+					// 	this.logger.info(`User: ${user}, parsed data:\n${JSON.stringify(parsed)}`);
+
+					// } else {
+					// 	this.logger.error(`User: ${user}, received "choices[0].message.content" undefined or not a string, data:\n${JSON.stringify(parsed)}`);
+					// }
 
 				}
 			});
