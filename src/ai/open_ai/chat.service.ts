@@ -1,5 +1,6 @@
 import { AxiosRequestConfig, AxiosResponse } from 'axios';
 import { Configuration, OpenAIApi } from 'openai';
+import { resolve } from 'path';
 import { IConfigService } from '../../config/config.interface.js';
 import { AiTextResponse, AiResponseStatus } from '../../controller/controller.interface.js';
 import { ILogger } from '../../logger/logger.interface.js';
@@ -83,108 +84,103 @@ export class OpenAiChatService implements IAIText {
 		}
 	}
 
-	public async textStreamRequest(user: string, prompt: string): Promise<AiTextResponse> {
+	public textStreamRequest(user: string, prompt: string): Promise<AiTextResponse> {
 
-		const methodName = 'textStreamRequest';
+		return new Promise(async (resolve, reject) => {
+			const methodName = 'textStreamRequest';
 
-		let textResponse: string[] = [];
-		let textResponseStr: string = '';
+			let textResponse: string[] = [];
+			let textResponseStr: string = '';
 
-		this.logger.info(`User: ${user}, sending stream request to OpenAI (ChatGPT)`);
+			this.logger.info(`User: ${user}, sending stream request to OpenAI (ChatGPT)`);
 
-		try {
+			try {
 
-			const options: AxiosRequestConfig = {
-				responseType: 'stream'
-			};
-
-
-			const message: IOpenAiChatMessage = {
-				role: OpenAiChatRoles.USER,
-				content: prompt
-			};
-
-			const requestParams: IChatRequestParams = {
-				model: OpenAiChatModels.GPT_3_5,
-				messages: [message],
-				stream: true
-			};
-
-			const max_tokens = Number(this.configService.get('MAX_TOKENS'));
-
-			// TODO: delete
-			this.logger.warn(`max_tokens:\n${max_tokens}`);
-
-
-			if (max_tokens) {
-				requestParams.max_tokens = max_tokens;
-			}
-
-			// TODO: delete
-			this.logger.warn(`User: ${user}, stream requestParams:\n${JSON.stringify(requestParams)}`);
-
-			let requestCompleted: boolean = false;
-			let timeOut: boolean = false;
-
-			const response: AxiosResponse = await this.openai.createChatCompletion(requestParams, options);
-
-			this.logger.info(`User: ${user}, stream openai.createChatCompletion response:\nStatus: ${response.status} Status text: ${response.statusText}`);
-
-			const timeOutId = setTimeout(() => {
-				timeOut = true;
-			}, 30000);
-
-			response.data.on('data', (data: string): void => {
-
-				const lines: string[] = data.toString().split('\n').filter((line: string) => line.trim() !== '');
-
-				for (const line of lines) {
-					const data: string = line.replace(/^data: /, '').replace('\n', '');
-					if (data === '[DONE]') {
-
-						textResponseStr = textResponse.join('');
-
-						this.logger.warn(`User: ${user}, request completed: ${textResponseStr}`);
-
-						requestCompleted = true;
-						clearTimeout(timeOutId);
-						return;
-					}
-
-					const parsed = JSON.parse(data);
-
-					this.logger.info(`User: ${user}, parsed data:\n${JSON.stringify(parsed)}`);
-
-					if (parsed.choices[0].delta?.content
-						&& typeof parsed.choices[0].delta.content === 'string'
-					) {
-						textResponse.push(parsed.choices[0].delta.content);
-					}
-
-				}
-			});
-
-			do {
-			} while (!requestCompleted && !timeOut);
-
-			if (requestCompleted) {
-				return {
-					status: AiResponseStatus.SUCCESS,
-					payload: [textResponseStr]
+				const options: AxiosRequestConfig = {
+					responseType: 'stream'
 				};
-			} else {
+
+
+				const message: IOpenAiChatMessage = {
+					role: OpenAiChatRoles.USER,
+					content: prompt
+				};
+
+				const requestParams: IChatRequestParams = {
+					model: OpenAiChatModels.GPT_3_5,
+					messages: [message],
+					stream: true
+				};
+
+				const max_tokens = Number(this.configService.get('MAX_TOKENS'));
+
+				// TODO: delete
+				this.logger.warn(`max_tokens:\n${max_tokens}`);
+
+
+				if (max_tokens) {
+					requestParams.max_tokens = max_tokens;
+				}
+
+				// TODO: delete
+				this.logger.warn(`User: ${user}, stream requestParams:\n${JSON.stringify(requestParams)}`);
+
+				const response: AxiosResponse = await this.openai.createChatCompletion(requestParams, options);
+
+				this.logger.info(`User: ${user}, stream openai.createChatCompletion response:\nStatus: ${response.status} Status text: ${response.statusText}`);
+
+				const timeOutId = setTimeout(() => {
+					resolve(
+						{
+							status: AiResponseStatus.ERROR,
+							payload: [`Timeout on request`]
+						}
+					)
+				}, 30000);
+
+				response.data.on('data', (data: string): void => {
+
+					const lines: string[] = data.toString().split('\n').filter((line: string) => line.trim() !== '');
+
+					for (const line of lines) {
+						const data: string = line.replace(/^data: /, '').replace('\n', '');
+						if (data === '[DONE]') {
+
+							textResponseStr = textResponse.join('');
+
+							this.logger.warn(`User: ${user}, request completed: ${textResponseStr}`);
+
+							clearTimeout(timeOutId);
+
+							resolve(
+								{
+									status: AiResponseStatus.SUCCESS,
+									payload: [textResponseStr]
+								}
+							)
+						}
+
+						const parsed = JSON.parse(data);
+
+						this.logger.info(`User: ${user}, parsed data:\n${JSON.stringify(parsed)}`);
+
+						if (parsed.choices[0].delta?.content
+							&& typeof parsed.choices[0].delta.content === 'string'
+						) {
+							textResponse.push(parsed.choices[0].delta.content);
+						}
+
+					}
+				});
+
+			} catch (error) {
 				return {
 					status: AiResponseStatus.ERROR,
-					payload: [`Timeout on request`]
+					payload: [this.utils.errorLog(this, error, methodName)]
 				};
 			}
+		});
 
-		} catch (error) {
-			return {
-				status: AiResponseStatus.ERROR,
-				payload: [this.utils.errorLog(this, error, methodName)]
-			};
-		}
 	}
 
 
