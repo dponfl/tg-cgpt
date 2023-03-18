@@ -130,6 +130,8 @@ export class OpenAiChatService implements IAIText {
 
 				this.logger.info(`User: ${user}, stream openai.createChatCompletion response:\nStatus: ${response.status} Status text: ${response.statusText}`);
 
+				const timeout = Number(this.configService.get('RESPONSE_TIMEOUT')) ?? Infinity;
+
 				const timeOutId = setTimeout(() => {
 					resolve(
 						{
@@ -137,7 +139,7 @@ export class OpenAiChatService implements IAIText {
 							payload: [`Timeout on request`]
 						}
 					)
-				}, 300);
+				}, timeout);
 
 				response.data.on('data', (data: string): void => {
 
