@@ -107,7 +107,7 @@ export class OpenAiChatService implements IAIText {
 			const requestParams: IChatRequestParams = {
 				model: OpenAiChatModels.GPT_3_5,
 				messages: [message],
-				// stream: true
+				stream: true
 			};
 
 			const max_tokens = Number(this.configService.get('MAX_TOKENS'));
