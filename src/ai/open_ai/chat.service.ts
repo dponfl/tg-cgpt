@@ -24,7 +24,7 @@ export class OpenAiChatService implements IAIText {
 		this.openai = new OpenAIApi(this.configuration);
 	}
 
-	public async textRequest(user: string, prompt: string): Promise<AiTextResponse> {
+	public async textRequest(user: string, prompt: string): Promise<AiTextResponse | void> {
 
 		const methodName = 'textRequest';
 
@@ -83,7 +83,7 @@ export class OpenAiChatService implements IAIText {
 		}
 	}
 
-	public async textStreamRequest(user: string, prompt: string): Promise<AiTextResponse> {
+	public async textStreamRequest(user: string, prompt: string): Promise<AiTextResponse | void> {
 
 		const methodName = 'textStreamRequest';
 
@@ -165,11 +165,6 @@ export class OpenAiChatService implements IAIText {
 				return {
 					status: AiResponseStatus.SUCCESS,
 					payload: [textResponseStr]
-				};
-			} else {
-				return {
-					status: AiResponseStatus.ERROR,
-					payload: []
 				};
 			}
 
