@@ -1,5 +1,5 @@
 import { IAIImg, IAIText } from './ai/ai.interface.js';
-import { ChatGPTService } from './ai/cgpt/cgpt.class.js';
+// import { ChatGPTService } from './ai/cgpt/cgpt.class.js';
 import { MjService } from './ai/cgpt/mj.class.js';
 import { App } from './app.class.js';
 import { BotService } from './bot/bot.class.js';

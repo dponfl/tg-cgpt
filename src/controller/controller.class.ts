@@ -13,13 +13,30 @@ export class MainController implements IMainController {
 
 	public async textRequest(user: string, prompt: string): Promise<AiTextResponsePayload> {
 
+		const resPayload: string[] = [];
+
 		const resRaw: AiTextResponse = await this.chatGptService.textRequest(user, prompt);
+
+		const resStreamRaw: AiTextResponse = await this.chatGptService.textStreamRequest(user, prompt);
 
 		if (resRaw.status !== AiResponseStatus.SUCCESS) {
 			throw new Error('ChatGPT error response');
+		} else if (resRaw.payload) {
+			resPayload.push(resRaw.payload[0]);
 		} else {
-			return resRaw.payload;
+			this.logger.error(`User: ${user}, resRaw.payload is undefined`)
 		}
+
+		if (resStreamRaw.status !== AiResponseStatus.SUCCESS) {
+			throw new Error('ChatGPT (stream) error response');
+		} else if (resStreamRaw.payload) {
+			resPayload.push(resStreamRaw.payload[0]);
+		} else {
+			this.logger.error(`User: ${user}, resStreamRaw.payload is undefined`)
+		}
+
+		return resPayload;
+
 	}
 
 	public async imgRequest(user: string, prompt: string): Promise<AiImgResponsePayload> {
