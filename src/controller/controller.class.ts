@@ -11,9 +11,9 @@ export class MainController implements IMainController {
 		private readonly mjService: IAIImg
 	) { }
 
-	public async textRequest(prompt: string): Promise<AiTextResponsePayload> {
+	public async textRequest(user: string, prompt: string): Promise<AiTextResponsePayload> {
 
-		const resRaw: AiTextResponse = await this.chatGptService.textRequest(prompt);
+		const resRaw: AiTextResponse = await this.chatGptService.textRequest(user, prompt);
 
 		if (resRaw.status !== AiResponseStatus.SUCCESS) {
 			throw new Error('ChatGPT error response');
@@ -22,8 +22,8 @@ export class MainController implements IMainController {
 		}
 	}
 
-	public async imgRequest(prompt: string): Promise<AiImgResponsePayload> {
-		const resRaw: AiTextResponse = await this.mjService.imgRequest(prompt);
+	public async imgRequest(user: string, prompt: string): Promise<AiImgResponsePayload> {
+		const resRaw: AiTextResponse = await this.mjService.imgRequest(user, prompt);
 
 		if (resRaw.status !== AiResponseStatus.SUCCESS) {
 			throw new Error('MidJourney error response');

@@ -26,6 +26,6 @@ export type AiImgResponse = {
 };
 
 export interface IMainController {
-	textRequest(prompt: string): Promise<AiTextResponsePayload>;
-	imgRequest(prompt: string): Promise<AiImgResponsePayload>;
+	textRequest(user: string, prompt: string): Promise<AiTextResponsePayload>;
+	imgRequest(user: string, prompt: string): Promise<AiImgResponsePayload>;
 }

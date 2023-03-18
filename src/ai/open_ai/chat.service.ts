@@ -28,11 +28,11 @@ export class OpenAiChatService implements IAIText {
 		// };
 	}
 
-	public async textRequest(prompt: string): Promise<AiTextResponse> {
+	public async textRequest(user: string, prompt: string): Promise<AiTextResponse> {
 
 		const methodName = 'textRequest';
 
-		this.logger.info('Sending request to OpenAI (ChatGPT)');
+		this.logger.info(`User: ${user}, sending request to OpenAI (ChatGPT)`);
 
 		try {
 
@@ -57,13 +57,13 @@ export class OpenAiChatService implements IAIText {
 			}
 
 			// TODO: delete
-			this.logger.warn(`requestParams:\n${JSON.stringify(requestParams)}`);
+			this.logger.warn(`User: ${user}, requestParams:\n${JSON.stringify(requestParams)}`);
 
 			let requestCompleted: boolean = false;
 
 			const response = await this.openai.createChatCompletion(requestParams);
 
-			this.logger.info(`openai.createChatCompletion response:\nStatus: ${response.status} Status text: ${response.statusText} Data: ${JSON.stringify(response.data)}`);
+			this.logger.info(`User: ${user}, openai.createChatCompletion response:\nStatus: ${response.status} Status text: ${response.statusText} Data: ${JSON.stringify(response.data)}`);
 
 			requestCompleted = true;
 

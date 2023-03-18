@@ -310,7 +310,9 @@ export class ScenesGenerator implements ISceneGenerator {
 
 				this.sessionService.updateSession(ctx);
 
-				this.mainController.textRequest(text)
+				const userGuid = ctx.session.botUserSession.userGuid ? ctx.session.botUserSession.userGuid : this.utils.getChatIdStr(ctx);
+
+				this.mainController.textRequest(userGuid, text)
 					.then(
 						async (result) => {
 
@@ -427,7 +429,9 @@ export class ScenesGenerator implements ISceneGenerator {
 
 				this.sessionService.updateSession(ctx);
 
-				this.mainController.textRequest(text)
+				const userGuid = ctx.session.botUserSession.userGuid ? ctx.session.botUserSession.userGuid : this.utils.getChatIdStr(ctx);
+
+				this.mainController.textRequest(userGuid, text)
 					.then(
 						async (result) => {
 
@@ -541,7 +545,9 @@ export class ScenesGenerator implements ISceneGenerator {
 
 				this.sessionService.updateSession(ctx);
 
-				this.mainController.imgRequest(text)
+				const userGuid = ctx.session.botUserSession.userGuid ? ctx.session.botUserSession.userGuid : this.utils.getChatIdStr(ctx);
+
+				this.mainController.imgRequest(userGuid, text)
 					.then(
 						async (result) => {
 							ctx.session.botUserSession.pendingMjRequest = false;
@@ -642,7 +648,9 @@ export class ScenesGenerator implements ISceneGenerator {
 
 				this.sessionService.updateSession(ctx);
 
-				this.mainController.imgRequest(text)
+				const userGuid = ctx.session.botUserSession.userGuid ? ctx.session.botUserSession.userGuid : this.utils.getChatIdStr(ctx);
+
+				this.mainController.imgRequest(userGuid, text)
 					.then(
 						async (result) => {
 							ctx.session.botUserSession.pendingMjRequest = false;
