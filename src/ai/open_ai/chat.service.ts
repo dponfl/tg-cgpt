@@ -137,7 +137,7 @@ export class OpenAiChatService implements IAIText {
 							payload: [`Timeout on request`]
 						}
 					)
-				}, 3000);
+				}, 300);
 
 				response.data.on('data', (data: string): void => {
 
