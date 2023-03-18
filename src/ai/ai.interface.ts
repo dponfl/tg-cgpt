@@ -1,8 +1,8 @@
 import { AiImgResponse, AiTextResponse } from '../controller/controller.interface.js';
 
 export interface IAIText {
-	textRequest: (user: string, prompt: string) => Promise<AiTextResponse | void>;
-	textStreamRequest: (user: string, prompt: string) => Promise<AiTextResponse | void>;
+	textRequest: (user: string, prompt: string) => Promise<AiTextResponse>;
+	textStreamRequest: (user: string, prompt: string) => Promise<AiTextResponse>;
 }
 
 export interface IAIImg {

@@ -24,7 +24,7 @@ export class OpenAiChatService implements IAIText {
 		this.openai = new OpenAIApi(this.configuration);
 	}
 
-	public async textRequest(user: string, prompt: string): Promise<AiTextResponse | void> {
+	public async textRequest(user: string, prompt: string): Promise<AiTextResponse> {
 
 		const methodName = 'textRequest';
 
@@ -83,7 +83,7 @@ export class OpenAiChatService implements IAIText {
 		}
 	}
 
-	public async textStreamRequest(user: string, prompt: string): Promise<AiTextResponse | void> {
+	public async textStreamRequest(user: string, prompt: string): Promise<AiTextResponse> {
 
 		const methodName = 'textStreamRequest';
 
@@ -124,47 +124,58 @@ export class OpenAiChatService implements IAIText {
 			this.logger.warn(`User: ${user}, stream requestParams:\n${JSON.stringify(requestParams)}`);
 
 			let requestCompleted: boolean = false;
+			let timeOut: boolean = false;
 
 			const response: AxiosResponse = await this.openai.createChatCompletion(requestParams, options);
 
 			this.logger.info(`User: ${user}, stream openai.createChatCompletion response:\nStatus: ${response.status} Status text: ${response.statusText}`);
 
+			const timeOutId = setTimeout(() => {
+				timeOut = true;
+			}, 30000);
 
-			response.data.on('data', (data: string): void => {
+			do {
+				response.data.on('data', (data: string): void => {
 
-				// this.logger.info(`User: ${user}, data chunk received: ${data}`);
+					const lines: string[] = data.toString().split('\n').filter((line: string) => line.trim() !== '');
 
-				const lines: string[] = data.toString().split('\n').filter((line: string) => line.trim() !== '');
+					for (const line of lines) {
+						const data: string = line.replace(/^data: /, '').replace('\n', '');
+						if (data === '[DONE]') {
 
-				for (const line of lines) {
-					const data: string = line.replace(/^data: /, '').replace('\n', '');
-					if (data === '[DONE]') {
+							textResponseStr = textResponse.join('');
 
-						textResponseStr = textResponse.join('');
+							this.logger.warn(`User: ${user}, request completed: ${textResponseStr}`);
 
-						this.logger.warn(`User: ${user}, request completed: ${textResponseStr}`);
+							requestCompleted = true;
+							clearTimeout(timeOutId);
+							return;
+						}
 
-						requestCompleted = true;
-						return;
+						const parsed = JSON.parse(data);
+
+						this.logger.info(`User: ${user}, parsed data:\n${JSON.stringify(parsed)}`);
+
+						if (parsed.choices[0].delta?.content
+							&& typeof parsed.choices[0].delta.content === 'string'
+						) {
+							textResponse.push(parsed.choices[0].delta.content);
+						}
+
 					}
+				});
+			} while (requestCompleted || timeOut);
 
-					const parsed = JSON.parse(data);
-
-					this.logger.info(`User: ${user}, parsed data:\n${JSON.stringify(parsed)}`);
-
-					if (parsed.choices[0].delta?.content
-						&& typeof parsed.choices[0].delta.content === 'string'
-					) {
-						textResponse.push(parsed.choices[0].delta.content);
-					}
-
-				}
-			});
 
 			if (requestCompleted) {
 				return {
 					status: AiResponseStatus.SUCCESS,
 					payload: [textResponseStr]
+				};
+			} else {
+				return {
+					status: AiResponseStatus.ERROR,
+					payload: [`Timeout on request`]
 				};
 			}
 
