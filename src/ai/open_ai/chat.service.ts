@@ -164,7 +164,7 @@ export class OpenAiChatService implements IAIText {
 
 					}
 				});
-			} while (requestCompleted || timeOut);
+			} while (!requestCompleted && !timeOut);
 
 
 			if (requestCompleted) {
