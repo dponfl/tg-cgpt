@@ -134,38 +134,38 @@ export class OpenAiChatService implements IAIText {
 				timeOut = true;
 			}, 30000);
 
-			do {
-				response.data.on('data', (data: string): void => {
+			response.data.on('data', (data: string): void => {
 
-					const lines: string[] = data.toString().split('\n').filter((line: string) => line.trim() !== '');
+				const lines: string[] = data.toString().split('\n').filter((line: string) => line.trim() !== '');
 
-					for (const line of lines) {
-						const data: string = line.replace(/^data: /, '').replace('\n', '');
-						if (data === '[DONE]') {
+				for (const line of lines) {
+					const data: string = line.replace(/^data: /, '').replace('\n', '');
+					if (data === '[DONE]') {
 
-							textResponseStr = textResponse.join('');
+						textResponseStr = textResponse.join('');
 
-							this.logger.warn(`User: ${user}, request completed: ${textResponseStr}`);
+						this.logger.warn(`User: ${user}, request completed: ${textResponseStr}`);
 
-							requestCompleted = true;
-							clearTimeout(timeOutId);
-							return;
-						}
-
-						const parsed = JSON.parse(data);
-
-						this.logger.info(`User: ${user}, parsed data:\n${JSON.stringify(parsed)}`);
-
-						if (parsed.choices[0].delta?.content
-							&& typeof parsed.choices[0].delta.content === 'string'
-						) {
-							textResponse.push(parsed.choices[0].delta.content);
-						}
-
+						requestCompleted = true;
+						clearTimeout(timeOutId);
+						return;
 					}
-				});
-			} while (!requestCompleted && !timeOut);
 
+					const parsed = JSON.parse(data);
+
+					this.logger.info(`User: ${user}, parsed data:\n${JSON.stringify(parsed)}`);
+
+					if (parsed.choices[0].delta?.content
+						&& typeof parsed.choices[0].delta.content === 'string'
+					) {
+						textResponse.push(parsed.choices[0].delta.content);
+					}
+
+				}
+			});
+
+			do {
+			} while (!requestCompleted && !timeOut);
 
 			if (requestCompleted) {
 				return {
