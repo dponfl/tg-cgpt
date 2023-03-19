@@ -536,6 +536,10 @@ export class ScenesGenerator implements ISceneGenerator {
 
 			await ctx.answerCbQuery('Продолжаю работать над вашим запросом...');
 
+			await ctx.replyWithHTML(`✅ Вы выбрали: <b><i>Продолжай 📝</i></b>`);
+			await ctx.editMessageReplyMarkup({ inline_keyboard: [] });
+
+
 			if (ctx.session.botUserSession.pendingChatGptRequest) {
 
 				const secondRequestText =
@@ -577,9 +581,13 @@ export class ScenesGenerator implements ISceneGenerator {
 							this.sessionService.updateSession(ctx);
 
 							let msgText = '';
+
 							await ctx.deleteMessage(message_id);
 
 							msgText = result.payload;
+
+							// TODO: delete 
+							this.logger.warn(`ctx.session.botUserSession:\n${JSON.stringify(ctx.session.botUserSession)}`);
 
 							if (!ctx.session.botUserSession.textRequestMessageId) {
 								this.logger.error(`UserGuid: ${ctx.session.botUserSession.userGuid}, Missing ctx.session.botUserSession.textRequestMessageId`);
