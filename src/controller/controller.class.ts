@@ -47,7 +47,6 @@ export class MainController implements IMainController {
 		if (
 			resRaw.status !== AiResponseStatus.SUCCESS
 			|| !resRaw?.payload
-			|| !Array.isArray(resRaw?.payload)
 		) {
 			throw new Error(`User: ${user}, ChatGPT error response: ${resRaw.payload}`);
 		} else {

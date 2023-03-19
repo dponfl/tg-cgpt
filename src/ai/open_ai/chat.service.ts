@@ -112,15 +112,15 @@ export class OpenAiChatService implements IAIText {
 					stream: true
 				};
 
-				const max_tokens = Number(this.configService.get('MAX_TOKENS'));
+				// const max_tokens = Number(this.configService.get('MAX_TOKENS'));
 
-				// TODO: delete
-				this.logger.warn(`max_tokens:\n${max_tokens}`);
+				// // TODO: delete
+				// this.logger.warn(`max_tokens:\n${max_tokens}`);
 
 
-				if (max_tokens) {
-					requestParams.max_tokens = max_tokens;
-				}
+				// if (max_tokens) {
+				// 	requestParams.max_tokens = max_tokens;
+				// }
 
 				// TODO: delete
 				this.logger.warn(`User: ${user}, stream requestParams:\n${JSON.stringify(requestParams)}`);

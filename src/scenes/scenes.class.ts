@@ -452,6 +452,8 @@ export class ScenesGenerator implements ISceneGenerator {
 
 				ctx.session.botUserSession.textRequest = ctx.message.text;
 
+				ctx.session.botUserSession.textRequestMessageId = ctx.message.id;
+
 				this.sessionService.updateSession(ctx);
 
 				const userGuid = ctx.session.botUserSession.userGuid ? ctx.session.botUserSession.userGuid : this.utils.getChatIdStr(ctx);
@@ -579,31 +581,11 @@ export class ScenesGenerator implements ISceneGenerator {
 
 							msgText = result.payload;
 
-							switch (result.finishReason) {
-								case OpenAiChatFinishReason.stop:
-								case OpenAiChatFinishReason.content_filter:
-								case OpenAiChatFinishReason.null:
-									await ctx.replyWithHTML(msgText,
-										{ reply_to_message_id: ctx.update.message.message_id });
-									break;
-
-								case OpenAiChatFinishReason.length:
-									await ctx.replyWithHTML(msgText,
-										{
-											reply_to_message_id: ctx.update.message.message_id,
-											...Markup.inlineKeyboard([
-												[
-													Markup.button.callback('Продолжай 📝', 'stream_request')
-												]
-											])
-										}
-									);
-									break;
-
-								default:
-									this.logger.error(`Unknown finishReason: ${result.finishReason}`);
-									await ctx.replyWithHTML(msgText,
-										{ reply_to_message_id: ctx.update.message.message_id });
+							if (!ctx.session.botUserSession.textRequestMessageId) {
+								this.logger.error(`UserGuid: ${ctx.session.botUserSession.userGuid}, Missing ctx.session.botUserSession.textRequestMessageId`);
+								await ctx.replyWithHTML(msgText);
+							} else {
+								await ctx.replyWithHTML(msgText, { reply_to_message_id: ctx.session.botUserSession.textRequestMessageId });
 							}
 						},
 						async (error) => {
