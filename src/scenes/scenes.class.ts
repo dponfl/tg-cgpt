@@ -346,7 +346,7 @@ export class ScenesGenerator implements ISceneGenerator {
 													reply_to_message_id: ctx.update.message.message_id,
 													...Markup.inlineKeyboard([
 														[
-															Markup.button.callback('Продолжить', 'stream_request')
+															Markup.button.callback('Продолжай 📝', 'stream_request')
 														]
 													])
 												}
@@ -488,7 +488,7 @@ export class ScenesGenerator implements ISceneGenerator {
 												reply_to_message_id: ctx.update.message.message_id,
 												...Markup.inlineKeyboard([
 													[
-														Markup.button.callback('Продолжить', 'stream_request')
+														Markup.button.callback('Продолжай 📝', 'stream_request')
 													]
 												])
 											}
@@ -500,6 +500,101 @@ export class ScenesGenerator implements ISceneGenerator {
 										await ctx.replyWithHTML(msgText,
 											{ reply_to_message_id: ctx.update.message.message_id });
 								}
+							}
+						},
+						async (error) => {
+
+							this.logger.error(`Error response from mainController.textRequest: ${error}`);
+
+							const errorResponseText =
+								`
+К сожалению что-то пошло не так 😔
+
+Пожалуйста, повторите ваш вопрос 🙏🏾
+
+`;
+
+							ctx.session.botUserSession.pendingChatGptRequest = false;
+
+							this.sessionService.updateSession(ctx);
+
+							await ctx.deleteMessage(message_id);
+							await ctx.replyWithHTML(errorResponseText,
+								{ reply_to_message_id: ctx.update.message.message_id });
+
+						}
+					);
+
+			}
+		});
+
+		afterPaymentGptScene.action('stream_request', async (ctx: any) => {
+			if (ctx.session.botUserSession.pendingChatGptRequest) {
+
+				const secondRequestText =
+					`
+<b>В данный момент я обрабатываю ваш предыдущий запрос</b> 🔄
+
+После моего ответа, вы сможете задать следующий вопрос 👌🏼
+
+`;
+
+				// tslint:disable-next-line: no-shadowed-variable
+				const { message_id } = await ctx.replyWithHTML(secondRequestText);
+				setTimeout(() => {
+					ctx.deleteMessage(message_id);
+				}, 5000);
+
+			} else {
+
+				const { message_id } = await ctx.replyWithHTML(textOnMessage);
+
+				const text = ctx.message.text;
+
+				ctx.session.botUserSession.pendingChatGptRequest = true;
+
+				this.sessionService.updateSession(ctx);
+
+				const userGuid = ctx.session.botUserSession.userGuid ? ctx.session.botUserSession.userGuid : this.utils.getChatIdStr(ctx);
+
+				this.mainController.textStreamRequest(userGuid, text)
+					.then(
+						async (result) => {
+
+							ctx.session.botUserSession.pendingChatGptRequest = false;
+
+							this.sessionService.updateSession(ctx);
+
+							let msgText = '';
+							await ctx.deleteMessage(message_id);
+
+							msgText = result.payload;
+
+							switch (result.finishReason) {
+								case OpenAiChatFinishReason.stop:
+								case OpenAiChatFinishReason.content_filter:
+								case OpenAiChatFinishReason.null:
+									await ctx.replyWithHTML(msgText,
+										{ reply_to_message_id: ctx.update.message.message_id });
+									break;
+
+								case OpenAiChatFinishReason.length:
+									await ctx.replyWithHTML(msgText,
+										{
+											reply_to_message_id: ctx.update.message.message_id,
+											...Markup.inlineKeyboard([
+												[
+													Markup.button.callback('Продолжай 📝', 'stream_request')
+												]
+											])
+										}
+									);
+									break;
+
+								default:
+									this.logger.error(`Unknown finishReason: ${result.finishReason}`);
+									await ctx.replyWithHTML(msgText,
+										{ reply_to_message_id: ctx.update.message.message_id });
 							}
 						},
 						async (error) => {
