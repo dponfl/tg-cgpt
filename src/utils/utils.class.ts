@@ -28,6 +28,7 @@ export interface IServiceUsageInfo {
 export interface IUtils {
 	// tslint:disable-next-line: no-any
 	errorLog: (that: any, err: unknown, methodName: string) => string;
+	debugLogger: (arg: string) => void;
 	isObject: (data: unknown) => boolean;
 	clearSpecialChars: (str: string) => string;
 	getChatIdStr: (ctx: IBotContext) => string;
@@ -60,6 +61,16 @@ export class Utils implements IUtils {
 		}
 
 		return str;
+	}
+
+	debugLogger(arg: string): void {
+		const txt =
+			`
+============================= DEBUG LOG =============================
+${arg}
+=====================================================================
+`;
+		this.logger.warn(txt);
 	}
 
 	isObject(data: unknown): boolean {

@@ -446,6 +446,7 @@ export class ScenesGenerator implements ISceneGenerator {
 
 				// TODO: delete
 				this.logger.warn(`afterPaymentGptScene.on('message') ctx:\n${JSON.stringify(ctx.message)}`);
+				this.utils.debugLogger(`afterPaymentGptScene.on('message') ctx:\n${JSON.stringify(ctx.message)}`);
 
 				const { message_id } = await ctx.replyWithHTML(textOnMessage);
 
