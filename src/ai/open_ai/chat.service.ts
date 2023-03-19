@@ -1,6 +1,5 @@
 import { AxiosRequestConfig, AxiosResponse } from 'axios';
 import { Configuration, OpenAIApi } from 'openai';
-import { resolve } from 'path';
 import { IConfigService } from '../../config/config.interface.js';
 import { AiTextResponse, AiResponseStatus, OpenAiChatFinishReason } from '../../controller/controller.interface.js';
 import { ILogger } from '../../logger/logger.interface.js';
@@ -68,19 +67,19 @@ export class OpenAiChatService implements IAIText {
 				return {
 					status: AiResponseStatus.SUCCESS,
 					finishReason: response.data.choices[0].finish_reason ?? null,
-					payload: [response.data.choices[0].message.content]
+					payload: response.data.choices[0].message.content
 				};
 			} else {
 				return {
 					status: AiResponseStatus.ERROR,
-					payload: []
+					payload: ''
 				};
 			}
 
 		} catch (error) {
 			return {
 				status: AiResponseStatus.ERROR,
-				payload: [this.utils.errorLog(this, error, methodName)]
+				payload: this.utils.errorLog(this, error, methodName)
 			};
 		}
 	}
@@ -136,7 +135,7 @@ export class OpenAiChatService implements IAIText {
 					resolve(
 						{
 							status: AiResponseStatus.ERROR,
-							payload: [`Timeout on request`]
+							payload: `Request timeout`
 						}
 					)
 				}, timeout);
@@ -159,7 +158,7 @@ export class OpenAiChatService implements IAIText {
 								{
 									status: AiResponseStatus.SUCCESS,
 									finishReason: OpenAiChatFinishReason.stop,
-									payload: [textResponseStr]
+									payload: textResponseStr
 								}
 							)
 							return;
@@ -167,7 +166,7 @@ export class OpenAiChatService implements IAIText {
 
 						const parsed = JSON.parse(data);
 
-						this.logger.info(`User: ${user}, parsed data:\n${JSON.stringify(parsed)}`);
+						// this.logger.info(`User: ${user}, parsed data:\n${JSON.stringify(parsed)}`);
 
 						if (parsed.choices[0].delta?.content
 							&& typeof parsed.choices[0].delta.content === 'string'
@@ -181,7 +180,7 @@ export class OpenAiChatService implements IAIText {
 			} catch (error) {
 				return {
 					status: AiResponseStatus.ERROR,
-					payload: [this.utils.errorLog(this, error, methodName)]
+					payload: this.utils.errorLog(this, error, methodName)
 				};
 			}
 		});

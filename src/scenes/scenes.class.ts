@@ -12,7 +12,7 @@ import { PaymentCommand } from '../commands/base_scenes/payment.command.js';
 import { StartCommand } from '../commands/base_scenes/start.command.js';
 import { InfoCommand } from '../commands/base_scenes/info.command.js';
 import { IConfigService } from '../config/config.interface.js';
-import { IMainController } from '../controller/controller.interface.js';
+import { IMainController, OpenAiChatFinishReason } from '../controller/controller.interface.js';
 import { ILogger } from '../logger/logger.interface.js';
 import { IGetPaymentLinkParams, IGetPaymentLinkResponse, IPaymentService } from '../payments/payments.interface.js';
 import { GroupTransactionCurrency, GroupTransactionServiceName, IDatabase } from '../storage/mysql.interface.js';
@@ -326,13 +326,38 @@ export class ScenesGenerator implements ISceneGenerator {
 							let i = 1;
 
 							if (result) {
-								for (const txt of result) {
+								for (const elem of result) {
 									msgText = result.length > 1
-										? `<b>Ответ ${i} 👇</b>\n\n${txt}`
-										: txt;
+										? `<b>Ответ ${i} 👇</b>\n\n${elem.payload}`
+										: elem.payload;
 									i++;
-									await ctx.replyWithHTML(msgText,
-										{ reply_to_message_id: ctx.update.message.message_id });
+
+									switch (elem.finishReason) {
+										case OpenAiChatFinishReason.stop:
+										case OpenAiChatFinishReason.content_filter:
+										case OpenAiChatFinishReason.null:
+											await ctx.replyWithHTML(msgText,
+												{ reply_to_message_id: ctx.update.message.message_id });
+											break;
+
+										case OpenAiChatFinishReason.length:
+											await ctx.replyWithHTML(msgText,
+												{
+													reply_to_message_id: ctx.update.message.message_id,
+													...Markup.inlineKeyboard([
+														[
+															Markup.button.callback('Продолжить', 'stream_request')
+														]
+													])
+												}
+											);
+											break;
+
+										default:
+											this.logger.error(`Unknown finishReason: ${elem.finishReason}`);
+											await ctx.replyWithHTML(msgText,
+												{ reply_to_message_id: ctx.update.message.message_id });
+									}
 								}
 							}
 						},
@@ -455,13 +480,38 @@ export class ScenesGenerator implements ISceneGenerator {
 							let i = 1;
 
 							if (result) {
-								for (const txt of result) {
+								for (const elem of result) {
 									msgText = result.length > 1
-										? `<b>Ответ ${i} 👇</b>\n\n${txt}`
-										: txt;
+										? `<b>Ответ ${i} 👇</b>\n\n${elem.payload}`
+										: elem.payload;
 									i++;
-									await ctx.replyWithHTML(msgText,
-										{ reply_to_message_id: ctx.update.message.message_id });
+
+									switch (elem.finishReason) {
+										case OpenAiChatFinishReason.stop:
+										case OpenAiChatFinishReason.content_filter:
+										case OpenAiChatFinishReason.null:
+											await ctx.replyWithHTML(msgText,
+												{ reply_to_message_id: ctx.update.message.message_id });
+											break;
+
+										case OpenAiChatFinishReason.length:
+											await ctx.replyWithHTML(msgText,
+												{
+													reply_to_message_id: ctx.update.message.message_id,
+													...Markup.inlineKeyboard([
+														[
+															Markup.button.callback('Продолжить', 'stream_request')
+														]
+													])
+												}
+											);
+											break;
+
+										default:
+											this.logger.error(`Unknown finishReason: ${elem.finishReason}`);
+											await ctx.replyWithHTML(msgText,
+												{ reply_to_message_id: ctx.update.message.message_id });
+									}
 								}
 							}
 						},

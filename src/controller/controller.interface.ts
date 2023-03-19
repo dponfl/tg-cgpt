@@ -18,14 +18,17 @@ export type AiImgRequest = {
 	text: string;
 };
 
-export type AiTextResponsePayload = string[] | undefined;
+export type AiTextResponsePayload = {
+	payload: string;
+	finishReason?: OpenAiChatFinishReason | string | null;
+};
 
 export type AiImgResponsePayload = string[] | undefined;
 
 export type AiTextResponse = {
 	status: AiResponseStatus;
 	finishReason?: OpenAiChatFinishReason | string | null;
-	payload?: AiTextResponsePayload;
+	payload?: string;
 };
 
 export type AiImgResponse = {
@@ -34,6 +37,7 @@ export type AiImgResponse = {
 };
 
 export interface IMainController {
-	textRequest(user: string, prompt: string): Promise<AiTextResponsePayload>;
-	imgRequest(user: string, prompt: string): Promise<AiImgResponsePayload>;
+	textRequest: (user: string, prompt: string) => Promise<AiTextResponsePayload[]>;
+	textStreamRequest: (user: string, prompt: string) => Promise<AiTextResponsePayload>;
+	imgRequest: (user: string, prompt: string) => Promise<AiImgResponsePayload>;
 }
