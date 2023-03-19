@@ -454,7 +454,15 @@ export class ScenesGenerator implements ISceneGenerator {
 
 				ctx.session.botUserSession.textRequestMessageId = ctx.message.id;
 
+				// TODO: delete 
+				this.logger.warn(`ctx.message.id (on 'message'):\n${ctx.message.id}`);
+				this.logger.warn(`ctx.session.botUserSession (on 'message'):\n${JSON.stringify(ctx.session.botUserSession)}`);
+
 				this.sessionService.updateSession(ctx);
+
+				// TODO: delete 
+				this.logger.warn(`ctx.session.botUserSession (on 'message'):\n${JSON.stringify(ctx.session.botUserSession)}`);
+
 
 				const userGuid = ctx.session.botUserSession.userGuid ? ctx.session.botUserSession.userGuid : this.utils.getChatIdStr(ctx);
 
