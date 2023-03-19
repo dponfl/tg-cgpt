@@ -406,39 +406,30 @@ export class ScenesGenerator implements ISceneGenerator {
 
 	private async afterPaymentGptScene(): Promise<BaseScene> {
 
+		const methodName = `afterPaymentGptScene)`;
+
 		const afterPaymentGptScene = new BaseScene('afterPaymentGptScene');
 
-		await this.activateCommands(afterPaymentGptScene);
+		try {
 
-		const textOnMessage =
-			`
+			await this.activateCommands(afterPaymentGptScene);
+
+			const textOnMessage =
+				`
 Работаю над вашим вопросом ⏳
 
 `;
 
-		// 		const textOnMessage01 =
-		// 			`
-		// Работаю над вашим вопросом 🔄
-		// `;
+			// tslint:disable-next-line: no-any
+			afterPaymentGptScene.enter(async (ctx: any) => {
 
-		// 		const textOnMessage02 =
-		// 			`
-		// Работаю над вашим вопросом 🔃
-		// `;
+				ctx.session.botUserSession.chatName = ChatSceneNames.afterPaymentGptScene;
+				this.sessionService.updateSession(ctx);
 
-		// tslint:disable-next-line: no-any
-		afterPaymentGptScene.enter(async (ctx: any) => {
+			});
 
-			ctx.session.botUserSession.chatName = ChatSceneNames.afterPaymentGptScene;
-			this.sessionService.updateSession(ctx);
-
-		});
-
-
-		// tslint:disable-next-line: no-any
-		afterPaymentGptScene.on('message', async (ctx: any) => {
-			const methodName = `afterPaymentGptScene.on('message')`;
-			try {
+			// tslint:disable-next-line: no-any
+			afterPaymentGptScene.on('message', async (ctx: any) => {
 				if (ctx.session.botUserSession.pendingChatGptRequest) {
 
 					const secondRequestText =
@@ -542,14 +533,15 @@ export class ScenesGenerator implements ISceneGenerator {
 						);
 
 				}
-			} catch (error) {
-				this.utils.errorLog(this, error, methodName);
-			}
-		});
+			});
 
-		// tslint:disable-next-line: no-any
-		afterPaymentGptScene.leave(async (ctx: any) => {
-		});
+			// tslint:disable-next-line: no-any
+			afterPaymentGptScene.leave(async (ctx: any) => {
+			});
+
+		} catch (error) {
+			this.utils.errorLog(this, error, methodName);
+		}
 
 		return afterPaymentGptScene;
 	}

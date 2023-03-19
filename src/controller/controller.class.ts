@@ -52,7 +52,7 @@ export class MainController implements IMainController {
 			throw new Error(`User: ${user}, ChatGPT error response: ${resRaw.payload}`);
 		} else {
 			return {
-				payload: resRaw.payload[0],
+				payload: resRaw.payload,
 				finishReason: resRaw?.finishReason
 			};
 		}
