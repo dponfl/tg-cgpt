@@ -28,7 +28,7 @@ export class MainController implements IMainController {
 			this.logger.error(`User: ${user}, ChatGPT error response: ${resRaw.payload}`);
 		} else {
 			result.push({
-				payload: resRaw.payload[0],
+				payload: resRaw.payload,
 				finishReason: resRaw?.finishReason
 			});
 		}

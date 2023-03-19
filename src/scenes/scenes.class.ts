@@ -406,142 +406,131 @@ export class ScenesGenerator implements ISceneGenerator {
 
 	private async afterPaymentGptScene(): Promise<BaseScene> {
 
-		const methodName = `afterPaymentGptScene)`;
-
 		const afterPaymentGptScene = new BaseScene('afterPaymentGptScene');
 
-		try {
+		await this.activateCommands(afterPaymentGptScene);
 
-			await this.activateCommands(afterPaymentGptScene);
-
-			const textOnMessage =
-				`
+		const textOnMessage =
+			`
 Работаю над вашим вопросом ⏳
 
 `;
 
-			// tslint:disable-next-line: no-any
-			afterPaymentGptScene.enter(async (ctx: any) => {
+		// tslint:disable-next-line: no-any
+		afterPaymentGptScene.enter(async (ctx: any) => {
 
-				ctx.session.botUserSession.chatName = ChatSceneNames.afterPaymentGptScene;
-				this.sessionService.updateSession(ctx);
+			ctx.session.botUserSession.chatName = ChatSceneNames.afterPaymentGptScene;
+			this.sessionService.updateSession(ctx);
 
-			});
+		});
 
-			// tslint:disable-next-line: no-any
-			afterPaymentGptScene.on('message', async (ctx: any) => {
-				if (ctx.session.botUserSession.pendingChatGptRequest) {
+		// tslint:disable-next-line: no-any
+		afterPaymentGptScene.on('message', async (ctx: any) => {
+			if (ctx.session.botUserSession.pendingChatGptRequest) {
 
-					const secondRequestText =
-						`
+				const secondRequestText =
+					`
 <b>В данный момент я обрабатываю ваш предыдущий запрос</b> 🔄
 
 После моего ответа, вы сможете задать следующий вопрос 👌🏼
 
 `;
 
-					// tslint:disable-next-line: no-shadowed-variable
-					const { message_id } = await ctx.replyWithHTML(secondRequestText);
-					setTimeout(() => {
-						ctx.deleteMessage(message_id);
-					}, 5000);
+				// tslint:disable-next-line: no-shadowed-variable
+				const { message_id } = await ctx.replyWithHTML(secondRequestText);
+				setTimeout(() => {
+					ctx.deleteMessage(message_id);
+				}, 5000);
 
-				} else {
+			} else {
 
-					const { message_id } = await ctx.replyWithHTML(textOnMessage);
+				const { message_id } = await ctx.replyWithHTML(textOnMessage);
 
-					const text = ctx.message.text;
+				const text = ctx.message.text;
 
-					ctx.session.botUserSession.pendingChatGptRequest = true;
+				ctx.session.botUserSession.pendingChatGptRequest = true;
 
-					this.sessionService.updateSession(ctx);
+				this.sessionService.updateSession(ctx);
 
-					const userGuid = ctx.session.botUserSession.userGuid ? ctx.session.botUserSession.userGuid : this.utils.getChatIdStr(ctx);
+				const userGuid = ctx.session.botUserSession.userGuid ? ctx.session.botUserSession.userGuid : this.utils.getChatIdStr(ctx);
 
-					this.mainController.textRequest(userGuid, text)
-						.then(
-							async (result) => {
+				this.mainController.textRequest(userGuid, text)
+					.then(
+						async (result) => {
 
-								ctx.session.botUserSession.pendingChatGptRequest = false;
+							ctx.session.botUserSession.pendingChatGptRequest = false;
 
-								this.sessionService.updateSession(ctx);
+							this.sessionService.updateSession(ctx);
 
-								let msgText = '';
-								await ctx.deleteMessage(message_id);
+							let msgText = '';
+							await ctx.deleteMessage(message_id);
 
-								let i = 1;
+							let i = 1;
 
-								for (const elem of result) {
+							for (const elem of result) {
 
-									// TODO: delete
-									this.logger.warn(`elem: ${JSON.stringify(elem)}`);
+								msgText = result.length > 1
+									? `<b>Ответ ${i} 👇</b>\n\n${elem.payload}`
+									: elem.payload;
+								i++;
 
-									msgText = result.length > 1
-										? `<b>Ответ ${i} 👇</b>\n\n${elem.payload}`
-										: elem.payload;
-									i++;
+								switch (elem.finishReason) {
+									case OpenAiChatFinishReason.stop:
+									case OpenAiChatFinishReason.content_filter:
+									case OpenAiChatFinishReason.null:
+										await ctx.replyWithHTML(msgText,
+											{ reply_to_message_id: ctx.update.message.message_id });
+										break;
 
-									switch (elem.finishReason) {
-										case OpenAiChatFinishReason.stop:
-										case OpenAiChatFinishReason.content_filter:
-										case OpenAiChatFinishReason.null:
-											await ctx.replyWithHTML(msgText,
-												{ reply_to_message_id: ctx.update.message.message_id });
-											break;
+									case OpenAiChatFinishReason.length:
+										await ctx.replyWithHTML(msgText,
+											{
+												reply_to_message_id: ctx.update.message.message_id,
+												...Markup.inlineKeyboard([
+													[
+														Markup.button.callback('Продолжить', 'stream_request')
+													]
+												])
+											}
+										);
+										break;
 
-										case OpenAiChatFinishReason.length:
-											await ctx.replyWithHTML(msgText,
-												{
-													reply_to_message_id: ctx.update.message.message_id,
-													...Markup.inlineKeyboard([
-														[
-															Markup.button.callback('Продолжить', 'stream_request')
-														]
-													])
-												}
-											);
-											break;
-
-										default:
-											this.logger.error(`Unknown finishReason: ${elem.finishReason}`);
-											await ctx.replyWithHTML(msgText,
-												{ reply_to_message_id: ctx.update.message.message_id });
-									}
+									default:
+										this.logger.error(`Unknown finishReason: ${elem.finishReason}`);
+										await ctx.replyWithHTML(msgText,
+											{ reply_to_message_id: ctx.update.message.message_id });
 								}
-							},
-							async (error) => {
+							}
+						},
+						async (error) => {
 
-								this.logger.error(`Error response from mainController.textRequest: ${error}`);
+							this.logger.error(`Error response from mainController.textRequest: ${error}`);
 
-								const errorResponseText =
-									`
+							const errorResponseText =
+								`
 К сожалению что-то пошло не так 😔
 
 Пожалуйста, повторите ваш вопрос 🙏🏾
 
 `;
 
-								ctx.session.botUserSession.pendingChatGptRequest = false;
+							ctx.session.botUserSession.pendingChatGptRequest = false;
 
-								this.sessionService.updateSession(ctx);
+							this.sessionService.updateSession(ctx);
 
-								await ctx.deleteMessage(message_id);
-								await ctx.replyWithHTML(errorResponseText,
-									{ reply_to_message_id: ctx.update.message.message_id });
+							await ctx.deleteMessage(message_id);
+							await ctx.replyWithHTML(errorResponseText,
+								{ reply_to_message_id: ctx.update.message.message_id });
 
-							}
-						);
+						}
+					);
 
-				}
-			});
+			}
+		});
 
-			// tslint:disable-next-line: no-any
-			afterPaymentGptScene.leave(async (ctx: any) => {
-			});
-
-		} catch (error) {
-			this.utils.errorLog(this, error, methodName);
-		}
+		// tslint:disable-next-line: no-any
+		afterPaymentGptScene.leave(async (ctx: any) => {
+		});
 
 		return afterPaymentGptScene;
 	}
