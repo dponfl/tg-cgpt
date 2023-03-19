@@ -72,7 +72,7 @@ const bootstap = async () => {
 
 	const mainController: IMainController = new MainController(
 		logger,
-		// cgptService,
+		utils,
 		chatOpenAiService,
 		mjService
 	);

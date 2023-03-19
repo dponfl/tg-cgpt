@@ -1,15 +1,40 @@
 import { IAIImg, IAIText } from '../ai/ai.interface.js';
 import { ILogger } from '../logger/logger.interface.js';
+import { IUtils } from '../utils/utils.class.js';
 // tslint:disable-next-line: max-line-length
-import { AiImgResponsePayload, AiResponseStatus, AiTextResponse, AiTextResponsePayload, IMainController } from './controller.interface.js';
+import { AiImgResponsePayload, AiOrchestratorResponse, AiResponseStatus, AiTextResponse, AiTextResponsePayload, IMainController, RequestCategory } from './controller.interface.js';
 
 export class MainController implements IMainController {
 
 	constructor(
 		private readonly logger: ILogger,
+		private readonly utils: IUtils,
 		private readonly chatGptService: IAIText,
 		private readonly mjService: IAIImg
 	) { }
+
+	// tslint:disable-next-line: max-line-length
+	public async orchestrator(user: string, chatId: number, prompt: string, requestCategory: RequestCategory): Promise<AiOrchestratorResponse> {
+
+		const methodName = 'orchestrator';
+
+		let result: AiOrchestratorResponse;
+
+		switch (requestCategory) {
+			case RequestCategory.chatText:
+				result = await this.textRequest(user, prompt);
+				break;
+			case RequestCategory.chatTextStream:
+				result = await this.textStreamRequest(user, prompt);
+				break;
+			default:
+				const error = new Error(`Unknown requestCategory: ${requestCategory}`);
+				this.utils.errorLog(this, error, methodName);
+				throw error;
+		}
+
+		return result;
+	}
 
 	public async textRequest(user: string, prompt: string): Promise<AiTextResponsePayload[]> {
 

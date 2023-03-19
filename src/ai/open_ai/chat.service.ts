@@ -84,12 +84,13 @@ export class OpenAiChatService implements IAIText {
 		}
 	}
 
+	// tslint:disable-next-line: promise-function-async
 	public textStreamRequest(user: string, prompt: string): Promise<AiTextResponse> {
 
 		return new Promise(async (resolve, reject) => {
 			const methodName = 'textStreamRequest';
 
-			let textResponse: string[] = [];
+			const textResponse: string[] = [];
 			let textResponseStr: string = '';
 
 			this.logger.info(`User: ${user}, sending stream request to OpenAI (ChatGPT)`);
@@ -137,7 +138,7 @@ export class OpenAiChatService implements IAIText {
 							status: AiResponseStatus.ERROR,
 							payload: `Request timeout`
 						}
-					)
+					);
 				}, timeout);
 
 				response.data.on('data', (data: string): void => {
@@ -145,6 +146,7 @@ export class OpenAiChatService implements IAIText {
 					const lines: string[] = data.toString().split('\n').filter((line: string) => line.trim() !== '');
 
 					for (const line of lines) {
+						// tslint:disable-next-line: no-shadowed-variable
 						const data: string = line.replace(/^data: /, '').replace('\n', '');
 						if (data === '[DONE]') {
 
@@ -160,7 +162,7 @@ export class OpenAiChatService implements IAIText {
 									finishReason: OpenAiChatFinishReason.stop,
 									payload: textResponseStr
 								}
-							)
+							);
 							return;
 						}
 
