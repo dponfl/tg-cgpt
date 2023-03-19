@@ -450,6 +450,8 @@ export class ScenesGenerator implements ISceneGenerator {
 
 				ctx.session.botUserSession.pendingChatGptRequest = true;
 
+				ctx.session.botUserSession.textRequest = ctx.message.text;
+
 				this.sessionService.updateSession(ctx);
 
 				const userGuid = ctx.session.botUserSession.userGuid ? ctx.session.botUserSession.userGuid : this.utils.getChatIdStr(ctx);
@@ -529,6 +531,9 @@ export class ScenesGenerator implements ISceneGenerator {
 		});
 
 		afterPaymentGptScene.action('stream_request', async (ctx: any) => {
+
+			await ctx.answerCbQuery('Продолжаю работать над вашим запросом...');
+
 			if (ctx.session.botUserSession.pendingChatGptRequest) {
 
 				const secondRequestText =
@@ -549,7 +554,11 @@ export class ScenesGenerator implements ISceneGenerator {
 
 				const { message_id } = await ctx.replyWithHTML(textOnMessage);
 
-				const text = ctx.message.text;
+				if (!ctx.session.botUserSession.textRequest) {
+					throw new Error(`Missing ctx.session.botUserSession.textRequest`);
+				}
+
+				const text = ctx.session.botUserSession.textRequest;
 
 				ctx.session.botUserSession.pendingChatGptRequest = true;
 
@@ -619,7 +628,6 @@ export class ScenesGenerator implements ISceneGenerator {
 
 						}
 					);
-
 			}
 		});
 
