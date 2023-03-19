@@ -218,16 +218,6 @@ export class ScenesGenerator implements ISceneGenerator {
 
 `;
 
-		// 		const textOnMessage01 =
-		// 			`
-		// Работаю над вашим вопросом 🔄
-		// `;
-
-		// 		const textOnMessage02 =
-		// 			`
-		// Работаю над вашим вопросом 🔃
-		// `;
-
 		// tslint:disable-next-line: no-any
 		mainGptScene.enter(async (ctx: any) => {
 			const { message_id: messageId } = await ctx.replyWithHTML(textMain);
@@ -239,10 +229,8 @@ export class ScenesGenerator implements ISceneGenerator {
 			await ctx.pinChatMessage(messageId);
 		});
 
-
 		// tslint:disable-next-line: no-any
 		mainGptScene.on('message', async (ctx: any) => {
-
 			if (ctx.session.botUserSession.pendingChatGptRequest) {
 
 				const secondRequestText =
@@ -263,50 +251,13 @@ export class ScenesGenerator implements ISceneGenerator {
 
 				const { message_id } = await ctx.replyWithHTML(textOnMessage);
 
-				/**
-				 * The below approach can hit Telegram limit for sending messages
-				 */
-				// const { message_id } = await ctx.replyWithHTML(textOnMessage01);
-
-				// const opt = Object(message_id);
-
-				// const int01 = setInterval(async () => {
-				// 	await ctx.telegram.editMessageText(ctx.chat.id, message_id, undefined, textOnMessage02);
-				// 	setTimeout(async () => {
-				// 		await ctx.telegram.editMessageText(ctx.chat.id, message_id, undefined, textOnMessage01);
-				// 	}, 500);
-				// }, 1000);
-
-				// setTimeout(async () => {
-				// 	clearInterval(int01);
-				// 	await ctx.deleteMessage(message_id);
-				// 	await ctx.replyWithHTML('This is a reply to your request',
-				// 		{ reply_to_message_id: ctx.update.message.message_id });
-				// }, 5000);
-
-
-				/**
-				 * To show functionality
-				 */
-
-				// setTimeout(async () => {
-				// 	await ctx.deleteMessage(message_id);
-				// 	await ctx.replyWithHTML('This is a reply to your request',
-				// 		{ reply_to_message_id: ctx.update.message.message_id });
-				// }, 5000);
-
-				// This solution block user communication
-
-				// const str = await chatGPTService.textRequest('some text');
-
-				// await ctx.deleteMessage(message_id);
-				// await ctx.replyWithHTML(str,
-				// 	{ reply_to_message_id: ctx.update.message.message_id });
-
-
 				const text = ctx.message.text;
 
 				ctx.session.botUserSession.pendingChatGptRequest = true;
+
+				ctx.session.botUserSession.textRequest = ctx.message.text;
+
+				ctx.session.botUserSession.textRequestMessageId = ctx.message.message_id;
 
 				this.sessionService.updateSession(ctx);
 
@@ -325,39 +276,38 @@ export class ScenesGenerator implements ISceneGenerator {
 
 							let i = 1;
 
-							if (result) {
-								for (const elem of result) {
-									msgText = result.length > 1
-										? `<b>Ответ ${i} 👇</b>\n\n${elem.payload}`
-										: elem.payload;
-									i++;
+							for (const elem of result) {
 
-									switch (elem.finishReason) {
-										case OpenAiChatFinishReason.stop:
-										case OpenAiChatFinishReason.content_filter:
-										case OpenAiChatFinishReason.null:
-											await ctx.replyWithHTML(msgText,
-												{ reply_to_message_id: ctx.update.message.message_id });
-											break;
+								msgText = result.length > 1
+									? `<b>Ответ ${i} 👇</b>\n\n${elem.payload}`
+									: elem.payload;
+								i++;
 
-										case OpenAiChatFinishReason.length:
-											await ctx.replyWithHTML(msgText,
-												{
-													reply_to_message_id: ctx.update.message.message_id,
-													...Markup.inlineKeyboard([
-														[
-															Markup.button.callback('Продолжай 📝', 'stream_request')
-														]
-													])
-												}
-											);
-											break;
+								switch (elem.finishReason) {
+									case OpenAiChatFinishReason.stop:
+									case OpenAiChatFinishReason.content_filter:
+									case OpenAiChatFinishReason.null:
+										await ctx.replyWithHTML(msgText,
+											{ reply_to_message_id: ctx.update.message.message_id });
+										break;
 
-										default:
-											this.logger.error(`Unknown finishReason: ${elem.finishReason}`);
-											await ctx.replyWithHTML(msgText,
-												{ reply_to_message_id: ctx.update.message.message_id });
-									}
+									case OpenAiChatFinishReason.length:
+										await ctx.replyWithHTML(msgText,
+											{
+												reply_to_message_id: ctx.update.message.message_id,
+												...Markup.inlineKeyboard([
+													[
+														Markup.button.callback('Продолжай 📝', 'stream_request')
+													]
+												])
+											}
+										);
+										break;
+
+									default:
+										this.logger.error(`Unknown finishReason: ${elem.finishReason}`);
+										await ctx.replyWithHTML(msgText,
+											{ reply_to_message_id: ctx.update.message.message_id });
 								}
 							}
 						},
@@ -385,7 +335,111 @@ export class ScenesGenerator implements ISceneGenerator {
 					);
 
 			}
+		});
 
+		mainGptScene.action('stream_request', async (ctx: any) => {
+
+			await ctx.answerCbQuery('Продолжаю работать над вашим запросом...');
+
+			await ctx.replyWithHTML(`✅ Вы выбрали: <b><i>Продолжай 📝</i></b>`);
+			await ctx.editMessageReplyMarkup({ inline_keyboard: [] });
+
+
+			if (ctx.session.botUserSession.pendingChatGptRequest) {
+
+				const secondRequestText =
+					`
+<b>В данный момент я обрабатываю ваш предыдущий запрос</b> 🔄
+
+После моего ответа, вы сможете задать следующий вопрос 👌🏼
+
+`;
+
+				// tslint:disable-next-line: no-shadowed-variable
+				const { message_id } = await ctx.replyWithHTML(secondRequestText);
+				setTimeout(() => {
+					ctx.deleteMessage(message_id);
+				}, 5000);
+
+			} else {
+
+				const { message_id } = await ctx.replyWithHTML(textOnMessage);
+
+				if (!ctx.session.botUserSession.textRequest) {
+					throw new Error(`Missing ctx.session.botUserSession.textRequest`);
+				}
+
+				const text = ctx.session.botUserSession.textRequest;
+
+				ctx.session.botUserSession.pendingChatGptRequest = true;
+
+				this.sessionService.updateSession(ctx);
+
+				const userGuid = ctx.session.botUserSession.userGuid ? ctx.session.botUserSession.userGuid : this.utils.getChatIdStr(ctx);
+
+				this.mainController.textStreamRequest(userGuid, text)
+					.then(
+						async (result) => {
+
+							ctx.session.botUserSession.pendingChatGptRequest = false;
+
+							this.sessionService.updateSession(ctx);
+
+							let msgText = '';
+
+							await ctx.deleteMessage(message_id);
+
+							msgText = result.payload;
+
+							if (!ctx.session.botUserSession.textRequestMessageId) {
+								this.logger.error(`UserGuid: ${ctx.session.botUserSession.userGuid}, Missing ctx.session.botUserSession.textRequestMessageId`);
+								await ctx.replyWithHTML(msgText);
+							} else {
+								await ctx.replyWithHTML(msgText, { reply_to_message_id: ctx.session.botUserSession.textRequestMessageId });
+							}
+
+							ctx.session.botUserSession.textRequest = '';
+
+							ctx.session.botUserSession.textRequestMessageId = 0;
+
+							this.sessionService.updateSession(ctx);
+
+						},
+						async (error) => {
+
+							this.logger.error(`Error response from mainController.textRequest: ${error}`);
+
+							const errorResponseText =
+								`
+К сожалению что-то пошло не так 😔
+
+Пожалуйста, повторите ваш вопрос 🙏🏾
+
+`;
+
+							ctx.session.botUserSession.pendingChatGptRequest = false;
+
+							this.sessionService.updateSession(ctx);
+
+							await ctx.deleteMessage(message_id);
+
+							if (!ctx.session.botUserSession.textRequestMessageId) {
+								this.logger.error(`UserGuid: ${ctx.session.botUserSession.userGuid}, Missing ctx.session.botUserSession.textRequestMessageId`);
+								await ctx.replyWithHTML(errorResponseText);
+							} else {
+								await ctx.replyWithHTML(errorResponseText,
+									{ reply_to_message_id: ctx.update.message.message_id });
+							}
+
+							ctx.session.botUserSession.textRequest = '';
+
+							ctx.session.botUserSession.textRequestMessageId = 0;
+
+							this.sessionService.updateSession(ctx);
+
+						}
+					);
+			}
 		});
 
 		// tslint:disable-next-line: no-any
@@ -403,6 +457,8 @@ export class ScenesGenerator implements ISceneGenerator {
 
 		return mainGptScene;
 	}
+
+
 
 	private async afterPaymentGptScene(): Promise<BaseScene> {
 
@@ -444,9 +500,6 @@ export class ScenesGenerator implements ISceneGenerator {
 
 			} else {
 
-				// TODO: delete
-				this.utils.debugLogger(`afterPaymentGptScene.on('message') ctx:\n${JSON.stringify(ctx.message)}`);
-
 				const { message_id } = await ctx.replyWithHTML(textOnMessage);
 
 				const text = ctx.message.text;
@@ -457,15 +510,7 @@ export class ScenesGenerator implements ISceneGenerator {
 
 				ctx.session.botUserSession.textRequestMessageId = ctx.message.message_id;
 
-				// TODO: delete 
-				this.logger.warn(`ctx.message.id (on 'message'):\n${ctx.message.id}`);
-				this.logger.warn(`ctx.session.botUserSession (on 'message'):\n${JSON.stringify(ctx.session.botUserSession)}`);
-
 				this.sessionService.updateSession(ctx);
-
-				// TODO: delete 
-				this.logger.warn(`ctx.session.botUserSession (on 'message'):\n${JSON.stringify(ctx.session.botUserSession)}`);
-
 
 				const userGuid = ctx.session.botUserSession.userGuid ? ctx.session.botUserSession.userGuid : this.utils.getChatIdStr(ctx);
 
@@ -597,15 +642,19 @@ export class ScenesGenerator implements ISceneGenerator {
 
 							msgText = result.payload;
 
-							// TODO: delete 
-							this.logger.warn(`ctx.session.botUserSession:\n${JSON.stringify(ctx.session.botUserSession)}`);
-
 							if (!ctx.session.botUserSession.textRequestMessageId) {
 								this.logger.error(`UserGuid: ${ctx.session.botUserSession.userGuid}, Missing ctx.session.botUserSession.textRequestMessageId`);
 								await ctx.replyWithHTML(msgText);
 							} else {
 								await ctx.replyWithHTML(msgText, { reply_to_message_id: ctx.session.botUserSession.textRequestMessageId });
 							}
+
+							ctx.session.botUserSession.textRequest = '';
+
+							ctx.session.botUserSession.textRequestMessageId = 0;
+
+							this.sessionService.updateSession(ctx);
+
 						},
 						async (error) => {
 
@@ -624,8 +673,20 @@ export class ScenesGenerator implements ISceneGenerator {
 							this.sessionService.updateSession(ctx);
 
 							await ctx.deleteMessage(message_id);
-							await ctx.replyWithHTML(errorResponseText,
-								{ reply_to_message_id: ctx.update.message.message_id });
+
+							if (!ctx.session.botUserSession.textRequestMessageId) {
+								this.logger.error(`UserGuid: ${ctx.session.botUserSession.userGuid}, Missing ctx.session.botUserSession.textRequestMessageId`);
+								await ctx.replyWithHTML(errorResponseText);
+							} else {
+								await ctx.replyWithHTML(errorResponseText,
+									{ reply_to_message_id: ctx.update.message.message_id });
+							}
+
+							ctx.session.botUserSession.textRequest = '';
+
+							ctx.session.botUserSession.textRequestMessageId = 0;
+
+							this.sessionService.updateSession(ctx);
 
 						}
 					);
