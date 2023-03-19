@@ -445,7 +445,6 @@ export class ScenesGenerator implements ISceneGenerator {
 			} else {
 
 				// TODO: delete
-				this.logger.warn(`afterPaymentGptScene.on('message') ctx:\n${JSON.stringify(ctx.message)}`);
 				this.utils.debugLogger(`afterPaymentGptScene.on('message') ctx:\n${JSON.stringify(ctx.message)}`);
 
 				const { message_id } = await ctx.replyWithHTML(textOnMessage);
@@ -456,7 +455,7 @@ export class ScenesGenerator implements ISceneGenerator {
 
 				ctx.session.botUserSession.textRequest = ctx.message.text;
 
-				ctx.session.botUserSession.textRequestMessageId = ctx.message.id;
+				ctx.session.botUserSession.textRequestMessageId = ctx.message.message_id;
 
 				// TODO: delete 
 				this.logger.warn(`ctx.message.id (on 'message'):\n${ctx.message.id}`);

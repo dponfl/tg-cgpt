@@ -63,12 +63,13 @@ export class Utils implements IUtils {
 		return str;
 	}
 
-	debugLogger(arg: string): void {
+	debugLogger(str: string): void {
 		const txt =
-			`
+			`\n
 ============================= DEBUG LOG =============================
-${arg}
+${str}
 =====================================================================
+
 `;
 		this.logger.warn(txt);
 	}
