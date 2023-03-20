@@ -263,11 +263,11 @@ export class ScenesGenerator implements ISceneGenerator {
 		// tslint:disable-next-line: no-any
 		mainGptScene.action('pay_package', async (ctx: any) => {
 
-			await ctx.answerCbQuery();
+			await ctx.answerCbQuery('Переход в "Оплатить запросы"');
 			await ctx.replyWithHTML(`✅ Вы выбрали: <b><i>Оплатить запросы ✅</i></b>`);
 			await ctx.editMessageReplyMarkup({ inline_keyboard: [] });
 
-			await ctx.scene.enter('pushToPaymentScene');
+			await ctx.scene.enter('paymentScene');
 
 		});
 
@@ -314,12 +314,11 @@ export class ScenesGenerator implements ISceneGenerator {
 		// tslint:disable-next-line: no-any
 		afterPaymentGptScene.action('pay_package', async (ctx: any) => {
 
-			await ctx.answerCbQuery();
+			await ctx.answerCbQuery('Переход в "Оплатить запросы"');
 			await ctx.replyWithHTML(`✅ Вы выбрали: <b><i>Оплатить запросы ✅</i></b>`);
 			await ctx.editMessageReplyMarkup({ inline_keyboard: [] });
 
-			await ctx.scene.enter('pushToPaymentScene');
-
+			await ctx.scene.enter('paymentScene');
 		});
 
 
