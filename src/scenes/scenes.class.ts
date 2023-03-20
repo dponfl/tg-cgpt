@@ -1006,6 +1006,8 @@ export class ScenesGenerator implements ISceneGenerator {
 											await ctx.replyWithHTML(msgText,
 												{ reply_to_message_id: ctx.update.message.message_id });
 
+											this.clearTextSessionData(ctx);
+
 											break;
 
 										case OpenAiChatFinishReason.length:
@@ -1025,10 +1027,10 @@ export class ScenesGenerator implements ISceneGenerator {
 											this.logger.error(`Unknown finishReason: ${elem.finishReason}`);
 											await ctx.replyWithHTML(msgText,
 												{ reply_to_message_id: ctx.update.message.message_id });
+
+											this.clearTextSessionData(ctx);
 									}
 								}
-
-								this.clearTextSessionData(ctx);
 
 								break;
 
