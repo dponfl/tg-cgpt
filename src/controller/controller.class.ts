@@ -135,18 +135,24 @@ export class MainController implements IMainController {
 						throw new Error(`Wrong serviceUsage record:\n${serviceUsageRecRaw}`);
 					}
 
-					const { guid, gptFreeLeft, gptFreeUsed, gptPurchased, gptLeft } = serviceUsageRecRaw[0];
+					const { guid, gptFreeLeft, gptFreeUsed, gptUsed, gptLeft } = serviceUsageRecRaw[0];
 
 					if (gptFreeLeft > 0) {
 						await this.dbConnection
 							.updateTable('serviceUsage')
-							.set({ gptFreeLeft: gptFreeLeft - 1 })
+							.set({
+								gptFreeLeft: gptFreeLeft - 1,
+								gptFreeUsed: gptFreeUsed + 1
+							})
 							.where('guid', '=', guid)
 							.execute();
 					} else if (gptLeft > 0) {
 						await this.dbConnection
 							.updateTable('serviceUsage')
-							.set({ gptLeft: gptLeft - 1 })
+							.set({
+								gptLeft: gptLeft - 1,
+								gptUsed: gptUsed + 1
+							})
 							.where('guid', '=', guid)
 							.execute();
 					} else {
