@@ -1124,7 +1124,9 @@ export class ScenesGenerator implements ISceneGenerator {
 				.then(
 					async (result) => {
 
-						this.clearTextSessionData(ctx);
+						this.utils.debugLogger(`result:\n${JSON.stringify(result)}`);
+
+						// this.clearTextSessionData(ctx);
 
 						let msgText = '';
 
