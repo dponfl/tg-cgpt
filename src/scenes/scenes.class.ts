@@ -1124,10 +1124,6 @@ export class ScenesGenerator implements ISceneGenerator {
 				.then(
 					async (result) => {
 
-						this.utils.debugLogger(`result:\n${JSON.stringify(result)}`);
-
-						// this.clearTextSessionData(ctx);
-
 						let msgText = '';
 
 						await ctx.deleteMessage(message_id);
@@ -1140,6 +1136,8 @@ export class ScenesGenerator implements ISceneGenerator {
 						} else {
 							await ctx.replyWithHTML(msgText, { reply_to_message_id: ctx.session.botUserSession.textRequestMessageId });
 						}
+
+						this.clearTextSessionData(ctx);
 
 					},
 					async (error) => {
