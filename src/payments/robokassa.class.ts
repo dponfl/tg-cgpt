@@ -57,10 +57,14 @@ export class RobokassaService implements IPaymentService {
 				&& Array.isArray(gtRecs)
 				&& gtRecs.length > 0
 			) {
-				const { paymentLink } = gtRecs[gtRecs.length - 1];
+				if (gtRecs.length !== 1) {
+					this.logger.error(`More then one gt record for conditions. Conditions:\n${JSON.stringify(params)}\nFound records:\n${JSON.stringify(gtRecs)}`);
+				}
+
+				const { paymentLink } = gtRecs[0];
 
 				if (!paymentLink) {
-					this.logger.error(`ERROR: No paymentLink at gt rec: ${gtRecs[gtRecs.length - 1]}`);
+					this.logger.error(`ERROR: No paymentLink at gt gtRecs[0]:\n${JSON.stringify(gtRecs[0])}`);
 				} else {
 					res.url = paymentLink;
 					return res;
