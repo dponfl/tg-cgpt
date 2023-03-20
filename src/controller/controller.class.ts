@@ -52,7 +52,12 @@ export class MainController implements IMainController {
 
 			case RequestCategory.chatTextStream:
 
-				result = await this.textStreamRequest(userGuid, prompt);
+				payload = await this.textStreamRequest(userGuid, prompt);
+
+				result = {
+					status: ControllerStatus.SUCCESS,
+					payload,
+				};
 
 				break;
 

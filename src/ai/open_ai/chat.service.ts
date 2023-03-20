@@ -113,33 +113,18 @@ export class OpenAiChatService implements IAIText {
 					stream: true
 				};
 
-				// const max_tokens = Number(this.configService.get('MAX_TOKENS'));
-
-				// // TODO: delete
-				// this.logger.warn(`max_tokens:\n${max_tokens}`);
-
-
-				// if (max_tokens) {
-				// 	requestParams.max_tokens = max_tokens;
-				// }
-
 				// TODO: delete
 				this.logger.warn(`User: ${user}, stream requestParams:\n${JSON.stringify(requestParams)}`);
-
-				const response: AxiosResponse = await this.openai.createChatCompletion(requestParams, options);
-
-				this.logger.info(`User: ${user}, stream openai.createChatCompletion response:\nStatus: ${response.status} Status text: ${response.statusText}`);
 
 				const timeout = Number(this.configService.get('RESPONSE_TIMEOUT')) ?? Infinity;
 
 				const timeOutId = setTimeout(() => {
-					resolve(
-						{
-							status: AiResponseStatus.ERROR,
-							payload: `Request timeout`
-						}
-					);
+					reject(`Request timeout at ${methodName}`);
 				}, timeout);
+
+				const response: AxiosResponse = await this.openai.createChatCompletion(requestParams, options);
+
+				this.logger.info(`User: ${user}, stream openai.createChatCompletion response:\nStatus: ${response.status} Status text: ${response.statusText}`);
 
 				response.data.on('data', (data: string): void => {
 
@@ -180,10 +165,8 @@ export class OpenAiChatService implements IAIText {
 				});
 
 			} catch (error) {
-				return {
-					status: AiResponseStatus.ERROR,
-					payload: this.utils.errorLog(this, error, methodName)
-				};
+				const errText = this.utils.errorLog(this, error, methodName);
+				throw new Error(errText);
 			}
 		});
 
