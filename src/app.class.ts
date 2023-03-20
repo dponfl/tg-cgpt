@@ -41,10 +41,6 @@ export class App {
 
 		this.bot.catch(async (error: unknown, ctx) => {
 
-			if (error instanceof Error) {
-				this.logger.error(`Bot error:\n${JSON.stringify(error)}`);
-			}
-
 			this.logger.error(`Bot error: ${error}`);
 
 			await ctx.reply('При обработке вашего сообщения что-то пошло не так.');

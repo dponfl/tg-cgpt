@@ -977,8 +977,6 @@ export class ScenesGenerator implements ISceneGenerator {
 				.then(
 					async (result) => {
 
-						this.clearTextSessionData(ctx);
-
 						let msgText = '';
 
 						await ctx.deleteMessage(message_id);
