@@ -988,6 +988,9 @@ export class ScenesGenerator implements ISceneGenerator {
 						switch (result.status) {
 							case ControllerStatus.SUCCESS:
 
+								ctx.session.botUserSession.pendingChatGptRequest = false;
+								this.sessionService.updateSession(ctx);
+
 								let i = 1;
 
 								for (const elem of result.payload as AiTextResponsePayload[]) {
