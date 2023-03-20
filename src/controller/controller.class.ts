@@ -31,22 +31,24 @@ export class MainController implements IMainController {
 
 
 				if (!checkUserRightsResult) {
+
 					result = {
 						status: ControllerStatus.ACTION_PAYMENT,
 						payload: null,
 					};
 
-					return result as T;
+				} else {
+
+					payload = await this.textRequest(userGuid, prompt);
+
+					result = {
+						status: ControllerStatus.SUCCESS,
+						payload,
+					};
+
+					await this.updateUserRightsOnSuccessfulResponse(userGuid, AiServices.GTP);
+
 				}
-
-				payload = await this.textRequest(userGuid, prompt);
-
-				result = {
-					status: ControllerStatus.SUCCESS,
-					payload,
-				};
-
-				await this.updateUserRightsOnSuccessfulResponse(userGuid, AiServices.GTP);
 
 				break;
 
@@ -95,7 +97,9 @@ export class MainController implements IMainController {
 
 					const { gptFreeLeft, gptLeft } = serviceUsageRecRaw[0];
 
-					if (gptFreeLeft + gptLeft > 0) {
+					const availableRequests = gptFreeLeft + gptLeft;
+
+					if (availableRequests > 0) {
 						return true;
 					}
 

@@ -981,15 +981,15 @@ export class ScenesGenerator implements ISceneGenerator {
 
 						await ctx.deleteMessage(message_id);
 
-						if (!Array.isArray(result.payload)) {
-							throw new Error(`result.payload should be array, result:\n${JSON.stringify(result)}`);
-						}
-
 						switch (result.status) {
 							case ControllerStatus.SUCCESS:
 
 								ctx.session.botUserSession.pendingChatGptRequest = false;
 								this.sessionService.updateSession(ctx);
+
+								if (!Array.isArray(result.payload)) {
+									this.logger.error(`result.payload should be an array, result:\n${JSON.stringify(result)}`);
+								}
 
 								let i = 1;
 
