@@ -74,7 +74,8 @@ const bootstap = async () => {
 		logger,
 		utils,
 		chatOpenAiService,
-		mjService
+		mjService,
+		dbConnection
 	);
 
 	const dbServices: IDbServices = {

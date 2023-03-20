@@ -88,8 +88,8 @@ ${str}
 
 
 	getChatIdObj(ctx: IBotContext): GetChatIdObjResult {
-		const fromId = ctx.from?.id;
-		const chatId = ctx.chat?.id;
+		const fromId = ctx.from?.id ?? 0;
+		const chatId = ctx.chat?.id ?? 0;
 		return { fromId, chatId };
 	}
 

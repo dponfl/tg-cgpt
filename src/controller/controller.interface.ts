@@ -1,6 +1,17 @@
 export enum AiResponseStatus {
 	SUCCESS = 'SUCCESS',
-	ERROR = 'ERROR'
+	ERROR = 'ERROR',
+}
+
+export enum ControllerStatus {
+	SUCCESS = 'SUCCESS',
+	ERROR = 'ERROR',
+	ACTION_PAYMENT = 'ACTION_PAYMENT',
+}
+
+export enum AiServices {
+	GTP = 'gtp',
+	MJ = 'mj',
 }
 
 export enum OpenAiChatFinishReason {
@@ -41,11 +52,14 @@ export type AiImgResponse = {
 	payload?: AiImgResponsePayload;
 };
 
-export type AiOrchestratorResponse = AiTextResponsePayload | AiTextResponsePayload[] | AiImgResponsePayload;
+export type AiOrchestratorResponse<T> = {
+	status: ControllerStatus;
+	payload: T;
+};
 
 export interface IMainController {
 	// tslint:disable-next-line: max-line-length
-	orchestrator: (user: string, chatId: number, prompt: string, requestCategory: RequestCategory) => Promise<AiOrchestratorResponse>;
+	orchestrator: <T>(user: string, chatId: number, prompt: string, requestCategory: RequestCategory) => Promise<AiOrchestratorResponse<T>>;
 	textRequest: (user: string, prompt: string) => Promise<AiTextResponsePayload[]>;
 	textStreamRequest: (user: string, prompt: string) => Promise<AiTextResponsePayload>;
 	imgRequest: (user: string, prompt: string) => Promise<AiImgResponsePayload>;
