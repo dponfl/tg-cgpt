@@ -38,6 +38,7 @@ export interface IUtils {
 	getValRedis: (redisKey: string, targetObject: string[]) => Promise<any>;
 	getServiceUsageInfo: (uid: string) => Promise<IServiceUsageInfo | undefined>;
 	sleep: (milliseconds: number) => Promise<unknown>;
+	enqueue: (collection: unknown[], data: unknown, size: number) => unknown[];
 }
 
 export class Utils implements IUtils {
@@ -194,6 +195,15 @@ ${str}
 
 	async sleep(milliseconds: number): Promise<unknown> {
 		return new Promise(resolve => setTimeout(resolve, milliseconds));
+	}
+
+	enqueue(collection: unknown[], data: unknown, size: number): unknown[] {
+		const arr = [...collection];
+		arr.push(data);
+		if (arr.length > size) {
+			arr.shift();
+		}
+		return arr;
 	}
 
 }

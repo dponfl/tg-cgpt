@@ -194,20 +194,20 @@ const bootstap = async () => {
 		 * Check created redis methods
 		 */
 
-		const obj = {
-			key01: {
-				key01_01: 'some string',
-				key01_02: 123,
-				key01_03: {
-					key01_03_01: 'some another string'
-				}
-			},
-			key02: {
-				key02_01: 'text'
-			}
-		};
+		// const obj = {
+		// 	key01: {
+		// 		key01_01: 'some string',
+		// 		key01_02: 123,
+		// 		key01_03: {
+		// 			key01_03_01: 'some another string'
+		// 		}
+		// 	},
+		// 	key02: {
+		// 		key02_01: 'text'
+		// 	}
+		// };
 
-		await redis.set('test', JSON.stringify(obj));
+		// await redis.set('test', JSON.stringify(obj));
 
 		// await utils.updateRedis('test', ['key02'], 'newKey', 321);
 		// const res = await utils.updateRedis('test', ['key01', 'key01_03'], 'anotherNewKey', {
@@ -241,15 +241,35 @@ const bootstap = async () => {
 		// const res = await mainController.openAiChatRequest(prompt);
 		// logger.info(`mainController.openAiChatRequest:\n${JSON.stringify(res)}`);
 
-		const oldElem = await utils.getValRedis('test', ['key01']);
-		logger.info(`key01:\n${JSON.stringify(oldElem)}`);
-		const newElem = await utils.getValRedis('test', ['msgChatGpt']);
-		logger.info(`msgChatGpt:\n${newElem}`);
+		// const oldElem = await utils.getValRedis('test', ['key01']);
+		// logger.info(`key01:\n${JSON.stringify(oldElem)}`);
+		// const newElem = await utils.getValRedis('test', ['msgChatGpt']);
+		// logger.info(`msgChatGpt:\n${newElem}`);
 
-		exit;
+		// exit;
+
+		const size = 3;
+		let arr: unknown[] = [];
+
+		arr = utils.enqueue(arr, '111', size);
+		logger.info(`arr: ${JSON.stringify(arr)}`);
+
+		arr = utils.enqueue(arr, '222', size);
+		logger.info(`arr: ${JSON.stringify(arr)}`);
+
+		arr = utils.enqueue(arr, '333', size);
+		logger.info(`arr: ${JSON.stringify(arr)}`);
+
+		arr = utils.enqueue(arr, '444', size);
+		logger.info(`arr: ${JSON.stringify(arr)}`);
+
+		arr = utils.enqueue(arr, '555', size);
+		logger.info(`arr: ${JSON.stringify(arr)}`);
+
 
 	})();
 
+	exit;
 
 	await app.initBot();
 	await app.initApi();
