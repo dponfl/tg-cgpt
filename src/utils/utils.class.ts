@@ -95,13 +95,20 @@ ${str}
 	}
 
 	async updateRedis(redisKey: string, targetObject: string[], valueKey: string, value: unknown): Promise<void> {
-		const methodName = 'appendRedis';
+		const methodName = 'updateRedis';
 		try {
 
 			const dataStr = await this.redis.get(redisKey);
 
 			if (!dataStr) {
-				throw new Error(`Redis: no data by key=${redisKey}`);
+
+				const newRec = Object({});
+				newRec[valueKey] = value;
+
+				this.logger.warn(`Redis: no data by key=${redisKey}, gonna create new record containing object:\n${JSON.stringify(newRec)}`);
+				await this.redis.set(redisKey, JSON.stringify(newRec));
+
+				return newRec;
 			}
 
 			const dataObj = JSON.parse(dataStr);
@@ -131,7 +138,7 @@ ${str}
 
 	// tslint:disable-next-line: no-any
 	async getValRedis(redisKey: string, targetObject: string[]): Promise<any> {
-		const methodName = 'appendRedis';
+		const methodName = 'getValRedis';
 		try {
 
 			const dataStr = await this.redis.get(redisKey);
