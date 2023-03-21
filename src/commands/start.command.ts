@@ -186,10 +186,10 @@ export class StartCommand extends MyBotCommand {
 
 
 				/**
-				 * Push to 'startNext' scene
+				 * Push to 'startIntro' scene
 				 */
 
-				await ctx.scene.enter('startNext');
+				await ctx.scene.enter('startIntro');
 
 			} catch (error) {
 				if (error instanceof Error) {
