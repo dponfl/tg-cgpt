@@ -1003,7 +1003,7 @@ export class ScenesGenerator implements ISceneGenerator {
 										case OpenAiChatFinishReason.stop:
 										case OpenAiChatFinishReason.content_filter:
 										case OpenAiChatFinishReason.null:
-											await ctx.replyWithHTML(msgText,
+											await ctx.reply(msgText,
 												{ reply_to_message_id: ctx.update.message.message_id });
 
 											this.clearTextSessionData(ctx);
@@ -1011,7 +1011,7 @@ export class ScenesGenerator implements ISceneGenerator {
 											break;
 
 										case OpenAiChatFinishReason.length:
-											await ctx.replyWithHTML(msgText,
+											await ctx.reply(msgText,
 												{
 													reply_to_message_id: ctx.update.message.message_id,
 													...Markup.inlineKeyboard([
@@ -1025,7 +1025,7 @@ export class ScenesGenerator implements ISceneGenerator {
 
 										default:
 											this.logger.error(`Unknown finishReason: ${elem.finishReason}`);
-											await ctx.replyWithHTML(msgText,
+											await ctx.reply(msgText,
 												{ reply_to_message_id: ctx.update.message.message_id });
 
 											this.clearTextSessionData(ctx);
@@ -1131,9 +1131,9 @@ export class ScenesGenerator implements ISceneGenerator {
 
 						if (!ctx.session.botUserSession.textRequestMessageId) {
 							this.logger.error(`UserGuid: ${ctx.session.botUserSession.userGuid}, Missing ctx.session.botUserSession.textRequestMessageId`);
-							await ctx.replyWithHTML(msgText);
+							await ctx.reply(msgText);
 						} else {
-							await ctx.replyWithHTML(msgText, { reply_to_message_id: ctx.session.botUserSession.textRequestMessageId });
+							await ctx.reply(msgText, { reply_to_message_id: ctx.session.botUserSession.textRequestMessageId });
 						}
 
 						this.clearTextSessionData(ctx);
