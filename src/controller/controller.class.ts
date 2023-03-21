@@ -3,10 +3,10 @@ import { IAIImg, IAIText } from '../ai/ai.interface.js';
 import { IOpenAiChatMessage, OpenAiChatRoles } from '../ai/open_ai/chat.interface.js';
 import { IConfigService } from '../config/config.interface.js';
 import { ILogger } from '../logger/logger.interface.js';
-import { DbResponseStatus, IDatabase, IDbServices } from '../storage/mysql.interface.js';
+import { IDatabase, IDbServices } from '../storage/mysql.interface.js';
 import { IUtils } from '../utils/utils.class.js';
 // tslint:disable-next-line: max-line-length
-import { AiImgResponsePayload, AiOrchestratorResponse, AiResponseStatus, AiServices, AiTextResponse, AiTextResponsePayload, ControllerStatus, IMainController, RequestCategory } from './controller.interface.js';
+import { AiImgResponsePayload, AiResponseStatus, AiServices, AiTextResponse, AiTextResponsePayload, ControllerStatus, IMainController, RequestCategory } from './controller.interface.js';
 
 export class MainController implements IMainController {
 
@@ -211,17 +211,27 @@ export class MainController implements IMainController {
 			content: prompt
 		};
 
-		let chatGptMsgQueueRaw = await this.utils.getValRedis(`${fromId}:${chatId}`, ['chatGptMsgQueue']);
+		let chatGptMsgQueue = await this.utils.getValRedis(`${fromId}:${chatId}`, ['chatGptMsgQueue']);
 
-		if (chatGptMsgQueueRaw && !Array.isArray(chatGptMsgQueueRaw)) {
-			this.logger.error(`chatGptMsgQueue has wrong content (not array):\n${JSON.stringify(chatGptMsgQueueRaw)}`);
-			chatGptMsgQueueRaw = [];
+		this.utils.debugLogger(`chatGptMsgQueue 1:\n${JSON.stringify(chatGptMsgQueue)}`);
+
+		if (chatGptMsgQueue && !Array.isArray(chatGptMsgQueue)) {
+			this.logger.error(`chatGptMsgQueue has wrong content (not array):\n${JSON.stringify(chatGptMsgQueue)}`);
+			chatGptMsgQueue = [];
 		}
 
+		this.utils.debugLogger(`chatGptMsgQueue 2:\n${JSON.stringify(chatGptMsgQueue)}`);
 
-		let messages = [...chatGptMsgQueueRaw];
+
+		let messages = [...chatGptMsgQueue];
+
+		this.utils.debugLogger(`messages 1:\n${JSON.stringify(messages)}`);
+
 
 		messages = this.utils.enqueue(messages, message, this.chatGptMsgQueueSize);
+
+		this.utils.debugLogger(`messages 2:\n${JSON.stringify(messages)}`);
+
 
 
 		const resRaw: AiTextResponse = await this.chatGptService.textRequest(userGuid, messages);
@@ -249,9 +259,11 @@ export class MainController implements IMainController {
 			];
 
 
-			chatGptMsgQueueRaw = this.utils.enqueue(chatGptMsgQueueRaw, messagesWithResponse, this.chatGptMsgQueueSize);
+			chatGptMsgQueue = this.utils.enqueue(chatGptMsgQueue, messagesWithResponse, this.chatGptMsgQueueSize);
 
-			await this.utils.updateRedis(`${fromId}:${chatId}`, [], 'chatGptMsgQueue', chatGptMsgQueueRaw);
+			this.utils.debugLogger(`chatGptMsgQueue 3:\n${JSON.stringify(chatGptMsgQueue)}`);
+
+			await this.utils.updateRedis(`${fromId}:${chatId}`, [], 'chatGptMsgQueue', chatGptMsgQueue);
 
 			result.push({
 				payload: resRaw.payload,
@@ -274,17 +286,27 @@ export class MainController implements IMainController {
 			content: prompt
 		};
 
-		let chatGptMsgQueueRaw = await this.utils.getValRedis(`${fromId}:${chatId}`, ['chatGptMsgQueue']);
+		let chatGptMsgQueue = await this.utils.getValRedis(`${fromId}:${chatId}`, ['chatGptMsgQueue']);
 
-		if (chatGptMsgQueueRaw && !Array.isArray(chatGptMsgQueueRaw)) {
-			this.logger.error(`chatGptMsgQueue has wrong content (not array):\n${JSON.stringify(chatGptMsgQueueRaw)}`);
-			chatGptMsgQueueRaw = [];
+		this.utils.debugLogger(`chatGptMsgQueue 1:\n${JSON.stringify(chatGptMsgQueue)}`);
+
+		if (chatGptMsgQueue && !Array.isArray(chatGptMsgQueue)) {
+			this.logger.error(`chatGptMsgQueue has wrong content (not array):\n${JSON.stringify(chatGptMsgQueue)}`);
+			chatGptMsgQueue = [];
 		}
 
+		this.utils.debugLogger(`chatGptMsgQueue 2:\n${JSON.stringify(chatGptMsgQueue)}`);
 
-		let messages = [...chatGptMsgQueueRaw];
+
+
+		let messages = [...chatGptMsgQueue];
+
+		this.utils.debugLogger(`messages 1:\n${JSON.stringify(messages)}`);
+
 
 		messages = this.utils.enqueue(messages, message, this.chatGptMsgQueueSize);
+
+		this.utils.debugLogger(`messages 2:\n${JSON.stringify(messages)}`);
 
 
 		const resRaw: AiTextResponse = await this.chatGptService.textStreamRequest(userGuid, messages);
@@ -312,9 +334,12 @@ export class MainController implements IMainController {
 			];
 
 
-			chatGptMsgQueueRaw = this.utils.enqueue(chatGptMsgQueueRaw, messagesWithResponse, this.chatGptMsgQueueSize);
+			chatGptMsgQueue = this.utils.enqueue(chatGptMsgQueue, messagesWithResponse, this.chatGptMsgQueueSize);
 
-			await this.utils.updateRedis(`${fromId}:${chatId}`, [], 'chatGptMsgQueue', chatGptMsgQueueRaw);
+			this.utils.debugLogger(`chatGptMsgQueue 3:\n${JSON.stringify(chatGptMsgQueue)}`);
+
+
+			await this.utils.updateRedis(`${fromId}:${chatId}`, [], 'chatGptMsgQueue', chatGptMsgQueue);
 
 			return {
 				payload: resRaw.payload,
