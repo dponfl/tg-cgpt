@@ -24,7 +24,7 @@ export class OpenAiChatService implements IAIText {
 		this.openai = new OpenAIApi(this.configuration);
 	}
 
-	public async textRequest(user: string, prompt: string): Promise<AiTextResponse> {
+	public async textRequest(user: string, messages: IOpenAiChatMessage[]): Promise<AiTextResponse> {
 
 		const methodName = 'textRequest';
 
@@ -32,14 +32,9 @@ export class OpenAiChatService implements IAIText {
 
 		try {
 
-			const message: IOpenAiChatMessage = {
-				role: OpenAiChatRoles.USER,
-				content: prompt
-			};
-
 			const requestParams: IChatRequestParams = {
 				model: OpenAiChatModels.GPT_3_5,
-				messages: [message]
+				messages,
 			};
 
 			const max_tokens = Number(this.configService.get('MAX_TOKENS'));
@@ -85,7 +80,7 @@ export class OpenAiChatService implements IAIText {
 	}
 
 	// tslint:disable-next-line: promise-function-async
-	public textStreamRequest(user: string, prompt: string): Promise<AiTextResponse> {
+	public textStreamRequest(user: string, messages: IOpenAiChatMessage[]): Promise<AiTextResponse> {
 
 		return new Promise(async (resolve, reject) => {
 			const methodName = 'textStreamRequest';
@@ -102,14 +97,9 @@ export class OpenAiChatService implements IAIText {
 				};
 
 
-				const message: IOpenAiChatMessage = {
-					role: OpenAiChatRoles.USER,
-					content: prompt
-				};
-
 				const requestParams: IChatRequestParams = {
 					model: OpenAiChatModels.GPT_3_5,
-					messages: [message],
+					messages,
 					stream: true
 				};
 

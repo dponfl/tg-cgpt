@@ -970,9 +970,9 @@ export class ScenesGenerator implements ISceneGenerator {
 
 			this.setTextSessionData(ctx, ctx.message.text, ctx.message.message_id);
 
-			const { userGuid, chatId } = await this.getUserData(ctx);
+			const { userGuid, chatId, fromId } = await this.getUserData(ctx);
 
-			this.mainController.orchestrator<AiTextResponsePayload[]>(userGuid, chatId, text, RequestCategory.chatText)
+			this.mainController.orchestrator<AiTextResponsePayload[]>(userGuid, chatId, fromId, text, RequestCategory.chatText)
 				.then(
 					async (result) => {
 
@@ -1117,9 +1117,10 @@ export class ScenesGenerator implements ISceneGenerator {
 
 			this.sessionService.updateSession(ctx);
 
-			const { userGuid, chatId } = await this.getUserData(ctx);
+			const { userGuid, chatId, fromId } = await this.getUserData(ctx);
 
-			this.mainController.orchestrator<AiTextResponsePayload>(userGuid, chatId, text, RequestCategory.chatTextStream)
+			// tslint:disable-next-line: max-line-length
+			this.mainController.orchestrator<AiTextResponsePayload>(userGuid, chatId, fromId, text, RequestCategory.chatTextStream)
 				.then(
 					async (result) => {
 

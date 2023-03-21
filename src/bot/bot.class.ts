@@ -35,6 +35,7 @@ export class BotService implements IBotService {
 		public readonly scenesGenerator: ISceneGenerator,
 		public readonly redisSession: RedisSession,
 		private readonly dbConnection: Kysely<IDatabase>,
+		public readonly dbServices: IDbServices,
 		private readonly sessionService: ISessionService,
 		public readonly utils: IUtils,
 		private readonly broadcastService: IBroadcastService
@@ -118,7 +119,8 @@ export class BotService implements IBotService {
 		 */
 
 		this.commands = [
-			new StartCommand(this.bot, this.configService, this.logger, this.sessionService, this.dbConnection, this.utils),
+			// tslint:disable-next-line: max-line-length
+			new StartCommand(this.bot, this.configService, this.logger, this.sessionService, this.dbServices, this.dbConnection, this.utils),
 			new GptCommand(this.bot, this.logger, this.dbConnection, this.utils),
 			new MjCommand(this.bot, this.logger, this.dbConnection, this.utils),
 			new MenuCommand(this.bot, this.logger, this.dbConnection, this.utils),

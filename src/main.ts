@@ -29,6 +29,7 @@ import { PaymentProcessingController } from './api/payment.controller.js';
 import { PaymentService } from './payments/payment.class.js';
 import { Redis } from 'ioredis';
 import { OpenAiChatService } from './ai/open_ai/chat.service.js';
+import { ServiceUsageStorageService } from './storage/service.class.js';
 
 
 const bootstap = async () => {
@@ -70,18 +71,23 @@ const bootstap = async () => {
 	);
 	const mjService: IAIImg = new MjService();
 
+	const dbServices: IDbServices = {
+		usersDbService: new UsersStorageService(dbConnection, logger, utils),
+		gtDbService: new GtStorageService(dbConnection, logger, utils),
+		serviceUsageDbService: new ServiceUsageStorageService(dbConnection, logger, configService, utils)
+	};
+
+
 	const mainController: IMainController = new MainController(
+		configService,
 		logger,
 		utils,
 		chatOpenAiService,
 		mjService,
-		dbConnection
+		dbConnection,
+		dbServices
 	);
 
-	const dbServices: IDbServices = {
-		usersDbService: new UsersStorageService(dbConnection, logger, utils),
-		gtDbService: new GtStorageService(dbConnection, logger, utils)
-	};
 
 	const broadcastService = new BroadcastService(logger, dbServices, utils);
 
@@ -105,8 +111,8 @@ const bootstap = async () => {
 		configService,
 		scenesGenerator,
 		redisSession,
-		// dbServices,
 		dbConnection,
+		dbServices,
 		sessionService,
 		utils,
 		broadcastService
@@ -248,28 +254,28 @@ const bootstap = async () => {
 
 		// exit;
 
-		const size = 3;
-		let arr: unknown[] = [];
+		// const size = 3;
+		// let arr: unknown[] = [];
 
-		arr = utils.enqueue(arr, '111', size);
-		logger.info(`arr: ${JSON.stringify(arr)}`);
+		// arr = utils.enqueue(arr, '111', size);
+		// logger.info(`arr: ${JSON.stringify(arr)}`);
 
-		arr = utils.enqueue(arr, '222', size);
-		logger.info(`arr: ${JSON.stringify(arr)}`);
+		// arr = utils.enqueue(arr, '222', size);
+		// logger.info(`arr: ${JSON.stringify(arr)}`);
 
-		arr = utils.enqueue(arr, '333', size);
-		logger.info(`arr: ${JSON.stringify(arr)}`);
+		// arr = utils.enqueue(arr, '333', size);
+		// logger.info(`arr: ${JSON.stringify(arr)}`);
 
-		arr = utils.enqueue(arr, '444', size);
-		logger.info(`arr: ${JSON.stringify(arr)}`);
+		// arr = utils.enqueue(arr, '444', size);
+		// logger.info(`arr: ${JSON.stringify(arr)}`);
 
-		arr = utils.enqueue(arr, '555', size);
-		logger.info(`arr: ${JSON.stringify(arr)}`);
+		// arr = utils.enqueue(arr, '555', size);
+		// logger.info(`arr: ${JSON.stringify(arr)}`);
 
 
 	})();
 
-	exit;
+	// exit;
 
 	await app.initBot();
 	await app.initApi();

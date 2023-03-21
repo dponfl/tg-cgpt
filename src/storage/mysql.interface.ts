@@ -1,6 +1,6 @@
-import exp from 'constants';
 import { Generated } from 'kysely';
 import { IGTStorageService } from './gt.interface.js';
+import { IServiceUsageStorageSevice } from './service.interface.js';
 import { IUserStorageSevice } from './users.interface.js';
 
 export enum DbResponseStatus {
@@ -38,6 +38,7 @@ export enum GroupTransactionCurrency {
 export interface IDbServices {
 	usersDbService?: IUserStorageSevice;
 	gtDbService?: IGTStorageService;
+	serviceUsageDbService?: IServiceUsageStorageSevice;
 }
 
 export interface IDbServiceResponse {

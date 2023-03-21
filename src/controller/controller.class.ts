@@ -1,23 +1,31 @@
 import { Kysely } from 'kysely';
 import { IAIImg, IAIText } from '../ai/ai.interface.js';
+import { IOpenAiChatMessage, OpenAiChatRoles } from '../ai/open_ai/chat.interface.js';
+import { IConfigService } from '../config/config.interface.js';
 import { ILogger } from '../logger/logger.interface.js';
-import { IDatabase } from '../storage/mysql.interface.js';
+import { DbResponseStatus, IDatabase, IDbServices } from '../storage/mysql.interface.js';
 import { IUtils } from '../utils/utils.class.js';
 // tslint:disable-next-line: max-line-length
 import { AiImgResponsePayload, AiOrchestratorResponse, AiResponseStatus, AiServices, AiTextResponse, AiTextResponsePayload, ControllerStatus, IMainController, RequestCategory } from './controller.interface.js';
 
 export class MainController implements IMainController {
 
+	private chatGptMsgQueueSize: number;
+
 	constructor(
+		private readonly configService: IConfigService,
 		private readonly logger: ILogger,
 		private readonly utils: IUtils,
 		private readonly chatGptService: IAIText,
 		private readonly mjService: IAIImg,
 		private readonly dbConnection: Kysely<IDatabase>,
-	) { }
+		public readonly dbServices: IDbServices,
+	) {
+		this.chatGptMsgQueueSize = Number(configService.get('CHATGPT_MSG_QUEUE_SIZE')) ?? 5;
+	}
 
 	// tslint:disable-next-line: max-line-length
-	public async orchestrator<T>(userGuid: string, chatId: number, prompt: string, requestCategory: RequestCategory): Promise<T> {
+	public async orchestrator<T>(userGuid: string, chatId: number, fromId: number, prompt: string, requestCategory: RequestCategory): Promise<T> {
 
 		const methodName = 'orchestrator';
 
@@ -39,7 +47,7 @@ export class MainController implements IMainController {
 
 				} else {
 
-					payload = await this.textRequest(userGuid, prompt);
+					payload = await this.textRequest(userGuid, chatId, fromId, prompt);
 
 					result = {
 						status: ControllerStatus.SUCCESS,
@@ -54,7 +62,7 @@ export class MainController implements IMainController {
 
 			case RequestCategory.chatTextStream:
 
-				payload = await this.textStreamRequest(userGuid, prompt);
+				payload = await this.textStreamRequest(userGuid, chatId, fromId, prompt);
 
 				result = {
 					status: ControllerStatus.SUCCESS,
@@ -71,6 +79,10 @@ export class MainController implements IMainController {
 
 		return result as T;
 	}
+
+	private async getChatGptMsgQueue() { }
+
+	private async setChatGptMsgQueue() { }
 
 	private async checkUserRights(userGuid: string, serviceCategory: AiServices): Promise<boolean> {
 
@@ -185,7 +197,8 @@ export class MainController implements IMainController {
 
 	}
 
-	public async textRequest(userGuid: string, prompt: string): Promise<AiTextResponsePayload[]> {
+	// tslint:disable-next-line: max-line-length
+	public async textRequest(userGuid: string, chatId: number, fromId: number, prompt: string): Promise<AiTextResponsePayload[]> {
 
 		const result: AiTextResponsePayload[] = [];
 
@@ -193,7 +206,25 @@ export class MainController implements IMainController {
 		 * Здесь может быть слелано несколько запросов к различным системат
 		 */
 
-		const resRaw: AiTextResponse = await this.chatGptService.textRequest(userGuid, prompt);
+		const message: IOpenAiChatMessage = {
+			role: OpenAiChatRoles.USER,
+			content: prompt
+		};
+
+		let chatGptMsgQueueRaw = await this.utils.getValRedis(`${fromId}:${chatId}`, ['chatGptMsgQueue']);
+
+		if (chatGptMsgQueueRaw && !Array.isArray(chatGptMsgQueueRaw)) {
+			this.logger.error(`chatGptMsgQueue has wrong content (not array):\n${JSON.stringify(chatGptMsgQueueRaw)}`);
+			chatGptMsgQueueRaw = [];
+		}
+
+
+		let messages = [...chatGptMsgQueueRaw];
+
+		messages = this.utils.enqueue(messages, message, this.chatGptMsgQueueSize);
+
+
+		const resRaw: AiTextResponse = await this.chatGptService.textRequest(userGuid, messages);
 
 		if (
 			resRaw.status !== AiResponseStatus.SUCCESS
@@ -201,6 +232,27 @@ export class MainController implements IMainController {
 		) {
 			this.logger.error(`User: ${userGuid}, ChatGPT error response (chatGptService.textRequest):\n${JSON.stringify(resRaw)}`);
 		} else {
+
+			/**
+			 * Сохраняем пару "запрос:ответ" в кеше диалога с ChatGPT для сохранения контекста диалога
+			 */
+
+			const messagesWithResponse: IOpenAiChatMessage[] = [
+				{
+					role: OpenAiChatRoles.USER,
+					content: prompt
+				},
+				{
+					role: OpenAiChatRoles.ASSISTANT,
+					content: resRaw.payload
+				}
+			];
+
+
+			chatGptMsgQueueRaw = this.utils.enqueue(chatGptMsgQueueRaw, messagesWithResponse, this.chatGptMsgQueueSize);
+
+			await this.utils.updateRedis(`${fromId}:${chatId}`, [], 'chatGptMsgQueue', chatGptMsgQueueRaw);
+
 			result.push({
 				payload: resRaw.payload,
 				finishReason: resRaw?.finishReason
@@ -214,9 +266,28 @@ export class MainController implements IMainController {
 		return result;
 	}
 
-	public async textStreamRequest(userGuid: string, prompt: string): Promise<AiTextResponsePayload> {
+	// tslint:disable-next-line: max-line-length
+	public async textStreamRequest(userGuid: string, chatId: number, fromId: number, prompt: string): Promise<AiTextResponsePayload> {
 
-		const resRaw: AiTextResponse = await this.chatGptService.textStreamRequest(userGuid, prompt);
+		const message: IOpenAiChatMessage = {
+			role: OpenAiChatRoles.USER,
+			content: prompt
+		};
+
+		let chatGptMsgQueueRaw = await this.utils.getValRedis(`${fromId}:${chatId}`, ['chatGptMsgQueue']);
+
+		if (chatGptMsgQueueRaw && !Array.isArray(chatGptMsgQueueRaw)) {
+			this.logger.error(`chatGptMsgQueue has wrong content (not array):\n${JSON.stringify(chatGptMsgQueueRaw)}`);
+			chatGptMsgQueueRaw = [];
+		}
+
+
+		let messages = [...chatGptMsgQueueRaw];
+
+		messages = this.utils.enqueue(messages, message, this.chatGptMsgQueueSize);
+
+
+		const resRaw: AiTextResponse = await this.chatGptService.textStreamRequest(userGuid, messages);
 
 		if (
 			resRaw.status !== AiResponseStatus.SUCCESS
@@ -224,6 +295,27 @@ export class MainController implements IMainController {
 		) {
 			throw new Error(`User: ${userGuid}, ChatGPT error response: ${resRaw.payload}`);
 		} else {
+
+			/**
+			 * Сохраняем пару "запрос:ответ" в кеше диалога с ChatGPT для сохранения контекста диалога
+			 */
+
+			const messagesWithResponse: IOpenAiChatMessage[] = [
+				{
+					role: OpenAiChatRoles.USER,
+					content: prompt
+				},
+				{
+					role: OpenAiChatRoles.ASSISTANT,
+					content: resRaw.payload
+				}
+			];
+
+
+			chatGptMsgQueueRaw = this.utils.enqueue(chatGptMsgQueueRaw, messagesWithResponse, this.chatGptMsgQueueSize);
+
+			await this.utils.updateRedis(`${fromId}:${chatId}`, [], 'chatGptMsgQueue', chatGptMsgQueueRaw);
+
 			return {
 				payload: resRaw.payload,
 				finishReason: resRaw?.finishReason

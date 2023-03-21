@@ -59,8 +59,9 @@ export type AiOrchestratorResponse<T> = {
 
 export interface IMainController {
 	// tslint:disable-next-line: max-line-length
-	orchestrator: <T>(user: string, chatId: number, prompt: string, requestCategory: RequestCategory) => Promise<AiOrchestratorResponse<T>>;
-	textRequest: (user: string, prompt: string) => Promise<AiTextResponsePayload[]>;
-	textStreamRequest: (user: string, prompt: string) => Promise<AiTextResponsePayload>;
-	imgRequest: (user: string, prompt: string) => Promise<AiImgResponsePayload>;
+	orchestrator: <T>(userGuid: string, chatId: number, fromId: number, prompt: string, requestCategory: RequestCategory) => Promise<AiOrchestratorResponse<T>>;
+	textRequest: (userGuid: string, chatId: number, fromId: number, prompt: string) => Promise<AiTextResponsePayload[]>;
+	// tslint:disable-next-line: max-line-length
+	textStreamRequest: (userGuid: string, chatId: number, fromId: number, prompt: string) => Promise<AiTextResponsePayload>;
+	imgRequest: (userGuid: string, prompt: string) => Promise<AiImgResponsePayload>;
 }
