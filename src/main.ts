@@ -241,6 +241,11 @@ const bootstap = async () => {
 		// const res = await mainController.openAiChatRequest(prompt);
 		// logger.info(`mainController.openAiChatRequest:\n${JSON.stringify(res)}`);
 
+		const oldElem = await utils.getValRedis('test', ['key01']);
+		logger.info(`key01:\n${JSON.stringify(oldElem)}`);
+		const newElem = await utils.getValRedis('test', ['msgChatGpt']);
+		logger.info(`msgChatGpt:\n${newElem}`);
+
 		exit;
 
 	})();
