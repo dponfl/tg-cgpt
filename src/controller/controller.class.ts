@@ -262,12 +262,17 @@ export class MainController implements IMainController {
 				}
 			];
 
+			for (const msg of messagesWithResponse) {
+				chatGptMsgQueue = this.utils.enqueue(chatGptMsgQueue, msg, this.chatGptMsgQueueSize);
+			}
 
-			chatGptMsgQueue = this.utils.enqueue(chatGptMsgQueue, messagesWithResponse, this.chatGptMsgQueueSize);
 
 			this.utils.debugLogger(`chatGptMsgQueue 3:\n${JSON.stringify(chatGptMsgQueue)}`);
 
-			await this.utils.updateRedis(`${fromId}:${chatId}`, [], 'chatGptMsgQueue', chatGptMsgQueue);
+			const updateRedisRes = await this.utils.updateRedis(`${fromId}:${chatId}`, [], 'chatGptMsgQueue', chatGptMsgQueue);
+
+			// tslint:disable-next-line: max-line-length
+			this.utils.debugLogger(`updateRedisRes for fromId=${fromId} and chatId=${chatId}:\n${JSON.stringify(updateRedisRes)}`);
 
 			result.push({
 				payload: resRaw.payload,
@@ -342,7 +347,9 @@ export class MainController implements IMainController {
 			];
 
 
-			chatGptMsgQueue = this.utils.enqueue(chatGptMsgQueue, messagesWithResponse, this.chatGptMsgQueueSize);
+			for (const msg of messagesWithResponse) {
+				chatGptMsgQueue = this.utils.enqueue(chatGptMsgQueue, msg, this.chatGptMsgQueueSize);
+			}
 
 			this.utils.debugLogger(`chatGptMsgQueue 3:\n${JSON.stringify(chatGptMsgQueue)}`);
 
