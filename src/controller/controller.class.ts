@@ -211,9 +211,13 @@ export class MainController implements IMainController {
 			content: prompt
 		};
 
-		let chatGptMsgQueue = await this.utils.getValRedis(`${fromId}:${chatId}`, ['chatGptMsgQueue']);
+		// let chatGptMsgQueue = await this.utils.getValRedis(`${fromId}:${chatId}`, ['chatGptMsgQueue']);
+
+		let chatGptMsgQueue = await this.utils.getValRedis(`${fromId}:${chatId}:${userGuid}`, ['chatGptMsgQueue']);
 
 		this.utils.debugLogger(`chatGptMsgQueue 1:\n${JSON.stringify(chatGptMsgQueue)}`);
+
+
 
 		if (!chatGptMsgQueue) {
 			chatGptMsgQueue = [];
@@ -269,7 +273,8 @@ export class MainController implements IMainController {
 
 			this.utils.debugLogger(`chatGptMsgQueue 3:\n${JSON.stringify(chatGptMsgQueue)}`);
 
-			const updateRedisRes = await this.utils.updateRedis(`${fromId}:${chatId}`, [], 'chatGptMsgQueue', chatGptMsgQueue);
+			// tslint:disable-next-line: max-line-length
+			const updateRedisRes = await this.utils.updateRedis(`${fromId}:${chatId}:${userGuid}`, [], 'chatGptMsgQueue', chatGptMsgQueue);
 
 			// tslint:disable-next-line: max-line-length
 			this.utils.debugLogger(`updateRedisRes for fromId=${fromId} and chatId=${chatId}:\n${JSON.stringify(updateRedisRes)}`);
@@ -295,7 +300,7 @@ export class MainController implements IMainController {
 			content: prompt
 		};
 
-		let chatGptMsgQueue = await this.utils.getValRedis(`${fromId}:${chatId}`, ['chatGptMsgQueue']);
+		let chatGptMsgQueue = await this.utils.getValRedis(`${fromId}:${chatId}:${userGuid}`, ['chatGptMsgQueue']);
 
 		this.utils.debugLogger(`chatGptMsgQueue 1:\n${JSON.stringify(chatGptMsgQueue)}`);
 
@@ -354,7 +359,7 @@ export class MainController implements IMainController {
 			this.utils.debugLogger(`chatGptMsgQueue 3:\n${JSON.stringify(chatGptMsgQueue)}`);
 
 
-			await this.utils.updateRedis(`${fromId}:${chatId}`, [], 'chatGptMsgQueue', chatGptMsgQueue);
+			await this.utils.updateRedis(`${fromId}:${chatId}:${userGuid}`, [], 'chatGptMsgQueue', chatGptMsgQueue);
 
 			return {
 				payload: resRaw.payload,
