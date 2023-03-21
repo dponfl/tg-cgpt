@@ -57,7 +57,7 @@ export class UsersStorageService implements IUserStorageSevice {
 				.values(payload)
 				.execute();
 
-			const resRaw = this.dbConnection
+			const resRaw = await this.dbConnection
 				.selectFrom('users')
 				.selectAll()
 				.where('guid', '=', guid)
@@ -69,7 +69,7 @@ export class UsersStorageService implements IUserStorageSevice {
 				|| resRaw.length !== 1
 			) {
 				// tslint:disable-next-line: max-line-length
-				throw new Error(`Could not create user record for data=${JSON.stringify(data)}, result:\n${JSON.stringify(resRaw)}`);
+				throw new Error(`Could not create user record for data:\n${JSON.stringify(data)}, result:\n${JSON.stringify(resRaw)}`);
 			}
 
 

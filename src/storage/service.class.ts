@@ -61,7 +61,7 @@ export class ServiceUsageStorageService implements IServiceUsageStorageSevice {
 				.values(payload)
 				.execute();
 
-			const resRaw = this.dbConnection
+			const resRaw = await this.dbConnection
 				.selectFrom('serviceUsage')
 				.selectAll()
 				.where('guid', '=', guid)

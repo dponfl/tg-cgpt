@@ -3,10 +3,9 @@ import { IBotContext } from '../bot/bot.interface.js';
 import { ILogger } from '../logger/logger.interface.js';
 import { MyBotCommand } from './command.class.js';
 import { Messenger } from '../types.js';
-import { DbResponseStatus, IDatabase, IDbServices, IServiceUsageTable, IUsersTable } from '../storage/mysql.interface.js';
+import { DbResponseStatus, IDatabase, IDbServices } from '../storage/mysql.interface.js';
 import { randomUUID } from 'crypto';
 import { IUtils } from '../utils/utils.class.js';
-import moment from 'moment';
 import { ISessionService } from '../storage/session.interface.js';
 import { Kysely } from 'kysely';
 import { IConfigService } from '../config/config.interface.js';
@@ -112,7 +111,7 @@ export class StartCommand extends MyBotCommand {
 							!userCreateResRaw
 							|| userCreateResRaw.status !== DbResponseStatus.SUCCESS
 						) {
-							throw new Error(`Could not create user rec for params:\n${userRec}`);
+							throw new Error(`Could not create user rec for params:\n${JSON.stringify(userRec)}`);
 						}
 
 						ctx.session.botUserSession.userGuid = userGuidToUse;
