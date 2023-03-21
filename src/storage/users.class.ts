@@ -203,7 +203,12 @@ export class UsersStorageService implements IUserStorageSevice {
 				|| !Array.isArray(userRecRaw)
 				|| userRecRaw.length !== 1
 			) {
-				throw new Error(`None or several user recs for chatId=${chatId} and fromId=${fromId}, result:\n${JSON.stringify(userRecRaw)}`);
+				this.logger.warn(`None or several user recs for chatId=${chatId} and fromId=${fromId}, result:\n${JSON.stringify(userRecRaw)}`);
+
+				return {
+					status: DbResponseStatus.ERROR,
+					payload: `None or several user recs for chatId=${chatId} and fromId=${fromId}, result:\n${JSON.stringify(userRecRaw)}`
+				};
 			}
 
 			return {

@@ -109,7 +109,13 @@ export class ServiceUsageStorageService implements IServiceUsageStorageSevice {
 				|| !Array.isArray(serviceUsageRecRaw)
 				|| serviceUsageRecRaw.length !== 1
 			) {
-				throw new Error(`None or several service usage recs for userGuid=${userGuid}`);
+				this.logger.warn(`None or several service usage recs for userGuid=${userGuid}`);
+
+				return {
+					status: DbResponseStatus.ERROR,
+					payload: `None or several service usage recs for userGuid=${userGuid}`
+				};
+
 			}
 
 			return {
