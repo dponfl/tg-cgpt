@@ -215,6 +215,10 @@ export class MainController implements IMainController {
 
 		this.utils.debugLogger(`chatGptMsgQueue 1:\n${JSON.stringify(chatGptMsgQueue)}`);
 
+		if (!chatGptMsgQueue) {
+			chatGptMsgQueue = [];
+		}
+
 		if (chatGptMsgQueue && !Array.isArray(chatGptMsgQueue)) {
 			this.logger.error(`chatGptMsgQueue has wrong content (not array):\n${JSON.stringify(chatGptMsgQueue)}`);
 			chatGptMsgQueue = [];
@@ -289,6 +293,10 @@ export class MainController implements IMainController {
 		let chatGptMsgQueue = await this.utils.getValRedis(`${fromId}:${chatId}`, ['chatGptMsgQueue']);
 
 		this.utils.debugLogger(`chatGptMsgQueue 1:\n${JSON.stringify(chatGptMsgQueue)}`);
+
+		if (!chatGptMsgQueue) {
+			chatGptMsgQueue = [];
+		}
 
 		if (chatGptMsgQueue && !Array.isArray(chatGptMsgQueue)) {
 			this.logger.error(`chatGptMsgQueue has wrong content (not array):\n${JSON.stringify(chatGptMsgQueue)}`);
