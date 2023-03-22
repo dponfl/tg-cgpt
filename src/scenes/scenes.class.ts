@@ -20,7 +20,7 @@ import { ChatSceneNames } from '../types.js';
 import { IUtils } from '../utils/utils.class.js';
 import { ISceneGenerator } from './scenes.interface.js';
 import { Update } from 'telegraf/types';
-import { ConfigService } from '../config/config.service.js';
+import { DropContextCommand } from '../commands/base_scenes/dropcontext.command.js';
 
 export class ScenesGenerator implements ISceneGenerator {
 
@@ -103,6 +103,7 @@ export class ScenesGenerator implements ISceneGenerator {
 			new MjCommand(scene, this.logger),
 			new InfoCommand(scene, this.logger),
 			new HelpCommand(scene, this.logger),
+			new DropContextCommand(scene, this.logger, this.utils),
 		];
 
 		for (const command of this.commands) {

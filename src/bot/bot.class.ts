@@ -1,4 +1,4 @@
-import { Telegraf, session, Markup } from 'telegraf';
+import { Telegraf } from 'telegraf';
 import { Stage } from 'telegraf/scenes';
 import { BotCommand } from 'telegraf/types';
 import { MyBotCommand } from '../commands/command.class.js';
@@ -20,6 +20,7 @@ import { ISessionService } from '../storage/session.interface.js';
 import { BroadcaseMsgCategory, IUtils } from '../utils/utils.class.js';
 import { IBroadcastService } from '../broadcast/bc.interface.js';
 import { Kysely } from 'kysely';
+import { DropContextCommand } from '../commands/dropcontext.command.js';
 
 export class BotService implements IBotService {
 
@@ -127,6 +128,7 @@ export class BotService implements IBotService {
 			new PaymentCommand(this.bot, this.logger, this.dbConnection, this.utils),
 			new InfoCommand(this.bot, this.logger, this.dbConnection, this.utils),
 			new HelpCommand(this.bot, this.logger, this.dbConnection, this.utils),
+			new DropContextCommand(this.bot, this.logger, this.dbConnection, this.utils),
 		];
 
 		for (const command of this.commands) {

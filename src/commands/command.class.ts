@@ -2,7 +2,7 @@ import { Kysely } from 'kysely';
 import { Telegraf } from 'telegraf';
 import { IBotContext } from '../bot/bot.interface.js';
 import { ILogger } from '../logger/logger.interface.js';
-import { IDatabase, IDbServices } from '../storage/mysql.interface.js';
+import { IDatabase } from '../storage/mysql.interface.js';
 import { IUtils } from '../utils/utils.class.js';
 
 export abstract class MyBotCommand {

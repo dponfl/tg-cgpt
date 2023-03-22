@@ -33,12 +33,14 @@ export interface IUtils {
 	clearSpecialChars: (str: string) => string;
 	getChatIdStr: (ctx: IBotContext) => string;
 	getChatIdObj: (ctx: IBotContext) => GetChatIdObjResult;
+	getUserGuidByTelegramIds: (chatId: number, fromId: number) => Promise<string | unknown>;
 	updateRedis: (redisKey: string, targetObject: string[], key: string, value: unknown) => Promise<void>;
 	// tslint:disable-next-line: no-any
 	getValRedis: (redisKey: string, targetObject: string[]) => Promise<any>;
 	getServiceUsageInfo: (uid: string) => Promise<IServiceUsageInfo | undefined>;
 	sleep: (milliseconds: number) => Promise<unknown>;
 	enqueue: (collection: unknown[], data: unknown, size: number) => unknown[];
+	dropcontext: (chatId: number, fromId: number) => Promise<void>;
 }
 
 export class Utils implements IUtils {
@@ -50,7 +52,7 @@ export class Utils implements IUtils {
 	) { }
 
 	// tslint:disable-next-line: no-any
-	errorLog(that: any, err: unknown, methodName: string): string {
+	public errorLog(that: any, err: unknown, methodName: string): string {
 		let str: string;
 
 		if (err instanceof Error) {
@@ -64,7 +66,7 @@ export class Utils implements IUtils {
 		return str;
 	}
 
-	debugLogger(str: string): void {
+	public debugLogger(str: string): void {
 		const txt =
 			`\n
 ============================= DEBUG LOG =============================
@@ -75,26 +77,25 @@ ${str}
 		this.logger.warn(txt);
 	}
 
-	isObject(data: unknown): boolean {
+	public isObject(data: unknown): boolean {
 		return typeof data === 'object' && data !== null && !Array.isArray(data);
 	}
 
-	clearSpecialChars(str: string): string {
+	public clearSpecialChars(str: string): string {
 		return str.replace(/(?![a-zA-Z]|[а-яА-ЯёЁ]|[0-9]|[_\s-\(\),<>\|\!@#$%^&"№;:?*\[\]{}'\\\/\.])./g, '*') || '';
 	}
 
-	getChatIdStr(ctx: IBotContext): string {
+	public getChatIdStr(ctx: IBotContext): string {
 		return `${ctx.from?.id}:${ctx.chat?.id}`;
 	}
 
-
-	getChatIdObj(ctx: IBotContext): GetChatIdObjResult {
+	public getChatIdObj(ctx: IBotContext): GetChatIdObjResult {
 		const fromId = ctx.from?.id ?? 0;
 		const chatId = ctx.chat?.id ?? 0;
 		return { fromId, chatId };
 	}
 
-	async updateRedis(redisKey: string, targetObject: string[], valueKey: string, value: unknown): Promise<void> {
+	public async updateRedis(redisKey: string, targetObject: string[], valueKey: string, value: unknown): Promise<void> {
 		const methodName = 'updateRedis';
 		try {
 
@@ -137,7 +138,7 @@ ${str}
 	}
 
 	// tslint:disable-next-line: no-any
-	async getValRedis(redisKey: string, targetObject: string[]): Promise<any> {
+	public async getValRedis(redisKey: string, targetObject: string[]): Promise<any> {
 		const methodName = 'getValRedis';
 		try {
 
@@ -164,7 +165,7 @@ ${str}
 		}
 	}
 
-	async getServiceUsageInfo(uid: string): Promise<IServiceUsageInfo | undefined> {
+	public async getServiceUsageInfo(uid: string): Promise<IServiceUsageInfo | undefined> {
 		const methodName = 'getServiceUsageInfo';
 		try {
 
@@ -200,11 +201,11 @@ ${str}
 		}
 	}
 
-	async sleep(milliseconds: number): Promise<unknown> {
+	public async sleep(milliseconds: number): Promise<unknown> {
 		return new Promise(resolve => setTimeout(resolve, milliseconds));
 	}
 
-	enqueue(collection: unknown[], data: unknown, size: number): unknown[] {
+	public enqueue(collection: unknown[], data: unknown, size: number): unknown[] {
 		const arr = [...collection];
 		arr.push(data);
 		if (arr.length > size) {
@@ -213,4 +214,54 @@ ${str}
 		return arr;
 	}
 
+	public async getUserGuidByTelegramIds(chatId: number, fromId: number): Promise<string | undefined> {
+
+		const methodName = 'getUserGuidByTelegramIds';
+
+		try {
+
+			const userRecRaw = await this.dbConnection
+				.selectFrom('users')
+				.selectAll()
+				.where('chatId', '=', chatId)
+				.where('fromId', '=', fromId)
+				.execute();
+
+			if (
+				!userRecRaw
+				|| !Array.isArray(userRecRaw)
+				|| userRecRaw.length !== 1
+			) {
+				throw new Error(`None or several user recs for chatId=${chatId} and fromId=${fromId}, result:\n${JSON.stringify(userRecRaw)}`);
+			}
+
+			const { guid } = userRecRaw[0];
+
+			return guid;
+
+		} catch (error) {
+			this.errorLog(this, error, methodName);
+		}
+
+	}
+
+	public async dropcontext(chatId: number, fromId: number): Promise<void> {
+
+		const methodName = 'dropcontext';
+
+		try {
+
+			const userGuid = await this.getUserGuidByTelegramIds(chatId, fromId);
+
+			if (!userGuid) {
+				throw new Error(`Could get user guid by chatId=${chatId} and fromId=${fromId}`);
+			}
+
+			await this.updateRedis(`${fromId}:${chatId}:${userGuid}`, [], 'chatGptMsgQueue', []);
+
+		} catch (error) {
+			this.errorLog(this, error, methodName);
+		}
+
+	}
 }

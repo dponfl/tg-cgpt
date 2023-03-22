@@ -1,4 +1,4 @@
-import { IDbServiceResponse, IUsersTable } from './mysql.interface.js';
+import { IDbServiceResponse } from './mysql.interface.js';
 
 export interface IUserStorageSevice {
 	// tslint:disable-next-line: no-any
