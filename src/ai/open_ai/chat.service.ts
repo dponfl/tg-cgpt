@@ -29,6 +29,15 @@ export class OpenAiChatService implements IAIText {
 		const paramsObj = Object({});
 
 		/**
+		 * max_tokens
+		 */
+		const max_tokens = Number(this.configService.get('TC_MAX_TOKENS'));
+
+		if (max_tokens) {
+			paramsObj[max_tokens] = max_tokens;
+		}
+
+		/**
 		 * temperature
 		 */
 		const temperature = Number(this.configService.get('TC_TEMP'));
@@ -85,20 +94,12 @@ export class OpenAiChatService implements IAIText {
 
 		try {
 
-			const requestParams: IChatRequestParams = {
+			const majorParams: IChatRequestParams = {
 				model: OpenAiChatModels.GPT_3_5,
 				messages,
 			};
 
-			const max_tokens = Number(this.configService.get('MAX_TOKENS'));
-
-			// TODO: delete
-			this.logger.warn(`max_tokens:\n${max_tokens}`);
-
-
-			if (max_tokens) {
-				requestParams.max_tokens = max_tokens;
-			}
+			const requestParams: IChatRequestParams = await this.generateRequestParams(majorParams) as IChatRequestParams;
 
 			// TODO: delete
 			this.logger.warn(`User: ${user}, requestParams:\n${JSON.stringify(requestParams)}`);
