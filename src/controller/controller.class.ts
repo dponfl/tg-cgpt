@@ -349,6 +349,16 @@ export class MainController implements IMainController {
 			 * Сохраняем пару "запрос:ответ" в кеше диалога с ChatGPT для сохранения контекста диалога
 			 */
 
+			if (chatGptMsgQueue.length > 2) {
+
+				/**
+				 * Удаляем предыдущий промпт и ответ на него
+				 */
+
+				chatGptMsgQueue.splice(chatGptMsgQueue.length - 2);
+			}
+
+
 			const messagesWithResponse: IOpenAiChatMessage[] = [
 				{
 					role: OpenAiChatRoles.USER,

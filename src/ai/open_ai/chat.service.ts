@@ -127,7 +127,7 @@ export class OpenAiChatService implements IAIText {
 
 							textResponseStr = textResponse.join('');
 
-							this.logger.warn(`User: ${user}, request completed: ${textResponseStr}`);
+							this.logger.warn(`User: ${user}, stream request completed: ${textResponseStr}`);
 
 							clearTimeout(timeOutId);
 
