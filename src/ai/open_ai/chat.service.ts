@@ -34,7 +34,7 @@ export class OpenAiChatService implements IAIText {
 		const max_tokens = Number(this.configService.get('TC_MAX_TOKENS'));
 
 		if (max_tokens) {
-			paramsObj[max_tokens] = max_tokens;
+			paramsObj['max_tokens'] = max_tokens;
 		}
 
 		/**
@@ -43,7 +43,7 @@ export class OpenAiChatService implements IAIText {
 		const temperature = Number(this.configService.get('TC_TEMP'));
 
 		if (temperature) {
-			paramsObj[temperature] = temperature;
+			paramsObj['temperature'] = temperature;
 		}
 
 		/**
@@ -52,7 +52,7 @@ export class OpenAiChatService implements IAIText {
 		const top_p = Number(this.configService.get('TC_TOPP'));
 
 		if (top_p) {
-			paramsObj[top_p] = top_p;
+			paramsObj['top_p'] = top_p;
 		}
 
 		/**
@@ -61,7 +61,7 @@ export class OpenAiChatService implements IAIText {
 		const n = Number(this.configService.get('TC_N'));
 
 		if (n) {
-			paramsObj[n] = n;
+			paramsObj['n'] = n;
 		}
 
 		/**
@@ -70,7 +70,7 @@ export class OpenAiChatService implements IAIText {
 		const presence_penalty = Number(this.configService.get('TC_P_PNLT'));
 
 		if (presence_penalty) {
-			paramsObj[presence_penalty] = presence_penalty;
+			paramsObj['presence_penalty'] = presence_penalty;
 		}
 
 		/**
@@ -79,7 +79,7 @@ export class OpenAiChatService implements IAIText {
 		const frequency_penalty = Number(this.configService.get('TC_F_PNLT'));
 
 		if (frequency_penalty) {
-			paramsObj[frequency_penalty] = frequency_penalty;
+			paramsObj['frequency_penalty'] = frequency_penalty;
 		}
 
 
