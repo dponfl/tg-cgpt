@@ -24,6 +24,59 @@ export class OpenAiChatService implements IAIText {
 		this.openai = new OpenAIApi(this.configuration);
 	}
 
+	private async generateRequestParams(params: IChatRequestParams): Promise<unknown> {
+
+		const paramsObj = Object({});
+
+		/**
+		 * temperature
+		 */
+		const temperature = Number(this.configService.get('TC_TEMP'));
+
+		if (temperature) {
+			paramsObj[temperature] = temperature;
+		}
+
+		/**
+		 * top_p
+		 */
+		const top_p = Number(this.configService.get('TC_TOPP'));
+
+		if (top_p) {
+			paramsObj[top_p] = top_p;
+		}
+
+		/**
+		 * n
+		 */
+		const n = Number(this.configService.get('TC_N'));
+
+		if (n) {
+			paramsObj[n] = n;
+		}
+
+		/**
+		 * presence_penalty
+		 */
+		const presence_penalty = Number(this.configService.get('TC_P_PNLT'));
+
+		if (presence_penalty) {
+			paramsObj[presence_penalty] = presence_penalty;
+		}
+
+		/**
+		 * frequency_penalty
+		 */
+		const frequency_penalty = Number(this.configService.get('TC_F_PNLT'));
+
+		if (frequency_penalty) {
+			paramsObj[frequency_penalty] = frequency_penalty;
+		}
+
+
+		return { ...params, ...paramsObj };
+	}
+
 	public async textRequest(user: string, messages: IOpenAiChatMessage[]): Promise<AiTextResponse> {
 
 		const methodName = 'textRequest';
