@@ -319,6 +319,15 @@ export class MainController implements IMainController {
 
 		let messages = [...chatGptMsgQueue];
 
+		if (messages.length > 2) {
+
+			/**
+			 * Удаляем предыдущий промпт и ответ на него
+			 */
+
+			messages.splice(messages.length - 2);
+		}
+
 		this.utils.debugLogger(`messages 1:\n${JSON.stringify(messages)}`);
 
 
