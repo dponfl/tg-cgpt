@@ -333,6 +333,13 @@ export class ScenesGenerator implements ISceneGenerator {
 
 		// tslint:disable-next-line: no-any
 		afterPaymentGptScene.leave(async (ctx: any) => {
+			if (ctx.session.botUserSession.pinnedMessage > 0) {
+				try {
+					await ctx.unpinChatMessage(ctx.session.botUserSession.pinnedMessage);
+				} catch (err) {
+					this.logger.error(`Error: Cannot perform unpinChatMessage: ${err}`);
+				}
+			}
 		});
 
 		return afterPaymentGptScene;
@@ -511,6 +518,13 @@ export class ScenesGenerator implements ISceneGenerator {
 
 		// tslint:disable-next-line: no-any
 		afterPaymentMJScene.leave(async (ctx: any) => {
+			if (ctx.session.botUserSession.pinnedMessage > 0) {
+				try {
+					await ctx.unpinChatMessage(ctx.session.botUserSession.pinnedMessage);
+				} catch (err) {
+					this.logger.error(`Error: Cannot perform unpinChatMessage: ${err}`);
+				}
+			}
 		});
 
 		return afterPaymentMJScene;
