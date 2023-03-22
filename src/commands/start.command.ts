@@ -42,6 +42,32 @@ export class StartCommand extends MyBotCommand {
 				await ctx.deleteMessage();
 
 				/**
+				 * Очищаем значения переменных, связанных с чатом
+				 */
+
+				let chatVarsUpdated = false;
+
+				if (ctx.session.botUserSession.pendingChatGptRequest) {
+					ctx.session.botUserSession.pendingChatGptRequest = false;
+					chatVarsUpdated = true;
+				}
+
+				if (ctx.session.botUserSession.textRequest) {
+					ctx.session.botUserSession.textRequest = '';
+					chatVarsUpdated = true;
+				}
+
+				if (ctx.session.botUserSession.textRequestMessageId) {
+					ctx.session.botUserSession.textRequestMessageId = 0;
+					chatVarsUpdated = true;
+				}
+
+				if (chatVarsUpdated) {
+					this.sessionService.updateSession(ctx);
+				}
+
+
+				/**
 				 * Create user record if none
 				 */
 
