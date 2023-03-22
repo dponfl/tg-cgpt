@@ -297,6 +297,14 @@ export class ScenesGenerator implements ISceneGenerator {
 		// tslint:disable-next-line: no-any
 		afterPaymentGptScene.enter(async (ctx: any) => {
 
+			if (ctx.session.botUserSession.pinnedMessage > 0) {
+				try {
+					await ctx.pinChatMessage(ctx.session.botUserSession.pinnedMessage);
+				} catch (err) {
+					this.logger.error(`Error: Cannot perform unpinChatMessage: ${err}`);
+				}
+			}
+
 			ctx.session.botUserSession.chatName = ChatSceneNames.afterPaymentGptScene;
 			this.sessionService.updateSession(ctx);
 
@@ -354,7 +362,6 @@ export class ScenesGenerator implements ISceneGenerator {
 
 			ctx.session.botUserSession.pinnedMessage = messageId;
 			ctx.session.botUserSession.chatName = ChatSceneNames.mainMJScene;
-
 			this.sessionService.updateSession(ctx);
 
 			await ctx.pinChatMessage(messageId);
@@ -436,6 +443,14 @@ export class ScenesGenerator implements ISceneGenerator {
 
 		// tslint:disable-next-line: no-any
 		afterPaymentMJScene.enter(async (ctx: any) => {
+
+			if (ctx.session.botUserSession.pinnedMessage > 0) {
+				try {
+					await ctx.pinChatMessage(ctx.session.botUserSession.pinnedMessage);
+				} catch (err) {
+					this.logger.error(`Error: Cannot perform unpinChatMessage: ${err}`);
+				}
+			}
 
 			ctx.session.botUserSession.chatName = ChatSceneNames.mainMJScene;
 
