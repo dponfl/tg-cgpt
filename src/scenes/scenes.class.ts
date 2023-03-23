@@ -41,7 +41,7 @@ export class ScenesGenerator implements ISceneGenerator {
 
 	private readonly pushToPayText =
 		`
-К <i>сожалению текущий лимит запросов подошёл к концу</i>, <b>чтобы продолжить коммуникацию со мной — выберите один из пакетов по кнопке ниже</b> 👇
+К <i>сожалению текущий лимит бесплатных запросов подошёл к концу</i>, <b>чтобы продолжить коммуникацию со мной — используйте кнопку ниже</b> 👇
 `;
 
 	private readonly errorResponseText =
@@ -252,8 +252,8 @@ export class ScenesGenerator implements ISceneGenerator {
 		// tslint:disable-next-line: no-any
 		mainGptScene.action('pay_package', async (ctx: any) => {
 
-			await ctx.answerCbQuery('Переход в "Оплатить запросы"');
-			await ctx.replyWithHTML(`✅ Вы выбрали: <b><i>Оплатить запросы ✅</i></b>`);
+			await ctx.answerCbQuery('Переход в "Выбрать пакет"');
+			await ctx.replyWithHTML(`✅ Вы выбрали: <b><i>Выбрать пакет ✅</i></b>`);
 			await ctx.editMessageReplyMarkup({ inline_keyboard: [] });
 
 			await ctx.scene.enter('paymentScene');
@@ -311,8 +311,8 @@ export class ScenesGenerator implements ISceneGenerator {
 		// tslint:disable-next-line: no-any
 		afterPaymentGptScene.action('pay_package', async (ctx: any) => {
 
-			await ctx.answerCbQuery('Переход в "Оплатить запросы"');
-			await ctx.replyWithHTML(`✅ Вы выбрали: <b><i>Оплатить запросы ✅</i></b>`);
+			await ctx.answerCbQuery('Переход в "Выбрать пакет"');
+			await ctx.replyWithHTML(`✅ Вы выбрали: <b><i>Выбрать пакет ✅</i></b>`);
 			await ctx.editMessageReplyMarkup({ inline_keyboard: [] });
 
 			await ctx.scene.enter('paymentScene');
@@ -534,7 +534,7 @@ export class ScenesGenerator implements ISceneGenerator {
 
 			await ctx.replyWithHTML(text, Markup.inlineKeyboard([
 				[
-					Markup.button.callback('Оплатить запросы ✅', 'make_payment')
+					Markup.button.callback('Выбрать пакет ✅', 'make_payment')
 				],
 				[
 					Markup.button.callback('Информация ℹ️', 'info')
@@ -551,7 +551,7 @@ export class ScenesGenerator implements ISceneGenerator {
 
 		// tslint:disable-next-line: no-any
 		menuScene.action('make_payment', async (ctx: any) => {
-			await ctx.answerCbQuery('Переход в "Оплатить запросы"');
+			await ctx.answerCbQuery('Переход в "Выбрать пакет"');
 			await ctx.deleteMessage();
 			await ctx.scene.enter('paymentScene');
 		});
@@ -756,17 +756,12 @@ export class ScenesGenerator implements ISceneGenerator {
 
 		let messageId: number;
 
-		const text =
-			`
-К <i>сожалению текущий лимит запросов подошёл к концу</i>, <b>чтобы продолжить коммуникацию со мной — выберите один из пакетов по кнопке ниже</b> 👇
-`;
-
 		// tslint:disable-next-line: no-any
 		pushToPaymentScene.enter(async (ctx: any) => {
 
-			const { message_id } = await ctx.replyWithHTML(text, Markup.inlineKeyboard([
+			const { message_id } = await ctx.replyWithHTML(this.pushToPayText, Markup.inlineKeyboard([
 				[
-					Markup.button.callback('Оплатить запросы ✅', 'make_payment')
+					Markup.button.callback('Выбрать пакет ✅', 'make_payment')
 				]
 			]));
 
@@ -776,7 +771,7 @@ export class ScenesGenerator implements ISceneGenerator {
 
 		// tslint:disable-next-line: no-any
 		pushToPaymentScene.action('make_payment', async (ctx: any) => {
-			await ctx.answerCbQuery('Переход в "Оплатить запросы"');
+			await ctx.answerCbQuery('Переход в "Выбрать пакет"');
 			await ctx.deleteMessage();
 			await ctx.scene.enter('paymentScene');
 		});
@@ -1040,7 +1035,7 @@ export class ScenesGenerator implements ISceneGenerator {
 								await ctx.replyWithHTML(this.pushToPayText,
 									Markup.inlineKeyboard([
 										[
-											Markup.button.callback('Оплатить запросы ✅', 'pay_package')
+											Markup.button.callback('Выбрать пакет ✅', 'pay_package')
 										]
 									])
 								);
