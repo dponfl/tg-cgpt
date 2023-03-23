@@ -100,7 +100,7 @@ export class ScenesGenerator implements ISceneGenerator {
 			new MenuCommand(scene, this.logger),
 			new PaymentCommand(scene, this.logger),
 			new GptCommand(scene, this.logger),
-			new MjCommand(scene, this.logger),
+			// new MjCommand(scene, this.logger),
 			new InfoCommand(scene, this.logger),
 			new HelpCommand(scene, this.logger),
 			new DropContextCommand(scene, this.logger, this.utils),

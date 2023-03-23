@@ -57,14 +57,14 @@ export class BotService implements IBotService {
 			command: 'menu',
 			description: 'Главное меню',
 		},
-		{
-			command: 'gpt',
-			description: 'Запрос в ChatGPT',
-		},
-		{
-			command: 'img',
-			description: 'Запрос в Midjorney',
-		},
+		// {
+		// 	command: 'gpt',
+		// 	description: 'Запрос в ChatGPT',
+		// },
+		// {
+		// 	command: 'img',
+		// 	description: 'Запрос в Midjorney',
+		// },
 		{
 			command: 'pay',
 			description: 'Оплатить запросы',
@@ -123,7 +123,7 @@ export class BotService implements IBotService {
 			// tslint:disable-next-line: max-line-length
 			new StartCommand(this.bot, this.configService, this.logger, this.sessionService, this.dbServices, this.dbConnection, this.utils),
 			new GptCommand(this.bot, this.logger, this.dbConnection, this.utils),
-			new MjCommand(this.bot, this.logger, this.dbConnection, this.utils),
+			// new MjCommand(this.bot, this.logger, this.dbConnection, this.utils),
 			new MenuCommand(this.bot, this.logger, this.dbConnection, this.utils),
 			new PaymentCommand(this.bot, this.logger, this.dbConnection, this.utils),
 			new InfoCommand(this.bot, this.logger, this.dbConnection, this.utils),
