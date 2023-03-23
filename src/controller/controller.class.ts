@@ -80,10 +80,6 @@ export class MainController implements IMainController {
 		return result as T;
 	}
 
-	private async getChatGptMsgQueue() { }
-
-	private async setChatGptMsgQueue() { }
-
 	private async checkUserRights(userGuid: string, serviceCategory: AiServices): Promise<boolean> {
 
 		const methodName = 'checkUserRights';
