@@ -155,25 +155,28 @@ export class ScenesGenerator implements ISceneGenerator {
 <i>Наглядные примеры моих возможностей:</i>
 
 <b>1.Образование</b>
-Эссе
-Реферат
-Математические задачи 
+<a href='https://telegra.ph/Matematicheskie-zadachi-03-22'>Математические задачи</a>
+<a href='https://telegra.ph/Zadachi-na-logiku-03-22'>Задачи на логику</a>
+<a href='https://telegra.ph/Voprosy-raznoj-tematike-i-slozhnosti-03-22'>Вопросы разной тематики и сложности</a>
 
 <b>2.Программирование</b>
-Бот для телеграм 
-Код на PHP
-Код на Python 
-Код на Java 
+<a href='https://telegra.ph/Podgotovka-TZ-03-22'>Подготовка любых ТЗ</a>
+<a href='https://telegra.ph/Bot-dlya-Telegram-na-JavaScript-03-23'>Бот для телеграм на JavaScript</a>
+<a href='https://telegra.ph/Kod-na-JavaScript-03-23'>Код на JavaScript</a>
+<a href='https://telegra.ph/Kod-na-Python-03-23'>Код на Python</a>
+<a href='https://telegra.ph/Napisaniya-koda-na-PHP-03-23'>Код на PHP</a>
 
 <b>3.Копирайтинг</b>
-Рекламный креатив
-Продающий пост для телеграм 
-Воронка продаж 
+<a href='https://telegra.ph/Reklamnyj-kreativ-dlya-Telegram-03-23'>Рекламный креатив</a>
+<a href='https://telegra.ph/Post-dlya-Telegram-03-23'>Пост для Telegram</a>
+<a href='https://telegra.ph/Kreativnye-idei-i-zagolovki-03-23'>Креативные идеи</a>
 
 <i>Этот список не включает и 1% моих возможностей</i>, <b>начните общение со мной и убедитесь в этом сами</b> 😉
 `;
 
-			await ctx.replyWithHTML(text);
+			await ctx.replyWithHTML(text, {
+				disable_web_page_preview: true
+			});
 
 			setTimeout(async () => {
 				await ctx.scene.enter('startNext');
@@ -222,7 +225,7 @@ export class ScenesGenerator implements ISceneGenerator {
 			`
 <b>Сейчас вы находитесь в Чате Gpt</b> 🤖 
 
-Секреты GPT (гиперссылка)
+<a href='https://telegra.ph/Sekrety-AI-03-23'>Секреты GPT</a>
 
 <i>Все ваши обращения которые вы напишете</i> — <b>будут отправлены мне</b>. 
 
@@ -230,7 +233,9 @@ export class ScenesGenerator implements ISceneGenerator {
 
 		// tslint:disable-next-line: no-any
 		mainGptScene.enter(async (ctx: any) => {
-			const { message_id: messageId } = await ctx.replyWithHTML(textMain);
+			const { message_id: messageId } = await ctx.replyWithHTML(textMain, {
+				disable_web_page_preview: true
+			});
 
 			ctx.session.botUserSession.pinnedMessage = messageId;
 			ctx.session.botUserSession.chatName = ChatSceneNames.mainGptScene;
