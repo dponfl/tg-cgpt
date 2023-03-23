@@ -849,11 +849,11 @@ export class ScenesGenerator implements ISceneGenerator {
 
 			const text =
 				`
-<i>Бесплатных запросов <b>Gpt</b> (доступно):</i> <b>${gptFreeLeft}</b> из <b>${gptFreeReceived}</b>
+<i>Бесплатных запросов <b>Gpt</b>:</i> <b>${gptFreeLeft}</b> (доступно) из <b>${gptFreeReceived}</b> (всего)
 
 ———————————————
 
-<i>Платных</i> <b>запросов Gpt</b> (доступно): <b>${gptLeft}</b> из <b>${gptPurchased}</b>
+<i>Платных</i> <b>запросов Gpt</b>: <b>${gptLeft}</b> (доступно) из <b>${gptPurchased}</b> (куплено всего)
 
 	`;
 
