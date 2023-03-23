@@ -170,11 +170,6 @@ export class ScenesGenerator implements ISceneGenerator {
 Продающий пост для телеграм 
 Воронка продаж 
 
-<b>4.Midjourney</b>
-Мень для ресторана  
-Визитка 
-Изображение по тз
-
 <i>Этот список не включает и 1% моих возможностей</i>, <b>начните общение со мной и убедитесь в этом сами</b> 😉
 `;
 
@@ -204,12 +199,7 @@ export class ScenesGenerator implements ISceneGenerator {
 
 <b>Пример:</b> <i>Напиши мне эссе на 200 слов о пользе насекомых, не забудь добавить вступление, а так же сделать вывод</i>
 
-<b>2️⃣Для того чтобы получить изображения от Midjourney</b> напишите в строке для сообщения команду <i>/img</i> и после этого опишите изображение. 
-
-<b>Пример:</b>
-<i>/img: мальчик с мячом играет с кошкой, лес, озеро.</i>
-
-3️⃣Для того чтобы вызвать главное меню — <b>введи в строке с сообщением команду</b> <i>/menu</i>
+2️⃣Для того чтобы вызвать главное меню — <b>введи в строке с сообщением команду</b> <i>/menu</i>
 `;
 
 			await ctx.replyWithHTML(text);
@@ -235,8 +225,6 @@ export class ScenesGenerator implements ISceneGenerator {
 Секреты GPT (гиперссылка)
 
 <i>Все ваши обращения которые вы напишете</i> — <b>будут отправлены мне</b>. 
-
-<i>Чтобы перейти к Midjourney</i> — введите команду /img
 
 `;
 
@@ -597,8 +585,6 @@ export class ScenesGenerator implements ISceneGenerator {
 
 — Чтобы вернуться в чат GPT, используй команду /gpt
 
-— Чтобы вернуться в Midjourney, используй команду /img
-
 `;
 
 			const { message_id: messageId } = await ctx.replyWithHTML(text);
@@ -641,11 +627,8 @@ export class ScenesGenerator implements ISceneGenerator {
 				`
 	Для того, чтобы пользоваться всем функционалом необходимо оплатить запросы 👇 
 	
-	1) ${gptQty} запросов <b>для искусственного интеллекта (GPT)</b> — ${gptPrice}₽
+	${gptQty} запросов <b>для искусственного интеллекта (GPT)</b> — ${gptPrice}₽
 	
-	2) ${mjQty} запросов для <b>Midjourney</b> — ${mjPrice}₽
-	
-	3) ${gpt_mj_gptQty} запросов для <b>искусственного интеллекта (GPT)</b> + ${gpt_mj_mjQty} запросов для <b>Midjourney</b> — ${gpt_mjPrice}₽
 	`;
 
 			/**
@@ -697,41 +680,41 @@ export class ScenesGenerator implements ISceneGenerator {
 				purchasedQty: gptService,
 			};
 
-			const mjParamsRobokassa: IGetPaymentLinkParams = {
-				amount: Number(mjPrice),
-				currency: GroupTransactionCurrency.RUB,
-				description: `Подписка на Midjourney сервис (${mjQty} запросов)`,
-				uid: ctx.session.botUserSession.userGuid,
-				serviceName: GroupTransactionServiceName.MJ,
-				purchasedQty: mjService,
-			};
+			// const mjParamsRobokassa: IGetPaymentLinkParams = {
+			// 	amount: Number(mjPrice),
+			// 	currency: GroupTransactionCurrency.RUB,
+			// 	description: `Подписка на Midjourney сервис (${mjQty} запросов)`,
+			// 	uid: ctx.session.botUserSession.userGuid,
+			// 	serviceName: GroupTransactionServiceName.MJ,
+			// 	purchasedQty: mjService,
+			// };
 
-			const gptAndMjParamsRobokassa: IGetPaymentLinkParams = {
-				amount: Number(gpt_mjPrice),
-				currency: GroupTransactionCurrency.RUB,
-				description: `Подписка на GPT сервис (${gpt_mj_gptQty} запросов) и Midjourney сервис (${gpt_mj_mjQty} запросов)`,
-				uid: ctx.session.botUserSession.userGuid,
-				serviceName: GroupTransactionServiceName.GPT_MJ,
-				purchasedQty: gpt_mj_mjService,
-			};
+			// const gptAndMjParamsRobokassa: IGetPaymentLinkParams = {
+			// 	amount: Number(gpt_mjPrice),
+			// 	currency: GroupTransactionCurrency.RUB,
+			// 	description: `Подписка на GPT сервис (${gpt_mj_gptQty} запросов) и Midjourney сервис (${gpt_mj_mjQty} запросов)`,
+			// 	uid: ctx.session.botUserSession.userGuid,
+			// 	serviceName: GroupTransactionServiceName.GPT_MJ,
+			// 	purchasedQty: gpt_mj_mjService,
+			// };
 
 			const { url: gptUrl } = await this.robokassaService.getPaymentLink(gptParamsRobokassa) as IGetPaymentLinkResponse;
 
-			const { url: mjUrl } = await this.robokassaService.getPaymentLink(mjParamsRobokassa) as IGetPaymentLinkResponse;
+			// const { url: mjUrl } = await this.robokassaService.getPaymentLink(mjParamsRobokassa) as IGetPaymentLinkResponse;
 
 			// tslint:disable-next-line: max-line-length
-			const { url: gptAndMjUrl } = await this.robokassaService.getPaymentLink(gptAndMjParamsRobokassa) as IGetPaymentLinkResponse;
+			// const { url: gptAndMjUrl } = await this.robokassaService.getPaymentLink(gptAndMjParamsRobokassa) as IGetPaymentLinkResponse;
 
 			const { message_id: messageId } = await ctx.replyWithHTML(text, Markup.inlineKeyboard([
 				[
-					Markup.button.url(`1) 🤖 Gpt ${gptPrice}₽`, gptUrl)
+					Markup.button.url(`🤖 Gpt ${gptPrice}₽`, gptUrl)
 				],
-				[
-					Markup.button.url(`2) 🎑 Midjourney ${mjPrice}₽`, mjUrl)
-				],
-				[
-					Markup.button.url(`3) 🔝 GPT + Midjourney ${gpt_mjPrice}₽`, gptAndMjUrl)
-				],
+				// [
+				// 	Markup.button.url(`2) 🎑 Midjourney ${mjPrice}₽`, mjUrl)
+				// ],
+				// [
+				// 	Markup.button.url(`3) 🔝 GPT + Midjourney ${gpt_mjPrice}₽`, gptAndMjUrl)
+				// ],
 			]));
 
 			if (messageId) {
@@ -749,8 +732,6 @@ export class ScenesGenerator implements ISceneGenerator {
 Для коммуникации со мной, используй кнопки выше 👆🏾 
 
 — Чтобы вернуться в чат GPT, используй команду /gpt
-
-— Чтобы вернуться в Midjourney, используй команду /img
 
 `;
 
@@ -827,8 +808,6 @@ export class ScenesGenerator implements ISceneGenerator {
 
 — Чтобы вернуться в чат GPT, используй команду /gpt
 
-— Чтобы вернуться в Midjourney, используй команду /img
-
 `;
 
 			// tslint:disable-next-line: no-shadowed-variable
@@ -877,14 +856,10 @@ export class ScenesGenerator implements ISceneGenerator {
 				`
 <i>Бесплатных запросов <b>Gpt</b> (доступно):</i> <b>${gptFreeLeft}</b> из <b>${gptFreeReceived}</b>
 
-<i>Бесплатных запросов <b>Midjourney</b> (доступно):</i> <b>${mjFreeLeft}</b> из <b>${mjFreeReceived}</b>
-
 ———————————————
 
 <i>Платных</i> <b>запросов Gpt</b> (доступно): <b>${gptLeft}</b> из <b>${gptPurchased}</b>
 
-<i>Платных</i> <b>запросов Midjourney</b> (доступно): <b>${mjLeft}</b> из <b>${mjPurchased}</b>
-	
 	`;
 
 			await ctx.replyWithHTML(text, Markup.inlineKeyboard([
@@ -908,8 +883,6 @@ export class ScenesGenerator implements ISceneGenerator {
 Для коммуникации со мной, используй кнопки выше 👆🏾 
 
 — Чтобы вернуться в чат GPT, используй команду /gpt
-
-— Чтобы вернуться в Midjourney, используй команду /img
 
 `;
 
@@ -962,8 +935,6 @@ export class ScenesGenerator implements ISceneGenerator {
 Для коммуникации со мной, используй кнопки выше 👆🏾 
 
 — Чтобы вернуться в чат GPT, используй команду /gpt
-
-— Чтобы вернуться в Midjourney, используй команду /img
 
 `;
 
