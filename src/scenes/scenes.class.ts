@@ -27,7 +27,7 @@ export class ScenesGenerator implements ISceneGenerator {
 	private commands: MySceneCommand[] = [];
 	private readonly textOnMessage =
 		`
-Работаю над вашим вопросом ⏳
+Работаю над вашим вопросом, это может занять некоторое время ⏳
 
 `;
 
