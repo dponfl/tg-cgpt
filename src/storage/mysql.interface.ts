@@ -1,5 +1,7 @@
+import exp from 'constants';
 import { Generated } from 'kysely';
 import { IGTStorageService } from './gt.interface.js';
+import { IRequestService } from './requests.interface.js';
 import { IServiceUsageStorageSevice } from './service.interface.js';
 import { IUserStorageSevice } from './users.interface.js';
 
@@ -34,11 +36,34 @@ export enum GroupTransactionCurrency {
 	RUB = 'RUB',
 }
 
+export enum Systems {
+	CHATGPT = 'ChatGPT',
+	MIDJOURNEY = 'Midjourney',
+	WRITESONIC = 'WriteSonic',
+	DEEPL = 'DeepL',
+}
+
+export enum SubSustems {
+	CHAT = 'chat',
+	TRANSLATION = 'translation',
+}
+
+export enum RequestTypes {
+	ORDINARY = 'ordinary',
+	STREAM = 'stream',
+}
+
+export enum RequestStatus {
+	SUCCESS = 'success',
+	ERROR = 'error',
+}
+
 
 export interface IDbServices {
 	usersDbService?: IUserStorageSevice;
 	gtDbService?: IGTStorageService;
 	serviceUsageDbService?: IServiceUsageStorageSevice;
+	requestDbService?: IRequestService;
 }
 
 export interface IDbServiceResponse {
@@ -107,8 +132,27 @@ export interface IServiceUsageTable {
 	mjFreeLeft: number;
 }
 
+export interface IRequestsTable {
+	id?: Generated<number>;
+	createdAt: string;
+	updatedAt: string;
+	guid: string;
+	userGuid: string;
+	system: string; // Systems;
+	subsystem: string; // SubSustems;
+	requestType: string; // RequestTypes;
+	requestStatus: string; // RequestStatus
+	requestWords: number;
+	requestTokens: number;
+	responseWords: number;
+	responseTokens: number;
+	totalTokens: number;
+	duration: number;
+}
+
 export interface IDatabase {
 	users: IUsersTable;
 	groupTransactions: IGroupTransactionTable;
 	serviceUsage: IServiceUsageTable;
+	requests: IRequestsTable;
 }

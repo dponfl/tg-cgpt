@@ -106,7 +106,11 @@ export class OpenAiChatService implements IAIText {
 
 			let requestCompleted: boolean = false;
 
+			const startTime = new Date().getTime();
+
 			const response = await this.openai.createChatCompletion(requestParams);
+
+			const finishTime = new Date().getTime();
 
 			this.logger.info(`User: ${user}, openai.createChatCompletion response:\nStatus: ${response.status} Status text: ${response.statusText} Data: ${JSON.stringify(response.data)}`);
 

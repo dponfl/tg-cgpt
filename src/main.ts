@@ -30,6 +30,7 @@ import { PaymentService } from './payments/payment.class.js';
 import { Redis } from 'ioredis';
 import { OpenAiChatService } from './ai/open_ai/chat.service.js';
 import { ServiceUsageStorageService } from './storage/service.class.js';
+import { RequestStorageService } from './storage/request.class.js';
 
 
 const bootstap = async () => {
@@ -74,7 +75,8 @@ const bootstap = async () => {
 	const dbServices: IDbServices = {
 		usersDbService: new UsersStorageService(dbConnection, logger, utils),
 		gtDbService: new GtStorageService(dbConnection, logger, utils),
-		serviceUsageDbService: new ServiceUsageStorageService(dbConnection, logger, configService, utils)
+		serviceUsageDbService: new ServiceUsageStorageService(dbConnection, logger, configService, utils),
+		requestDbService: new RequestStorageService(dbConnection, logger, utils),
 	};
 
 
