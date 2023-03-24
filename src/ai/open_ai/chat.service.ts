@@ -138,7 +138,7 @@ export class OpenAiChatService implements IAIText {
 					totalTokens: response.data.usage?.total_tokens,
 				};
 
-				const createRequestMetricsRecRaw = await this.dbServices.requestDbService?.create(requestMetricsRecSuccess);
+				const createRequestMetricsRecRaw = await this.dbServices.requestsDbService?.create(requestMetricsRecSuccess);
 
 				if (createRequestMetricsRecRaw?.status !== DbResponseStatus.SUCCESS) {
 					this.logger.error(`Requests metrics rec creation error. requestMetricsRec:\n${JSON.stringify(requestMetricsRecSuccess)}\nresult:\n${JSON.stringify(createRequestMetricsRecRaw)}`);
@@ -161,7 +161,7 @@ export class OpenAiChatService implements IAIText {
 					requestWords: requestCount.words,
 				};
 
-				const createRequestMetricsRecRaw = await this.dbServices.requestDbService?.create(requestMetricsRecError);
+				const createRequestMetricsRecRaw = await this.dbServices.requestsDbService?.create(requestMetricsRecError);
 
 				if (createRequestMetricsRecRaw?.status !== DbResponseStatus.SUCCESS) {
 					this.logger.error(`Requests metrics rec creation error. requestMetricsRec:\n${JSON.stringify(requestMetricsRecError)}\nresult:\n${JSON.stringify(createRequestMetricsRecRaw)}`);
@@ -252,14 +252,16 @@ export class OpenAiChatService implements IAIText {
 								responseWords: responseCount.words,
 							};
 
-							this.dbServices.requestDbService?.create(requestMetricsRecSuccess)
+							this.dbServices.requestsDbService?.create(requestMetricsRecSuccess)
 								.then(
-									result => {
+									// tslint:disable-next-line: no-any
+									(result: any) => {
 										if (result.status !== DbResponseStatus.SUCCESS) {
 											this.logger.error(`Requests metrics rec creation error. requestMetricsRec:\n${JSON.stringify(requestMetricsRecSuccess)}\nresult:\n${JSON.stringify(result)}`);
 										}
 									},
-									error => {
+									// tslint:disable-next-line: no-any
+									(error: any) => {
 										this.logger.error(`Promise error: Requests metrics rec creation error. requestMetricsRec:\n${JSON.stringify(requestMetricsRecSuccess)}\nresult:\n${typeof error === 'string' ? error : JSON.stringify(error)}`);
 									}
 								);

@@ -1,4 +1,3 @@
-import exp from 'constants';
 import { Generated } from 'kysely';
 import { IGTStorageService } from './gt.interface.js';
 import { IRequestService } from './requests.interface.js';
@@ -64,7 +63,7 @@ export interface IDbServices {
 	usersDbService?: IUserStorageSevice;
 	gtDbService?: IGTStorageService;
 	serviceUsageDbService?: IServiceUsageStorageSevice;
-	requestDbService?: IRequestService;
+	requestsDbService?: IRequestService;
 }
 
 export interface IDbServiceResponse {

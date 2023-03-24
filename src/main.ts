@@ -70,7 +70,7 @@ const bootstap = async () => {
 		usersDbService: new UsersStorageService(dbConnection, logger, utils),
 		gtDbService: new GtStorageService(dbConnection, logger, utils),
 		serviceUsageDbService: new ServiceUsageStorageService(dbConnection, logger, configService, utils),
-		requestDbService: new RequestStorageService(dbConnection, logger, utils),
+		requestsDbService: new RequestStorageService(dbConnection, logger, utils)
 	};
 
 	// const cgptService: IAIText = new ChatGPTService();
