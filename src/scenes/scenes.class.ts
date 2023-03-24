@@ -250,7 +250,7 @@ export class ScenesGenerator implements ISceneGenerator {
 		});
 
 		// tslint:disable-next-line: no-any
-		mainGptScene.action('stream_request', async (ctx: any) => {
+		mainGptScene.action('proceed_request', async (ctx: any) => {
 			await this.gptActionStreamRequest(ctx, mainGptScene);
 		});
 
@@ -309,7 +309,7 @@ export class ScenesGenerator implements ISceneGenerator {
 		});
 
 		// tslint:disable-next-line: no-any
-		afterPaymentGptScene.action('stream_request', async (ctx: any) => {
+		afterPaymentGptScene.action('proceed_request', async (ctx: any) => {
 			await this.gptActionStreamRequest(ctx, afterPaymentGptScene);
 		});
 
@@ -1031,7 +1031,7 @@ export class ScenesGenerator implements ISceneGenerator {
 													reply_to_message_id: ctx.update.message.message_id,
 													...Markup.inlineKeyboard([
 														[
-															Markup.button.callback('Продолжай 📝', 'stream_request')
+															Markup.button.callback('Продолжай 📝', 'proceed_request')
 														]
 													])
 												}
@@ -1122,11 +1122,7 @@ export class ScenesGenerator implements ISceneGenerator {
 
 			const { message_id } = await ctx.replyWithHTML(this.textOnMessage);
 
-			if (!ctx.session.botUserSession.textRequest) {
-				throw new Error(`Missing ctx.session.botUserSession.textRequest`);
-			}
-
-			const text = ctx.session.botUserSession.textRequest;
+			const text = 'продолжай';
 
 			ctx.session.botUserSession.pendingChatGptRequest = true;
 
@@ -1134,8 +1130,7 @@ export class ScenesGenerator implements ISceneGenerator {
 
 			const { userGuid, chatId, fromId } = await this.getUserData(ctx);
 
-			// tslint:disable-next-line: max-line-length
-			this.mainController.orchestrator<AiTextResponsePayload>(userGuid, chatId, fromId, text, RequestCategory.chatTextStream)
+			this.mainController.orchestrator<AiTextResponsePayload[]>(userGuid, chatId, fromId, text, RequestCategory.chatText)
 				.then(
 					async (result) => {
 
@@ -1143,17 +1138,89 @@ export class ScenesGenerator implements ISceneGenerator {
 
 						await ctx.deleteMessage(message_id);
 
-						msgText = result.payload.payload;
+						switch (result.status) {
+							case ControllerStatus.SUCCESS:
 
-						if (!ctx.session.botUserSession.textRequestMessageId) {
-							this.logger.error(`UserGuid: ${ctx.session.botUserSession.userGuid}, Missing ctx.session.botUserSession.textRequestMessageId`);
-							await ctx.reply(msgText);
-						} else {
-							await ctx.reply(msgText, { reply_to_message_id: ctx.session.botUserSession.textRequestMessageId });
+								ctx.session.botUserSession.pendingChatGptRequest = false;
+								this.sessionService.updateSession(ctx);
+
+								if (!Array.isArray(result.payload)) {
+									this.logger.error(`result.payload should be an array, result:\n${JSON.stringify(result)}`);
+								}
+
+								let i = 1;
+
+								for (const elem of result.payload as AiTextResponsePayload[]) {
+
+									msgText = result.payload.length > 1
+										? `<b>Ответ ${i} 👇</b>\n\n${elem.payload}`
+										: elem.payload;
+									i++;
+
+									switch (elem.finishReason) {
+										case OpenAiChatFinishReason.stop:
+										case OpenAiChatFinishReason.content_filter:
+										case OpenAiChatFinishReason.null:
+											await ctx.reply(msgText,
+												{ reply_to_message_id: ctx.update.message.message_id });
+
+											this.clearTextSessionData(ctx);
+
+											break;
+
+										case OpenAiChatFinishReason.length:
+											await ctx.reply(msgText,
+												{
+													reply_to_message_id: ctx.update.message.message_id,
+													...Markup.inlineKeyboard([
+														[
+															Markup.button.callback('Продолжай 📝', 'proceed_request')
+														]
+													])
+												}
+											);
+											break;
+
+										default:
+											this.logger.error(`Unknown finishReason: ${elem.finishReason}`);
+											await ctx.reply(msgText,
+												{ reply_to_message_id: ctx.update.message.message_id });
+
+											this.clearTextSessionData(ctx);
+									}
+								}
+
+								break;
+
+							case ControllerStatus.ACTION_PAYMENT:
+
+								await ctx.replyWithHTML(this.pushToPayText,
+									Markup.inlineKeyboard([
+										[
+											Markup.button.callback('Выбрать пакет ✅', 'pay_package')
+										]
+									])
+								);
+
+								this.clearTextSessionData(ctx);
+
+								break;
+
+							case ControllerStatus.ERROR:
+								this.logger.error(`Error respose from MainController.orchestrator:\n${JSON.stringify(result)}`);
+
+								await ctx.deleteMessage(message_id);
+
+								await this.sendErrorMsgOnTextResponse(ctx);
+
+								break;
+
+							default:
+
+								this.logger.error(`UserGuid=${userGuid}, Unknown result.status, result:\n${JSON.stringify(result)}`);
+
+								this.clearTextSessionData(ctx);
 						}
-
-						this.clearTextSessionData(ctx);
-
 					},
 					async (error) => {
 
