@@ -239,7 +239,7 @@ export class OpenAiChatService implements IAIText {
 
 							const finishTime = new Date().getTime();
 
-							const responseCount = this.utils.wordCounter(response.data.choices[0].message.content);
+							const responseCount = this.utils.wordCounter(textResponseStr);
 
 							const requestMetricsRecSuccess: IRequestsTable = {
 								userGuid,
