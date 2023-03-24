@@ -211,6 +211,32 @@ export class OpenAiChatService implements IAIText {
 				const timeout = Number(this.configService.get('RESPONSE_TIMEOUT')) ?? Infinity;
 
 				const timeOutId = setTimeout(() => {
+
+					const finishTime = new Date().getTime();
+
+					const requestMetricsRecSuccess: IRequestsTable = {
+						userGuid,
+						system: Systems.CHATGPT,
+						subsystem: SubSustems.CHAT,
+						requestType: RequestTypes.STREAM,
+						requestStatus: RequestStatus.TIMEOUT,
+						duration: finishTime - startTime,
+					};
+
+					this.dbServices.requestsDbService?.create(requestMetricsRecSuccess)
+						.then(
+							// tslint:disable-next-line: no-any
+							(result: any) => {
+								if (result.status !== DbResponseStatus.SUCCESS) {
+									this.logger.error(`Requests metrics rec creation error. requestMetricsRec:\n${JSON.stringify(requestMetricsRecSuccess)}\nresult:\n${JSON.stringify(result)}`);
+								}
+							},
+							// tslint:disable-next-line: no-any
+							(error: any) => {
+								this.logger.error(`Promise error: Requests metrics rec creation error. requestMetricsRec:\n${JSON.stringify(requestMetricsRecSuccess)}\nresult:\n${typeof error === 'string' ? error : JSON.stringify(error)}`);
+							}
+						);
+
 					reject(`Request timeout at ${methodName}`);
 				}, timeout);
 
@@ -219,6 +245,9 @@ export class OpenAiChatService implements IAIText {
 				const requestCount = this.utils.wordCounter(messages[messages.length - 1].content);
 
 				const response: AxiosResponse = await this.openai.createChatCompletion(requestParams, options);
+
+				// TODO: delete
+				await this.utils.sleep(3000);
 
 				this.logger.info(`User: ${userGuid}, stream openai.createChatCompletion response:\nStatus: ${response.status} Status text: ${response.statusText}`);
 
