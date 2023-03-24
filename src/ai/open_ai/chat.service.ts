@@ -110,7 +110,13 @@ export class OpenAiChatService implements IAIText {
 
 			const startTime = new Date().getTime();
 
-			const response = await this.openai.createChatCompletion(requestParams);
+			this.utils.debugLogger(`Sending request to GPT`);
+
+			// const response = await this.openai.createChatCompletion(requestParams);
+
+			this.utils.sleep(5000);
+
+			this.utils.debugLogger(`Request to GPT completed`);
 
 			const finishTime = new Date().getTime();
 
