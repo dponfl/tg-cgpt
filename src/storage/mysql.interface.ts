@@ -56,6 +56,7 @@ export enum RequestTypes {
 export enum RequestStatus {
 	SUCCESS = 'success',
 	ERROR = 'error',
+	TIMEOUT = 'timeout',
 }
 
 
@@ -134,19 +135,19 @@ export interface IServiceUsageTable {
 
 export interface IRequestsTable {
 	id?: Generated<number>;
-	createdAt: string;
-	updatedAt: string;
-	guid: string;
+	createdAt?: string;
+	updatedAt?: string;
+	guid?: string;
 	userGuid: string;
 	system: string; // Systems;
 	subsystem: string; // SubSustems;
 	requestType: string; // RequestTypes;
 	requestStatus: string; // RequestStatus
-	requestWords: number;
-	requestTokens: number;
-	responseWords: number;
-	responseTokens: number;
-	totalTokens: number;
+	requestWords?: number;
+	requestTokens?: number;
+	responseWords?: number;
+	responseTokens?: number;
+	totalTokens?: number;
 	duration: number;
 }
 

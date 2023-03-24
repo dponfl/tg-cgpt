@@ -2,10 +2,10 @@ import { AiImgResponse, AiTextResponse } from '../controller/controller.interfac
 import { IOpenAiChatMessage } from './open_ai/chat.interface.js';
 
 export interface IAIText {
-	textRequest: (user: string, messages: IOpenAiChatMessage[]) => Promise<AiTextResponse>;
-	textStreamRequest: (user: string, messages: IOpenAiChatMessage[]) => Promise<AiTextResponse>;
+	textRequest: (userGuid: string, messages: IOpenAiChatMessage[]) => Promise<AiTextResponse>;
+	textStreamRequest: (userGuid: string, messages: IOpenAiChatMessage[]) => Promise<AiTextResponse>;
 }
 
 export interface IAIImg {
-	imgRequest: (user: string, prompt: string) => Promise<AiImgResponse>;
+	imgRequest: (userGuid: string, prompt: string) => Promise<AiImgResponse>;
 }

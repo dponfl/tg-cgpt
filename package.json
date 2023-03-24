@@ -1,6 +1,6 @@
 {
   "name": "tg_chatgpt",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "ChatGPT TG Bot",
   "type": "module",
   "scripts": {
@@ -16,6 +16,7 @@
   "author": "Dmitry Ponomarev dponfl@gmail.com",
   "license": "ISC",
   "dependencies": {
+    "@homegrown/word-counter": "^0.1.7",
     "body-parser": "^1.20.2",
     "dotenv": "^16.0.3",
     "express": "^4.18.2",

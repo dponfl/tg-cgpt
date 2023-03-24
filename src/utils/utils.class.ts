@@ -3,6 +3,7 @@ import { Kysely } from 'kysely';
 import { IBotContext } from '../bot/bot.interface.js';
 import { ILogger } from '../logger/logger.interface.js';
 import { IDatabase } from '../storage/mysql.interface.js';
+import wordCounter from '@homegrown/word-counter';
 
 type GetChatIdObjResult = {
 	fromId: number | undefined,
@@ -25,6 +26,13 @@ export interface IServiceUsageInfo {
 	mjFreeReceived: number;
 }
 
+export interface IWordCounter {
+	words: number;
+	lines: number;
+	characters: number;
+	charactersWithSpaces: number;
+}
+
 export interface IUtils {
 	// tslint:disable-next-line: no-any
 	errorLog: (that: any, err: unknown, methodName: string) => string;
@@ -41,6 +49,7 @@ export interface IUtils {
 	sleep: (milliseconds: number) => Promise<unknown>;
 	enqueue: (collection: unknown[], data: unknown, size: number) => unknown[];
 	dropcontext: (chatId: number, fromId: number) => Promise<void>;
+	wordCounter: (text: string) => IWordCounter;
 }
 
 export class Utils implements IUtils {
@@ -264,4 +273,9 @@ ${str}
 		}
 
 	}
+
+	public wordCounter(text: string): IWordCounter {
+		return wordCounter.count(text);
+	}
+
 }

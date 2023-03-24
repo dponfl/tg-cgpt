@@ -64,12 +64,6 @@ const bootstap = async () => {
 
 	const utils: IUtils = new Utils(logger, dbConnection, redis);
 
-	// const cgptService: IAIText = new ChatGPTService();
-	const chatOpenAiService: IAIText = new OpenAiChatService(
-		logger,
-		configService,
-		utils
-	);
 	const mjService: IAIImg = new MjService();
 
 	const dbServices: IDbServices = {
@@ -78,6 +72,14 @@ const bootstap = async () => {
 		serviceUsageDbService: new ServiceUsageStorageService(dbConnection, logger, configService, utils),
 		requestDbService: new RequestStorageService(dbConnection, logger, utils),
 	};
+
+	// const cgptService: IAIText = new ChatGPTService();
+	const chatOpenAiService: IAIText = new OpenAiChatService(
+		logger,
+		configService,
+		dbServices,
+		utils
+	);
 
 
 	const mainController: IMainController = new MainController(
