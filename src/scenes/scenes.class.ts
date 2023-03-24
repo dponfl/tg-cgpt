@@ -1161,24 +1161,42 @@ export class ScenesGenerator implements ISceneGenerator {
 										case OpenAiChatFinishReason.stop:
 										case OpenAiChatFinishReason.content_filter:
 										case OpenAiChatFinishReason.null:
-											await ctx.reply(msgText,
-												{ reply_to_message_id: ctx.update.message.message_id });
+
+											if (!ctx.session.botUserSession.textRequestMessageId) {
+												this.logger.error(`UserGuid: ${ctx.session.botUserSession.userGuid}, Missing ctx.session.botUserSession.textRequestMessageId`);
+												await ctx.reply(msgText);
+											} else {
+												await ctx.reply(msgText, { reply_to_message_id: ctx.session.botUserSession.textRequestMessageId });
+											}
 
 											this.clearTextSessionData(ctx);
 
 											break;
 
 										case OpenAiChatFinishReason.length:
-											await ctx.reply(msgText,
-												{
-													reply_to_message_id: ctx.update.message.message_id,
+
+											if (!ctx.session.botUserSession.textRequestMessageId) {
+												this.logger.error(`UserGuid: ${ctx.session.botUserSession.userGuid}, Missing ctx.session.botUserSession.textRequestMessageId`);
+												await ctx.reply(msgText,
+													{
+														...Markup.inlineKeyboard([
+															[
+																Markup.button.callback('Продолжай 📝', 'proceed_request')
+															]
+														])
+													}
+												);
+											} else {
+												await ctx.reply(msgText, {
+													reply_to_message_id: ctx.session.botUserSession.textRequestMessageId,
 													...Markup.inlineKeyboard([
 														[
 															Markup.button.callback('Продолжай 📝', 'proceed_request')
 														]
 													])
-												}
-											);
+												});
+											}
+
 											break;
 
 										default:
