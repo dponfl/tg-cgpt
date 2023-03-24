@@ -146,41 +146,9 @@ export class OpenAiChatService implements IAIText {
 
 				const startTimeOriginal = new Date().getTime();
 
-				// TODO: delete
-				// ===============================
-				this.utils.debugLogger(`Sending request to GPT`);
-				// ===============================
+				const response = await this.openai.createChatCompletion(requestParams);
 
-				// const response = await this.openai.createChatCompletion(requestParams);
-
-				// TODO: delete
-				// ============================================================
-				const response = {
-					status: 200,
-					statusText: '200 OK',
-					data: {
-						choices: [
-							{
-								message: {
-									content: 'content'
-								},
-								finish_reason: 'finish_reason'
-							}
-						],
-						usage: {
-							completion_tokens: 0,
-							prompt_tokens: 0,
-							total_tokens: 0
-						}
-					}
-				};
-
-				await this.utils.sleep(5000);
-
-				this.utils.debugLogger(`Request to GPT completed`);
-
-				// ============================================================
-
+				clearTimeout(timeOutId);
 
 				finishTimeOriginal = new Date().getTime();
 
