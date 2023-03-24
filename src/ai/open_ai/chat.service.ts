@@ -114,6 +114,8 @@ export class OpenAiChatService implements IAIText {
 
 			// const response = await this.openai.createChatCompletion(requestParams);
 
+			let response: any;
+
 			this.utils.sleep(5000);
 
 			this.utils.debugLogger(`Request to GPT completed`);
