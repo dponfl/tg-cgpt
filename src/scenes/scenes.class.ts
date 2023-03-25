@@ -24,6 +24,7 @@ import { DropContextCommand } from '../commands/base_scenes/dropcontext.command.
 
 export class ScenesGenerator implements ISceneGenerator {
 
+	private proceedContinueTimesMax: number;
 	private commands: MySceneCommand[] = [];
 	private readonly textOnMessage =
 		`
@@ -60,7 +61,9 @@ export class ScenesGenerator implements ISceneGenerator {
 		private readonly utils: IUtils,
 		private readonly dbConnection: Kysely<IDatabase>,
 		private readonly robokassaService: IPaymentService
-	) { }
+	) {
+		this.proceedContinueTimesMax = Number(configService.get('PROCEED_TIMES')) ?? 2;
+	}
 
 	public async getScenes(): Promise<BaseScene[] | unknown[]> {
 		const baseScenes = await this.getBaseScenes();
@@ -987,7 +990,8 @@ export class ScenesGenerator implements ISceneGenerator {
 
 			const { userGuid, chatId, fromId } = await this.getUserData(ctx);
 
-			this.mainController.orchestrator<AiTextResponsePayload[]>(userGuid, chatId, fromId, text, RequestCategory.chatText)
+			// tslint:disable-next-line: max-line-length
+			this.mainController.orchestrator<AiTextResponsePayload[]>(userGuid, chatId, fromId, text, RequestCategory.chatText, true)
 				.then(
 					async (result) => {
 
@@ -1026,16 +1030,43 @@ export class ScenesGenerator implements ISceneGenerator {
 											break;
 
 										case OpenAiChatFinishReason.length:
-											await ctx.reply(msgText,
-												{
-													reply_to_message_id: ctx.update.message.message_id,
-													...Markup.inlineKeyboard([
-														[
-															Markup.button.callback('Продолжай 📝', 'proceed_request')
-														]
-													])
-												}
-											);
+
+											if (!ctx.session.botUserSession.proceedContinueTimes) {
+												this.logger.error(`No ctx.session.botUserSession.proceedContinueTimes value`);
+											} else if (ctx.session.botUserSession.proceedContinueTimes < this.proceedContinueTimesMax) {
+
+												/**
+												 * Отправляем ответ с кнопкой продолжения
+												 */
+
+												await ctx.reply(msgText,
+													{
+														reply_to_message_id: ctx.update.message.message_id,
+														...Markup.inlineKeyboard([
+															[
+																Markup.button.callback('Продолжай 📝', 'proceed_request')
+															]
+														])
+													}
+												);
+
+											} else {
+
+												/**
+												 * Отправляем ответ простым сообщением и сбрасываем счётчик повторов
+												 */
+
+												ctx.session.botUserSession.proceedContinueTimes = 0;
+												this.sessionService.updateSession(ctx);
+
+												await ctx.reply(msgText,
+													{
+														reply_to_message_id: ctx.update.message.message_id
+													}
+												);
+
+											}
+
 											break;
 
 										default:
@@ -1130,7 +1161,8 @@ export class ScenesGenerator implements ISceneGenerator {
 
 			const { userGuid, chatId, fromId } = await this.getUserData(ctx);
 
-			this.mainController.orchestrator<AiTextResponsePayload[]>(userGuid, chatId, fromId, text, RequestCategory.chatText)
+			// tslint:disable-next-line: max-line-length
+			this.mainController.orchestrator<AiTextResponsePayload[]>(userGuid, chatId, fromId, text, RequestCategory.chatText, false)
 				.then(
 					async (result) => {
 
@@ -1175,26 +1207,52 @@ export class ScenesGenerator implements ISceneGenerator {
 
 										case OpenAiChatFinishReason.length:
 
-											if (!ctx.session.botUserSession.textRequestMessageId) {
-												this.logger.error(`UserGuid: ${ctx.session.botUserSession.userGuid}, Missing ctx.session.botUserSession.textRequestMessageId`);
-												await ctx.reply(msgText,
-													{
+											if (!ctx.session.botUserSession.proceedContinueTimes) {
+												this.logger.error(`No ctx.session.botUserSession.proceedContinueTimes value`);
+											} else if (ctx.session.botUserSession.proceedContinueTimes < this.proceedContinueTimesMax) {
+
+												/**
+												 * Отправляем ответ с кнопкой продолжения
+												 */
+
+												if (!ctx.session.botUserSession.textRequestMessageId) {
+													this.logger.error(`UserGuid: ${ctx.session.botUserSession.userGuid}, Missing ctx.session.botUserSession.textRequestMessageId`);
+													await ctx.reply(msgText,
+														{
+															...Markup.inlineKeyboard([
+																[
+																	Markup.button.callback('Продолжай 📝', 'proceed_request')
+																]
+															])
+														}
+													);
+												} else {
+													await ctx.reply(msgText, {
+														reply_to_message_id: ctx.session.botUserSession.textRequestMessageId,
 														...Markup.inlineKeyboard([
 															[
 																Markup.button.callback('Продолжай 📝', 'proceed_request')
 															]
 														])
-													}
-												);
+													});
+												}
 											} else {
-												await ctx.reply(msgText, {
-													reply_to_message_id: ctx.session.botUserSession.textRequestMessageId,
-													...Markup.inlineKeyboard([
-														[
-															Markup.button.callback('Продолжай 📝', 'proceed_request')
-														]
-													])
-												});
+
+												/**
+												 * Отправляем ответ простым сообщением и сбрасываем счётчик повторов
+												 */
+
+												ctx.session.botUserSession.proceedContinueTimes = 0;
+												this.sessionService.updateSession(ctx);
+
+												if (!ctx.session.botUserSession.textRequestMessageId) {
+													this.logger.error(`UserGuid: ${ctx.session.botUserSession.userGuid}, Missing ctx.session.botUserSession.textRequestMessageId`);
+													await ctx.reply(msgText);
+												} else {
+													await ctx.reply(msgText, {
+														reply_to_message_id: ctx.session.botUserSession.textRequestMessageId
+													});
+												}
 											}
 
 											break;

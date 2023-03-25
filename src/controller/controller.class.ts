@@ -25,7 +25,7 @@ export class MainController implements IMainController {
 	}
 
 	// tslint:disable-next-line: max-line-length
-	public async orchestrator<T>(userGuid: string, chatId: number, fromId: number, prompt: string, requestCategory: RequestCategory): Promise<T> {
+	public async orchestrator<T>(userGuid: string, chatId: number, fromId: number, prompt: string, requestCategory: RequestCategory, updateUserRights: boolean): Promise<T> {
 
 		const methodName = 'orchestrator';
 
@@ -54,7 +54,9 @@ export class MainController implements IMainController {
 						payload,
 					};
 
-					await this.updateUserRightsOnSuccessfulResponse(userGuid, AiServices.GTP);
+					if (updateUserRights) {
+						await this.updateUserRightsOnSuccessfulResponse(userGuid, AiServices.GTP);
+					}
 
 				}
 
