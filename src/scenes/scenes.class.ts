@@ -1041,6 +1041,8 @@ export class ScenesGenerator implements ISceneGenerator {
 
 											if (ctx.session.botUserSession.proceedContinueTimes < this.proceedContinueTimesMax) {
 
+												this.utils.debugLogger(`Gonna show button, session.botUserSession.proceedContinueTimes=${ctx.session.botUserSession.proceedContinueTimes}, proceedContinueTimesMax=${this.proceedContinueTimesMax}`)
+
 												/**
 												 * Отправляем ответ с кнопкой продолжения
 												 */
@@ -1225,6 +1227,9 @@ export class ScenesGenerator implements ISceneGenerator {
 											}
 
 											if (ctx.session.botUserSession.proceedContinueTimes < this.proceedContinueTimesMax) {
+
+												this.utils.debugLogger(`Gonna show button, session.botUserSession.proceedContinueTimes=${ctx.session.botUserSession.proceedContinueTimes}, proceedContinueTimesMax=${this.proceedContinueTimesMax}`)
+
 
 												/**
 												 * Отправляем ответ с кнопкой продолжения
