@@ -1045,6 +1045,10 @@ export class ScenesGenerator implements ISceneGenerator {
 												 * Отправляем ответ с кнопкой продолжения
 												 */
 
+												ctx.session.botUserSession.proceedContinueTimes += 1;
+												this.sessionService.updateSession(ctx);
+
+
 												await ctx.reply(msgText,
 													{
 														reply_to_message_id: ctx.update.message.message_id,
@@ -1214,12 +1218,20 @@ export class ScenesGenerator implements ISceneGenerator {
 										case OpenAiChatFinishReason.length:
 
 											if (!ctx.session.botUserSession.proceedContinueTimes) {
-												this.logger.error(`No ctx.session.botUserSession.proceedContinueTimes value`);
-											} else if (ctx.session.botUserSession.proceedContinueTimes < this.proceedContinueTimesMax) {
+												this.logger.error(`No ctx.session.botUserSession.proceedContinueTimes value. Gonna set it to 0`);
+
+												ctx.session.botUserSession.proceedContinueTimes = 0;
+												this.sessionService.updateSession(ctx);
+											}
+
+											if (ctx.session.botUserSession.proceedContinueTimes < this.proceedContinueTimesMax) {
 
 												/**
 												 * Отправляем ответ с кнопкой продолжения
 												 */
+
+												ctx.session.botUserSession.proceedContinueTimes += 1;
+												this.sessionService.updateSession(ctx);
 
 												if (!ctx.session.botUserSession.textRequestMessageId) {
 													this.logger.error(`UserGuid: ${ctx.session.botUserSession.userGuid}, Missing ctx.session.botUserSession.textRequestMessageId`);
