@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "build": "rm -rf ./dist && tsc",
-    "start": "node -r newrelic ./dist/main.js",
+    "start": "node ./dist/main.js",
     "h:start": "heroku ps:scale web=1 && heroku logs -t",
     "h:stop": "heroku ps:scale web=0",
     "h:restart": "heroku ps:restart && heroku logs -t",
@@ -17,6 +17,7 @@
   "license": "ISC",
   "dependencies": {
     "@homegrown/word-counter": "^0.1.7",
+    "@types/newrelic": "^9.4.0",
     "body-parser": "^1.20.2",
     "dotenv": "^16.0.3",
     "express": "^4.18.2",

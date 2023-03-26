@@ -1,1 +1,1 @@
-web: node -r newrelic ./dist/main.js
+web: node ./dist/main.js
