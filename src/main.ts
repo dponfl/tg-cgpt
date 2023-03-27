@@ -282,8 +282,9 @@ const bootstap = async () => {
 		logger.info('Test info message');
 		logger.warn('Test warn message');
 		logger.error('Test error message');
+		logger.error('Test 2 error message', new Error('Some error message here'));
 
-		newrelic.recordLogEvent({ message: 'some message', level: 'ERROR', error: new Error('Some error message') });
+		// newrelic.recordLogEvent({ message: 'some message', level: 'ERROR', error: new Error('Some error message') });
 
 	})();
 
