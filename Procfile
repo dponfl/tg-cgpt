@@ -1,1 +1,1 @@
-web: node ./dist/main.js
+web: node --experimental-loader newrelic/esm-loader.mjs ./dist/main.js
