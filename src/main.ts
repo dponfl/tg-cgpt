@@ -279,9 +279,14 @@ const bootstap = async () => {
 		// logger.info(`arr: ${JSON.stringify(arr)}`);
 
 
+		logger.info('Test info message');
+		logger.warn('Test warn message');
+		logger.error('Test error message');
+
+
 	})();
 
-	// exit;
+	exit;
 
 	await app.initBot();
 	await app.initApi();
