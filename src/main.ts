@@ -1,4 +1,4 @@
-import newrelic from 'newrelic';
+import 'newrelic';
 
 import { IAIImg, IAIText } from './ai/ai.interface.js';
 // import { ChatGPTService } from './ai/cgpt/cgpt.class.js';
