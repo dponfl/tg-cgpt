@@ -9,11 +9,11 @@ exports.config = {
 	/**
 	* Array of application names.
 	*/
-	app_name: ['TG-AI'],
+	app_name: ['TG-GPT'],
 	/**
 	* Your New Relic license key.
 	*/
-	license_key: 'eu01xx85c8c4a479fa269310fcbd512aFFFFNRAL',
+	license_key: '0822a05a646a064d340e9112ba498d5aFFFFNRAL',
 	logging: {
 		/**
 		* Level at which to log. 'trace' is most useful to New Relic when diagnosing
