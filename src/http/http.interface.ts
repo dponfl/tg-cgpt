@@ -1,4 +1,5 @@
-import { BodyInit, RequestInit } from 'node-fetch';
+// import { BodyInit, RequestInit } from 'node-fetch';
+import 'node-fetch';
 import { IGetPaymentLinkHttpPayload } from '../payments/payments.interface.js';
 
 export enum HttpResponseStatus {

@@ -1,4 +1,5 @@
-import fetch, { Response } from 'node-fetch';
+// import fetch, { Response } from 'node-fetch';
+import 'node-fetch';
 import { ILogger } from '../logger/logger.interface.js';
 import { IUtils } from '../utils/utils.class.js';
 import { HttpDataFormat, HttpResponseStatus, IHttpPayloadGeneric, IHttpRequest, IHttpResponse, IHttpService } from './http.interface.js';
