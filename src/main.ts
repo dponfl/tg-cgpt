@@ -1,4 +1,4 @@
-import 'newrelic';
+import newrelic from 'newrelic';
 
 import { IAIImg, IAIText } from './ai/ai.interface.js';
 // import { ChatGPTService } from './ai/cgpt/cgpt.class.js';
@@ -38,7 +38,7 @@ import { RequestStorageService } from './storage/request.class.js';
 const bootstap = async () => {
 
 
-	const logger: ILogger = new UseLogger();
+	const logger: ILogger = new UseLogger(newrelic);
 	const configService: IConfigService = new ConfigService(logger);
 
 
@@ -283,6 +283,7 @@ const bootstap = async () => {
 		logger.warn('Test warn message');
 		logger.error('Test error message');
 
+		newrelic.recordLogEvent({ message: 'some message', level: 'ERROR', error: new Error('Some error message') });
 
 	})();
 

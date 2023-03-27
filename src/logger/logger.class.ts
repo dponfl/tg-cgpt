@@ -19,7 +19,7 @@ export class UseLogger implements ILogger {
 	private useLogger: Logger;
 	private useLoggerOptions: LoggerOptions;
 
-	constructor() {
+	constructor(private readonly newrelic: any) {
 
 		const host: string = process.env.PAPERTRAIL_HOST as string;
 		const port: number = parseInt(process.env.PAPERTRAIL_PORT as string);
@@ -54,7 +54,14 @@ export class UseLogger implements ILogger {
 		this.useLogger = this.container.add(program, this.useLoggerOptions);
 	}
 
+	private createModuleUsageMetric(agent: any): void {
+		agent.metrics
+			.getOrCreateMetric('Supportability/ExternalModules/WinstonLogEnricher')
+			.incrementCallCount();
+	}
+
 	info(...args: unknown[]): void {
+		this.createModuleUsageMetric(this.newrelic.shim.agent);
 		this.useLogger.info(args);
 	}
 
