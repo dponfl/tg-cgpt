@@ -34,6 +34,7 @@ import { MjService } from './ai/mj/mj.service.js';
 
 import puppeteer from 'puppeteer-core';
 import { join } from 'path';
+import * as url from 'url';
 
 
 const bootstap = async () => {
@@ -299,8 +300,12 @@ const bootstap = async () => {
 
 	(async () => {
 
+		const __filename = url.fileURLToPath(import.meta.url);
+		const __dirname = url.fileURLToPath(new URL('.', import.meta.url));
+
 		utils.debugLogger('puppeteer: start');
 		const executablePath = join(__dirname, '.cache', 'puppeteer');
+		utils.debugLogger(`executablePath=${executablePath}`);
 
 		const browser = await puppeteer.launch({ executablePath });
 		utils.debugLogger('puppeteer.launch');
