@@ -142,7 +142,7 @@ export class UseLogger implements ILogger {
 		this.newrelic.recordLogEvent(
 			{
 				message: str,
-				level: 'INFO',
+				level: 'WARN',
 				timestamp: new Date(),
 			}
 		);
