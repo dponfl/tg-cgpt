@@ -1,6 +1,5 @@
 import { IAIImg, IAIText } from './ai/ai.interface.js';
 // import { ChatGPTService } from './ai/cgpt/cgpt.class.js';
-import { MjService } from './ai/cgpt/mj.class.js';
 import { App } from './app.class.js';
 import { BotService } from './bot/bot.class.js';
 import { IConfigService } from './config/config.interface.js';
@@ -31,6 +30,7 @@ import { Redis } from 'ioredis';
 import { OpenAiChatService } from './ai/open_ai/chat.service.js';
 import { ServiceUsageStorageService } from './storage/service.class.js';
 import { RequestStorageService } from './storage/request.class.js';
+import { MjService } from './ai/mj/mj.service.js';
 
 
 const bootstap = async () => {
@@ -64,8 +64,6 @@ const bootstap = async () => {
 
 	const utils: IUtils = new Utils(logger, dbConnection, redis);
 
-	const mjService: IAIImg = new MjService();
-
 	const dbServices: IDbServices = {
 		usersDbService: new UsersStorageService(dbConnection, logger, utils),
 		gtDbService: new GtStorageService(dbConnection, logger, utils),
@@ -73,8 +71,14 @@ const bootstap = async () => {
 		requestsDbService: new RequestStorageService(dbConnection, logger, utils)
 	};
 
-	// const cgptService: IAIText = new ChatGPTService();
 	const chatOpenAiService: IAIText = new OpenAiChatService(
+		logger,
+		configService,
+		dbServices,
+		utils
+	);
+
+	const mjService: IAIImg = new MjService(
 		logger,
 		configService,
 		dbServices,
@@ -279,7 +283,17 @@ const bootstap = async () => {
 
 	})();
 
-	// exit;
+	mjService.imgRequest('userGuid', 'test prompt')
+		.then(
+			async (result) => {
+				logger.info(`mjService.imgRequest: resolved`);
+			},
+			async (error) => {
+				logger.error(`mjService.imgRequest: rejected`);
+			}
+		);
+
+	exit;
 
 	await app.initBot();
 	await app.initApi();

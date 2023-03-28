@@ -16,6 +16,7 @@
   "author": "Dmitry Ponomarev dponfl@gmail.com",
   "license": "ISC",
   "dependencies": {
+    "@d-lab/discord-puppet": "^0.5.0",
     "@homegrown/word-counter": "^0.1.7",
     "body-parser": "^1.20.2",
     "dotenv": "^16.0.3",
