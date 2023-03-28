@@ -304,7 +304,7 @@ const bootstap = async () => {
 		const __dirname = url.fileURLToPath(new URL('.', import.meta.url));
 
 		utils.debugLogger('puppeteer: start');
-		const executablePath = join('..', __dirname, '.cache', 'puppeteer');
+		const executablePath = join(__dirname, '..', '.cache', 'puppeteer');
 		utils.debugLogger(`executablePath=${executablePath}`);
 
 		const browser = await puppeteer.launch({ executablePath });
