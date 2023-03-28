@@ -13,7 +13,7 @@ export class MjService implements IMjService {
 	private readonly options: Option;
 	private readonly username: string;
 	private readonly password: string;
-	private readonly args: string[] = [];
+	private readonly args: string[] = ['--no-sandbox'];
 	private readonly userDataDir: string;
 	private readonly logs: boolean = true;
 	private readonly headless: boolean = true;
