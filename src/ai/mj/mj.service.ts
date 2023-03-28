@@ -16,7 +16,7 @@ export class MjService implements IMjService {
 	private readonly args: string[] = ['--no-sandbox'];
 	private readonly userDataDir: string;
 	private readonly logs: boolean = true;
-	private readonly headless: boolean = true;
+	private readonly headless: boolean = false;
 	private readonly waitLogin: number;
 	private readonly waitElement: number;
 
