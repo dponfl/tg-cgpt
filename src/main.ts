@@ -32,7 +32,8 @@ import { ServiceUsageStorageService } from './storage/service.class.js';
 import { RequestStorageService } from './storage/request.class.js';
 import { MjService } from './ai/mj/mj.service.js';
 
-import puppeteer from 'puppeteer';
+import puppeteer from 'puppeteer-core';
+import { join } from 'path';
 
 
 const bootstap = async () => {
@@ -298,10 +299,16 @@ const bootstap = async () => {
 
 	(async () => {
 
-		const browser = await puppeteer.launch();
+		utils.debugLogger('puppeteer: start');
+		const executablePath = join(__dirname, '.cache', 'puppeteer');
+
+		const browser = await puppeteer.launch({ executablePath });
+		utils.debugLogger('puppeteer.launch');
 		const page = await browser.newPage();
+		utils.debugLogger('browser.newPage');
 
 		await page.goto('https://developer.chrome.com/');
+		utils.debugLogger('page.goto');
 
 		// Set screen size
 		await page.setViewport({ width: 1080, height: 1024 });
