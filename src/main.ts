@@ -32,7 +32,7 @@ import { ServiceUsageStorageService } from './storage/service.class.js';
 import { RequestStorageService } from './storage/request.class.js';
 import { MjService } from './ai/mj/mj.service.js';
 
-import puppeteer from 'puppeteer-core';
+import puppeteer from 'puppeteer';
 
 
 const bootstap = async () => {
@@ -297,6 +297,7 @@ const bootstap = async () => {
 
 
 	(async () => {
+
 		const browser = await puppeteer.launch();
 		const page = await browser.newPage();
 
