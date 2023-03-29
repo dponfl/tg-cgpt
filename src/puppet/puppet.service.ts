@@ -37,7 +37,7 @@ export class PuppetService implements IPuppetService {
 	) {
 
 		puppeteer.use(StealthPlugin());
-		puppeteer.use(require('puppeteer-extra-plugin-user-data-dir')());
+		// puppeteer.use(require('puppeteer-extra-plugin-user-data-dir')());
 
 		this.username = this.configService.get('DISCORD_USERNAME');
 		this.password = this.configService.get('DISCORD_PASSWORD');
