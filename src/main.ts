@@ -308,7 +308,7 @@ const bootstap = async () => {
 		// const executablePath = join(__dirname, '..', '.cache', 'puppeteer');
 		// utils.debugLogger(`executablePath=${executablePath}`);
 
-		const browser = await puppeteer.launch({
+		const browser = await puppeteer.default.launch({
 			headless: true,
 			// executablePath,
 			args: ['--no-sandbox'],
