@@ -126,7 +126,17 @@ export class PuppetService implements IPuppetService {
 
 	public async isLoggedIn(): Promise<boolean> {
 
+		const selector = await this.page.waitForSelector('div[class*="sidebar"]', {
+			visible: true,
+			timeout: 60000,
+		});
+
+		this.utils.debugLogger(`Selector (str): ${selector}`);
+		this.utils.debugLogger(`Selector: ${JSON.stringify(selector)}`);
+
 		const sidebar = await this.page.$('div[class*="sidebar"]');
+
+		this.utils.debugLogger(`page.$('div[class*="sidebar"]')=${sidebar}`);
 
 		this.logger.info(`[login]: is in? ${sidebar !== null ? 'yes' : 'no'}`);
 
@@ -162,6 +172,7 @@ export class PuppetService implements IPuppetService {
 		const methodName = 'login';
 
 		if (await this.isLoggedIn()) {
+			this.logger.info(`[login]: already logged in`);
 			return true;
 		}
 
