@@ -1,4 +1,4 @@
-import fetch, { Response } from 'node-fetch';
+import * as fetch from 'node-fetch';
 import { ILogger } from '../logger/logger.interface.js';
 import { IUtils } from '../utils/utils.class.js';
 import { HttpDataFormat, HttpResponseStatus, IHttpPayloadGeneric, IHttpRequest, IHttpResponse, IHttpService } from './http.interface.js';
@@ -13,12 +13,12 @@ export class HttpService implements IHttpService {
 	async get(params: IHttpRequest): Promise<IHttpResponse | undefined> {
 		const methodName = 'get';
 		try {
-			let res: Response;
+			let res: fetch.Response;
 
 			if (params.options) {
-				res = await fetch(params.url, params.options);
+				res = await fetch.default(params.url, params.options);
 			} else {
-				res = await fetch(params.url);
+				res = await fetch.default(params.url);
 			}
 
 			const data = params.options?.dataFormat === HttpDataFormat.json ? await res.json() : await res.text();
@@ -34,12 +34,12 @@ export class HttpService implements IHttpService {
 	async post(params: IHttpRequest): Promise<IHttpResponse | undefined> {
 		const methodName = 'post';
 		try {
-			let res: Response;
+			let res: fetch.Response;
 			if (params.options) {
 				if (params.options.dataFormat === HttpDataFormat.json) {
 					params.options.headers = { ...params.options.headers, ...{ 'Content-Type': 'application/json' } };
 				}
-				res = await fetch(params.url, params.options);
+				res = await fetch.default(params.url, params.options);
 			} else {
 				throw new Error(`Error: POST request with no options parameter`);
 			}
