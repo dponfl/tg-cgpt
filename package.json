@@ -30,6 +30,8 @@
     "puppeteer": "^19.8.0",
     "puppeteer-core": "^19.8.0",
     "puppeteer-extra": "^3.3.6",
+    "puppeteer-extra-plugin-stealth": "^2.11.2",
+    "puppeteer-extra-plugin-user-data-dir": "^2.4.1",
     "telegraf": "^4.11.2",
     "telegraf-session-redis-upd": "^5.1.4",
     "tslog": "^4.7.4",

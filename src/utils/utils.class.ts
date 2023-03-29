@@ -4,6 +4,7 @@ import { IBotContext } from '../bot/bot.interface.js';
 import { ILogger } from '../logger/logger.interface.js';
 import { IDatabase } from '../storage/mysql.interface.js';
 import wordCounter from '@homegrown/word-counter';
+import { Sticker } from 'telegraf/types';
 
 type GetChatIdObjResult = {
 	fromId: number | undefined,
@@ -35,7 +36,7 @@ export interface IWordCounter {
 
 export interface IUtils {
 	// tslint:disable-next-line: no-any
-	errorLog: (that: any, err: unknown, methodName: string) => string;
+	errorLog: (that: any, err: unknown, methodName: string, addMsg?: string) => string;
 	debugLogger: (arg: string) => void;
 	isObject: (data: unknown) => boolean;
 	clearSpecialChars: (str: string) => string;
@@ -61,14 +62,14 @@ export class Utils implements IUtils {
 	) { }
 
 	// tslint:disable-next-line: no-any
-	public errorLog(that: any, err: unknown, methodName: string): string {
+	public errorLog(that: any, err: unknown, methodName: string, addMsg?: string): string {
 		let str: string;
 
 		if (err instanceof Error) {
-			str = `Error in [${that.constructor.name}:${methodName}]: ${err.message}`;
+			str = `Error in [${that.constructor.name}:${methodName}]: ${err.message}${addMsg ? ', Additional info: ' + addMsg : ''}`;
 			this.logger.error(str);
 		} else {
-			str = `Error in [${that.constructor.name}:${methodName}]`;
+			str = `Error in [${that.constructor.name}:${methodName}]${addMsg ? ', Additional info: ' + addMsg : ''}`;
 			this.logger.error(str);
 		}
 

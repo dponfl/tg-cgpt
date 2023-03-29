@@ -31,12 +31,8 @@ import { OpenAiChatService } from './ai/open_ai/chat.service.js';
 import { ServiceUsageStorageService } from './storage/service.class.js';
 import { RequestStorageService } from './storage/request.class.js';
 import { MjService } from './ai/mj/mj.service.js';
-
-import puppeteerExtra from 'puppeteer-extra';
-import { join } from 'path';
-import * as url from 'url';
-
-const puppeteer = puppeteerExtra.default;
+import { PuppetService } from './puppet/puppet.service.js';
+import { IPuppetService } from './puppet/puppet.interface.js';
 
 const bootstap = async () => {
 
@@ -87,6 +83,12 @@ const bootstap = async () => {
 		logger,
 		configService,
 		dbServices,
+		utils
+	);
+
+	const puppetService: IPuppetService = new PuppetService(
+		logger,
+		configService,
 		utils
 	);
 
@@ -288,6 +290,69 @@ const bootstap = async () => {
 
 	})();
 
+
+	(async () => {
+
+		// /*
+
+		// Connect:
+
+		// import puppeteerExtra from 'puppeteer-extra';
+		// const puppeteer = puppeteerExtra.default;
+
+
+		// */
+
+		// /*
+		// // const __filename = url.fileURLToPath(import.meta.url);
+		// // const __dirname = url.fileURLToPath(new URL('.', import.meta.url));
+		// */
+
+		// utils.debugLogger('puppeteer: start');
+
+		// /*
+		// // const executablePath = join(__dirname, '..', '.cache', 'puppeteer');
+		// // utils.debugLogger(`executablePath=${executablePath}`);
+		// */
+
+		// const browser = await puppeteer.launch({
+		// 	headless: true,
+		// 	// executablePath,
+		// 	args: ['--no-sandbox'],
+		// });
+
+		// utils.debugLogger('puppeteer.launch');
+		// const page = await browser.newPage();
+		// utils.debugLogger('browser.newPage');
+
+		// await page.goto('https://developer.chrome.com/');
+		// utils.debugLogger('page.goto');
+
+		// // Set screen size
+		// await page.setViewport({ width: 1080, height: 1024 });
+
+		// // Type into search box
+		// await page.type('.search-box__input', 'automate beyond recorder');
+
+		// // Wait and click on first result
+		// const searchResultSelector = '.search-box__link';
+		// await page.waitForSelector(searchResultSelector);
+		// await page.click(searchResultSelector);
+
+		// // Locate the full title with a unique string
+		// const textSelector = await page.waitForSelector(
+		// 	'text/Customize and automate'
+		// );
+		// const fullTitle = await textSelector?.evaluate(el => el.textContent);
+
+		// // Print the full title
+		// logger.info(`The title of this blog post is "${fullTitle}"`);
+
+		// await browser.close();
+
+	})();
+
+
 	// mjService.imgRequest('userGuid', 'test prompt')
 	// 	.then(
 	// 		async (result) => {
@@ -298,51 +363,9 @@ const bootstap = async () => {
 	// 		}
 	// 	);
 
+	await puppetService.start();
 
-	(async () => {
 
-		// const __filename = url.fileURLToPath(import.meta.url);
-		// const __dirname = url.fileURLToPath(new URL('.', import.meta.url));
-
-		utils.debugLogger('puppeteer: start');
-		// const executablePath = join(__dirname, '..', '.cache', 'puppeteer');
-		// utils.debugLogger(`executablePath=${executablePath}`);
-
-		const browser = await puppeteer.launch({
-			headless: true,
-			// executablePath,
-			args: ['--no-sandbox'],
-		});
-
-		utils.debugLogger('puppeteer.launch');
-		const page = await browser.newPage();
-		utils.debugLogger('browser.newPage');
-
-		await page.goto('https://developer.chrome.com/');
-		utils.debugLogger('page.goto');
-
-		// Set screen size
-		await page.setViewport({ width: 1080, height: 1024 });
-
-		// Type into search box
-		await page.type('.search-box__input', 'automate beyond recorder');
-
-		// Wait and click on first result
-		const searchResultSelector = '.search-box__link';
-		await page.waitForSelector(searchResultSelector);
-		await page.click(searchResultSelector);
-
-		// Locate the full title with a unique string
-		const textSelector = await page.waitForSelector(
-			'text/Customize and automate'
-		);
-		const fullTitle = await textSelector?.evaluate(el => el.textContent);
-
-		// Print the full title
-		logger.info(`The title of this blog post is "${fullTitle}"`);
-
-		await browser.close();
-	})();
 
 	exit;
 
