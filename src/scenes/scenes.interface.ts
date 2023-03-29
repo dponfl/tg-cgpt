@@ -1,5 +1,5 @@
-import { BaseScene } from 'telegraf/scenes';
+import { Scenes } from 'telegraf';
 
 export interface ISceneGenerator {
-	getScenes(): Promise<BaseScene[] | unknown[]>
+	getScenes(): Promise<Scenes.BaseScene[] | unknown[]>
 }

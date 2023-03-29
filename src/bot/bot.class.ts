@@ -1,5 +1,5 @@
 import { Telegraf } from 'telegraf';
-import { Stage } from 'telegraf/scenes';
+import { Scenes } from 'telegraf';
 import { BotCommand } from 'telegraf/types';
 import { MyBotCommand } from '../commands/command.class.js';
 import { IConfigService } from '../config/config.interface.js';
@@ -21,6 +21,8 @@ import { BroadcaseMsgCategory, IUtils } from '../utils/utils.class.js';
 import { IBroadcastService } from '../broadcast/bc.interface.js';
 import { Kysely } from 'kysely';
 import { DropContextCommand } from '../commands/dropcontext.command.js';
+
+const Stage = Scenes.Stage;
 
 export class BotService implements IBotService {
 

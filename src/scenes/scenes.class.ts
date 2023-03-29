@@ -1,6 +1,6 @@
 import { Kysely } from 'kysely';
 import { Context, Markup } from 'telegraf';
-import { BaseScene } from 'telegraf/scenes';
+import { Scenes } from 'telegraf';
 import { IBotContext } from '../bot/bot.interface.js';
 import { MySceneCommand } from '../commands/base_scenes/command.class.js';
 import { GptCommand } from '../commands/base_scenes/gpt.command.js';
@@ -65,14 +65,14 @@ export class ScenesGenerator implements ISceneGenerator {
 		this.proceedContinueTimesMax = Number(configService.get('PROCEED_TIMES')) ?? 2;
 	}
 
-	public async getScenes(): Promise<BaseScene[] | unknown[]> {
+	public async getScenes(): Promise<Scenes.BaseScene[] | unknown[]> {
 		const baseScenes = await this.getBaseScenes();
 		const wizardScenes = await this.getWizardScenes();
 
 		return [...baseScenes, ...wizardScenes];
 	}
 
-	public async getBaseScenes(): Promise<BaseScene[]> {
+	public async getBaseScenes(): Promise<Scenes.BaseScene[]> {
 		return Promise.all([
 			this.startIntro(),
 			this.startNext(),
@@ -92,7 +92,7 @@ export class ScenesGenerator implements ISceneGenerator {
 		return Promise.all([]);
 	}
 
-	private async activateCommands(scene: BaseScene): Promise<void> {
+	private async activateCommands(scene: Scenes.BaseScene): Promise<void> {
 
 		/**
 		 * Init scene commands
@@ -140,9 +140,9 @@ export class ScenesGenerator implements ISceneGenerator {
 	 * Base scenes
 	 */
 
-	private async startIntro(): Promise<BaseScene> {
+	private async startIntro(): Promise<Scenes.BaseScene> {
 
-		const startIntro = new BaseScene('startIntro');
+		const startIntro = new Scenes.BaseScene('startIntro');
 
 		// tslint:disable-next-line: no-any
 		startIntro.enter(async (ctx: any) => {
@@ -190,9 +190,9 @@ export class ScenesGenerator implements ISceneGenerator {
 		return startIntro;
 	}
 
-	private async startNext(): Promise<BaseScene> {
+	private async startNext(): Promise<Scenes.BaseScene> {
 
-		const startNext = new BaseScene('startNext');
+		const startNext = new Scenes.BaseScene('startNext');
 
 		// tslint:disable-next-line: no-any
 		startNext.enter(async (ctx: any) => {
@@ -218,9 +218,9 @@ export class ScenesGenerator implements ISceneGenerator {
 		return startNext;
 	}
 
-	private async mainGptScene(): Promise<BaseScene> {
+	private async mainGptScene(): Promise<Scenes.BaseScene> {
 
-		const mainGptScene = new BaseScene('mainGptScene');
+		const mainGptScene = new Scenes.BaseScene('mainGptScene');
 
 		await this.activateCommands(mainGptScene);
 
@@ -284,9 +284,9 @@ export class ScenesGenerator implements ISceneGenerator {
 		return mainGptScene;
 	}
 
-	private async afterPaymentGptScene(): Promise<BaseScene> {
+	private async afterPaymentGptScene(): Promise<Scenes.BaseScene> {
 
-		const afterPaymentGptScene = new BaseScene('afterPaymentGptScene');
+		const afterPaymentGptScene = new Scenes.BaseScene('afterPaymentGptScene');
 
 		await this.activateCommands(afterPaymentGptScene);
 
@@ -341,9 +341,9 @@ export class ScenesGenerator implements ISceneGenerator {
 		return afterPaymentGptScene;
 	}
 
-	private async mainMJScene(): Promise<BaseScene> {
+	private async mainMJScene(): Promise<Scenes.BaseScene> {
 
-		const mainMJScene = new BaseScene('mainMJScene');
+		const mainMJScene = new Scenes.BaseScene('mainMJScene');
 
 		await this.activateCommands(mainMJScene);
 
@@ -438,9 +438,9 @@ export class ScenesGenerator implements ISceneGenerator {
 		return mainMJScene;
 	}
 
-	private async afterPaymentMJScene(): Promise<BaseScene> {
+	private async afterPaymentMJScene(): Promise<Scenes.BaseScene> {
 
-		const afterPaymentMJScene = new BaseScene('afterPaymentMJScene');
+		const afterPaymentMJScene = new Scenes.BaseScene('afterPaymentMJScene');
 
 		await this.activateCommands(afterPaymentMJScene);
 
@@ -526,9 +526,9 @@ export class ScenesGenerator implements ISceneGenerator {
 		return afterPaymentMJScene;
 	}
 
-	private async menuScene(): Promise<BaseScene> {
+	private async menuScene(): Promise<Scenes.BaseScene> {
 
-		const menuScene = new BaseScene('menuScene');
+		const menuScene = new Scenes.BaseScene('menuScene');
 
 		await this.activateCommands(menuScene);
 
@@ -609,9 +609,9 @@ export class ScenesGenerator implements ISceneGenerator {
 		return menuScene;
 	}
 
-	private async paymentScene(): Promise<BaseScene> {
+	private async paymentScene(): Promise<Scenes.BaseScene> {
 
-		const paymentScene = new BaseScene('paymentScene');
+		const paymentScene = new Scenes.BaseScene('paymentScene');
 
 		await this.activateCommands(paymentScene);
 
@@ -756,9 +756,9 @@ export class ScenesGenerator implements ISceneGenerator {
 		return paymentScene;
 	}
 
-	private async pushToPaymentScene(): Promise<BaseScene> {
+	private async pushToPaymentScene(): Promise<Scenes.BaseScene> {
 
-		const pushToPaymentScene = new BaseScene('pushToPaymentScene');
+		const pushToPaymentScene = new Scenes.BaseScene('pushToPaymentScene');
 
 		await this.activateCommands(pushToPaymentScene);
 
@@ -826,9 +826,9 @@ export class ScenesGenerator implements ISceneGenerator {
 		return pushToPaymentScene;
 	}
 
-	private async infoScene(): Promise<BaseScene> {
+	private async infoScene(): Promise<Scenes.BaseScene> {
 
-		const infoScene = new BaseScene('infoScene');
+		const infoScene = new Scenes.BaseScene('infoScene');
 
 		await this.activateCommands(infoScene);
 
@@ -903,9 +903,9 @@ export class ScenesGenerator implements ISceneGenerator {
 		return infoScene;
 	}
 
-	private async helpScene(): Promise<BaseScene> {
+	private async helpScene(): Promise<Scenes.BaseScene> {
 
-		const helpScene = new BaseScene('helpScene');
+		const helpScene = new Scenes.BaseScene('helpScene');
 
 		await this.activateCommands(helpScene);
 
@@ -970,7 +970,7 @@ export class ScenesGenerator implements ISceneGenerator {
 	}
 
 	// tslint:disable-next-line: no-any
-	private async gptOnMessage(ctx: any, scene: BaseScene<Context<Update>>) {
+	private async gptOnMessage(ctx: any, scene: Scenes.BaseScene<Context<Update>>) {
 
 		if (ctx.session.botUserSession.pendingChatGptRequest) {
 
@@ -1143,7 +1143,7 @@ export class ScenesGenerator implements ISceneGenerator {
 	}
 
 	// tslint:disable-next-line: no-any
-	private async gptActionStreamRequest(ctx: any, scene: BaseScene<Context<Update>>): Promise<void> {
+	private async gptActionStreamRequest(ctx: any, scene: Scenes.BaseScene<Context<Update>>): Promise<void> {
 
 		await ctx.answerCbQuery('Продолжаю работать над вашим запросом...');
 

@@ -1,4 +1,4 @@
-import { BaseScene } from 'telegraf/scenes';
+import { Scenes } from 'telegraf';
 import { ILogger } from '../../logger/logger.interface.js';
 import { ISessionService } from '../../storage/session.interface.js';
 import { IUtils } from '../../utils/utils.class.js';
@@ -6,7 +6,7 @@ import { MySceneCommand } from './command.class.js';
 
 export class StartCommand extends MySceneCommand {
 	constructor(
-		public readonly scene: BaseScene,
+		public readonly scene: Scenes.BaseScene,
 		public readonly logger: ILogger,
 		public readonly utils?: IUtils,
 		public readonly sessionService?: ISessionService

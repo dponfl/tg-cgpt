@@ -37,6 +37,7 @@ import { join } from 'path';
 import * as url from 'url';
 
 
+
 const bootstap = async () => {
 
 
@@ -300,8 +301,8 @@ const bootstap = async () => {
 
 	(async () => {
 
-		const __filename = url.fileURLToPath(import.meta.url);
-		const __dirname = url.fileURLToPath(new URL('.', import.meta.url));
+		// const __filename = url.fileURLToPath(import.meta.url);
+		// const __dirname = url.fileURLToPath(new URL('.', import.meta.url));
 
 		utils.debugLogger('puppeteer: start');
 		// const executablePath = join(__dirname, '..', '.cache', 'puppeteer');
@@ -312,6 +313,7 @@ const bootstap = async () => {
 			// executablePath,
 			args: ['--no-sandbox'],
 		});
+
 		utils.debugLogger('puppeteer.launch');
 		const page = await browser.newPage();
 		utils.debugLogger('browser.newPage');
