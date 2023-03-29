@@ -32,11 +32,11 @@ import { ServiceUsageStorageService } from './storage/service.class.js';
 import { RequestStorageService } from './storage/request.class.js';
 import { MjService } from './ai/mj/mj.service.js';
 
-import puppeteer from 'puppeteer-extra';
+import puppeteerExtra from 'puppeteer-extra';
 import { join } from 'path';
 import * as url from 'url';
 
-
+const puppeteer = puppeteerExtra.default;
 
 const bootstap = async () => {
 
@@ -308,7 +308,7 @@ const bootstap = async () => {
 		// const executablePath = join(__dirname, '..', '.cache', 'puppeteer');
 		// utils.debugLogger(`executablePath=${executablePath}`);
 
-		const browser = await puppeteer.default.launch({
+		const browser = await puppeteer.launch({
 			headless: true,
 			// executablePath,
 			args: ['--no-sandbox'],
