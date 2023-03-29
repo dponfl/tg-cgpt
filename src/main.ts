@@ -32,7 +32,7 @@ import { ServiceUsageStorageService } from './storage/service.class.js';
 import { RequestStorageService } from './storage/request.class.js';
 import { MjService } from './ai/mj/mj.service.js';
 
-import puppeteer from 'puppeteer-core';
+import puppeteer from 'puppeteer-extra';
 import { join } from 'path';
 import * as url from 'url';
 
@@ -304,12 +304,12 @@ const bootstap = async () => {
 		const __dirname = url.fileURLToPath(new URL('.', import.meta.url));
 
 		utils.debugLogger('puppeteer: start');
-		const executablePath = join(__dirname, '..', '.cache', 'puppeteer');
-		utils.debugLogger(`executablePath=${executablePath}`);
+		// const executablePath = join(__dirname, '..', '.cache', 'puppeteer');
+		// utils.debugLogger(`executablePath=${executablePath}`);
 
 		const browser = await puppeteer.launch({
 			headless: true,
-			executablePath,
+			// executablePath,
 			args: ['--no-sandbox'],
 		});
 		utils.debugLogger('puppeteer.launch');
@@ -337,7 +337,7 @@ const bootstap = async () => {
 		const fullTitle = await textSelector?.evaluate(el => el.textContent);
 
 		// Print the full title
-		logger.info('The title of this blog post is "%s".', fullTitle);
+		logger.info(`The title of this blog post is "${fullTitle}"`);
 
 		await browser.close();
 	})();
