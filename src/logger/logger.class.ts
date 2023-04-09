@@ -6,6 +6,8 @@ import { Config } from 'winston/lib/winston/config/index.js';
 import { ConsoleTransportInstance, Transports } from 'winston/lib/winston/transports/index.js';
 import { FormatInputPathObject } from 'path';
 import { Format } from 'logform';
+import { IConfigService } from '../config/config.interface.js';
+import { config } from 'dotenv';
 
 type UseTransports = ConsoleTransportInstance | PapertrailTransport;
 
@@ -19,12 +21,12 @@ export class UseLogger implements ILogger {
 	private useLogger: Logger;
 	private useLoggerOptions: LoggerOptions;
 
-	constructor() {
+	constructor(private readonly configService: IConfigService) {
 
-		const host: string = process.env.PAPERTRAIL_HOST as string;
-		const port: number = parseInt(process.env.PAPERTRAIL_PORT as string);
-		const hostname: string = process.env.PAPERTRAIL_HOSTNAME as string;
-		const program: string = process.env.PAPERTRAIL_PROGRAM as string;
+		const host: string = configService.get('PAPERTRAIL_HOST');
+		const port: number = parseInt(configService.get('PAPERTRAIL_PORT'));
+		const hostname: string = configService.get('PAPERTRAIL_HOSTNAME');
+		const program: string = configService.get('PAPERTRAIL_PROGRAM');
 
 		this.container = new Container();
 

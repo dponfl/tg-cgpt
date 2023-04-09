@@ -37,8 +37,8 @@ import { IPuppetService } from './puppet/puppet.interface.js';
 const bootstap = async () => {
 
 
+	const configService: IConfigService = new ConfigService();
 	const logger: ILogger = new UseLogger();
-	const configService: IConfigService = new ConfigService(logger);
 
 
 	const redisSession: RedisSession = new RedisSession({
