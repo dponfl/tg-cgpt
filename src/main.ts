@@ -38,7 +38,7 @@ const bootstap = async () => {
 
 
 	const configService: IConfigService = new ConfigService();
-	const logger: ILogger = new UseLogger();
+	const logger: ILogger = new UseLogger(configService);
 
 
 	const redisSession: RedisSession = new RedisSession({
