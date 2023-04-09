@@ -6,7 +6,7 @@
   "scripts": {
     "build": "rm -rf ./dist && tsc",
     "start": "node ./dist/main.js",
-    "start:dev": "node NODE_ENV=development ./dist/main.js",
+    "start:dev": "NODE_ENV=development node ./dist/main.js",
     "h:start": "heroku ps:scale web=1 && heroku logs -t",
     "h:stop": "heroku ps:scale web=0",
     "h:restart": "heroku ps:restart && heroku logs -t",
