@@ -363,11 +363,11 @@ const bootstap = async () => {
 	// 		}
 	// 	);
 
-	await puppetService.start();
+	// await puppetService.start();
 
 
 
-	exit;
+	// exit;
 
 	await app.initBot();
 	await app.initApi();
