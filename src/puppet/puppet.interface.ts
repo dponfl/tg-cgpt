@@ -29,6 +29,7 @@ export interface IOptions {
 
 export interface IPuppetService {
 	start: (serverId?: string) => Promise<void>;
+	startTest: (serverId?: string) => Promise<void>;
 	shutdown: () => unknown;
 	goToMain: () => unknown;
 	gotToChannel: (serverId: string, channelId: string) => unknown;

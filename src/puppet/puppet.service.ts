@@ -79,6 +79,40 @@ export class PuppetService implements IPuppetService {
 		await this.utils.sleep(1000);
 	}
 
+	public async startTest(serverId?: string): Promise<void> {
+
+		this.browser = await puppeteer.launch({
+			headless: this.options.headless,
+			userDataDir: this.options.userDataDir,
+			args: this.options.args
+		});
+
+		this.page = await this.browser.newPage();
+
+		await this.page.goto('https://developer.chrome.com/');
+
+		await this.page.setViewport({ width: 1080, height: 1024 });
+
+		await this.page.type('.search-box__input', 'automate beyond recorder');
+
+		const searchResultSelector = '.search-box__link';
+		await this.page.waitForSelector(searchResultSelector);
+		await this.page.click(searchResultSelector);
+
+		// Locate the full title with a unique string
+		const textSelector = await this.page.waitForSelector(
+			'text/Customize and automate'
+		);
+		const fullTitle = await textSelector?.evaluate((el: any) => el.textContent);
+
+		// Print the full title
+		this.logger.info(`The title of this blog post is "${fullTitle}"`);
+
+		await this.browser.close();
+
+	}
+
+
 	public async shutdown() {
 		await this.browser.close();
 	}
@@ -126,13 +160,13 @@ export class PuppetService implements IPuppetService {
 
 	public async isLoggedIn(): Promise<boolean> {
 
-		const selector = await this.page.waitForSelector('div[class*="sidebar"]', {
-			visible: true,
-			timeout: 60000,
-		});
+		// const selector = await this.page.waitForSelector('div[class*="sidebar"]', {
+		// 	visible: true,
+		// 	timeout: 3000,
+		// });
 
-		this.utils.debugLogger(`Selector (str): ${selector}`);
-		this.utils.debugLogger(`Selector: ${JSON.stringify(selector)}`);
+		// this.utils.debugLogger(`Selector (str): ${selector}`);
+		// this.utils.debugLogger(`Selector: ${JSON.stringify(selector)}`);
 
 		const sidebar = await this.page.$('div[class*="sidebar"]');
 
