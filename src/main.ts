@@ -1,5 +1,4 @@
 import { IAIImg, IAIText } from './ai/ai.interface.js';
-// import { ChatGPTService } from './ai/cgpt/cgpt.class.js';
 import { App } from './app.class.js';
 import { BotService } from './bot/bot.class.js';
 import { IConfigService } from './config/config.interface.js';
@@ -31,8 +30,6 @@ import { OpenAiChatService } from './ai/open_ai/chat.service.js';
 import { ServiceUsageStorageService } from './storage/service.class.js';
 import { RequestStorageService } from './storage/request.class.js';
 import { MjService } from './ai/mj/mj.service.js';
-import { PuppetService } from './puppet/puppet.service.js';
-import { IPuppetService } from './puppet/puppet.interface.js';
 
 const bootstap = async () => {
 
@@ -85,13 +82,6 @@ const bootstap = async () => {
 		dbServices,
 		utils
 	);
-
-	const puppetService: IPuppetService = new PuppetService(
-		logger,
-		configService,
-		utils
-	);
-
 
 	const mainController: IMainController = new MainController(
 		configService,
@@ -363,14 +353,9 @@ const bootstap = async () => {
 	// 		}
 	// 	);
 
-	await puppetService.start();
-	await puppetService.shutdown();
 
-
-	exit;
-
-	// await app.initBot();
-	// await app.initApi();
+	await app.initBot();
+	await app.initApi();
 
 };
 
