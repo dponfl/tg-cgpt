@@ -180,7 +180,10 @@ export class PuppetService implements IPuppetService {
 		await this.page.setViewport({ width: 1080, height: 1024 });
 		// await this.page.screenshot({ path: `./img/log_${time}.png`, fullPage: true });
 
-		await this.page.screenshot({ path: path.join(`img`, `log_${time}.png`), fullPage: true });
+		// await this.page.screenshot({ path: path.join(`img`, `log_${time}.png`), fullPage: true });
+
+		await this.page.screenshot({ path: `log_${time}.png`, fullPage: true });
+
 
 		const sidebar = await this.page.$('div[class*="sidebar"]');
 
