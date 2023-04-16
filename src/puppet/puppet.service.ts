@@ -8,6 +8,7 @@ import { IUtils } from '../utils/utils.class.js';
 import { IOptions, IPuppetService } from './puppet.interface.js';
 
 import { cwd } from 'node:process';
+import path from 'path';
 
 const puppeteer = puppeteerExtra.default;
 
@@ -174,10 +175,12 @@ export class PuppetService implements IPuppetService {
 		const date = new Date();
 		const time = date.getTime();
 
-		// this.logger.info(`Current working directory: ${cwd()}`);
+		this.logger.info(`Current working directory: ${cwd()}`);
 
 		await this.page.setViewport({ width: 1080, height: 1024 });
-		await this.page.screenshot({ path: `./img/log_${time}.png`, fullPage: true });
+		// await this.page.screenshot({ path: `./img/log_${time}.png`, fullPage: true });
+
+		await this.page.screenshot({ path: path.join(`img`, `log_${time}.png`), fullPage: true });
 
 		const sidebar = await this.page.$('div[class*="sidebar"]');
 
