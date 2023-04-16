@@ -25,7 +25,12 @@ export class PuppetService implements IPuppetService {
 
 	private readonly username: string;
 	private readonly password: string;
-	private readonly args: string[] = ['--no-sandbox'];
+	private readonly args: string[] = [
+		'--no-sandbox',
+		'--disable-setuid-sandbox',
+		'--disable-dev-shm-usage',
+		'--single-process'
+	];
 	private readonly userDataDir: string;
 	private readonly logs: boolean = true;
 	private readonly headless: boolean = true;
@@ -180,9 +185,9 @@ export class PuppetService implements IPuppetService {
 		await this.page.setViewport({ width: 1080, height: 1024 });
 		// await this.page.screenshot({ path: `./img/log_${time}.png`, fullPage: true });
 
-		// await this.page.screenshot({ path: path.join(`img`, `log_${time}.png`), fullPage: true });
+		await this.page.screenshot({ path: path.join(`img`, `log_${time}.png`), fullPage: true });
 
-		await this.page.screenshot({ path: `log_${time}.png`, fullPage: true });
+		// await this.page.screenshot({ path: `log_${time}.png`, fullPage: true });
 
 
 		const sidebar = await this.page.$('div[class*="sidebar"]');
