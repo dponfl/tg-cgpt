@@ -30,6 +30,8 @@ import { OpenAiChatService } from './ai/open_ai/chat.service.js';
 import { ServiceUsageStorageService } from './storage/service.class.js';
 import { RequestStorageService } from './storage/request.class.js';
 import { MjService } from './ai/mj/mj.service.js';
+import { IPuppetService } from './puppet/puppet.interface.js';
+import { PuppetService } from './puppet/puppet.service.js';
 
 const bootstap = async () => {
 
@@ -80,6 +82,12 @@ const bootstap = async () => {
 		logger,
 		configService,
 		dbServices,
+		utils
+	);
+
+	const puppetService: IPuppetService = new PuppetService(
+		logger,
+		configService,
 		utils
 	);
 
@@ -353,9 +361,15 @@ const bootstap = async () => {
 	// 		}
 	// 	);
 
+	await puppetService.start();
+	await puppetService.shutdown();
 
-	await app.initBot();
-	await app.initApi();
+
+	exit;
+
+
+	// await app.initBot();
+	// await app.initApi();
 
 };
 
