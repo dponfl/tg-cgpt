@@ -1,6 +1,6 @@
 {
   "name": "tg_chatgpt",
-  "version": "1.0.2",
+  "version": "1.0.2-HF001",
   "description": "ChatGPT TG Bot",
   "type": "module",
   "scripts": {
