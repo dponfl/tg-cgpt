@@ -110,7 +110,10 @@ export class PuppetService implements IPuppetService {
 			type: 'png'
 		});
 
-		fs.writeFileSync(path.join(`img`, `log_${time}.png`), buffer.toString('binary'), 'binary');
+		// fs.writeFileSync(path.join(`img`, `log_${time}.png`), buffer.toString('binary'), 'binary');
+
+		fs.writeFileSync('screenshot.png', buffer.toString('binary'), 'binary');
+
 
 		await this.page.type('.search-box__input', 'automate beyond recorder');
 
