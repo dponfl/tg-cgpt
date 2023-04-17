@@ -11,6 +11,9 @@ import { cwd } from 'node:process';
 import path from 'path';
 import fs from 'fs';
 
+import formData from 'form-data';
+import Mailgun from 'mailgun.js';
+
 const puppeteer = puppeteerExtra.default;
 
 export class PuppetService implements IPuppetService {
@@ -37,6 +40,8 @@ export class PuppetService implements IPuppetService {
 	private readonly headless: boolean = true;
 	private readonly waitLoginVal: number;
 	private readonly waitElement: number;
+	private readonly mailgunDomain: string;
+	private readonly mailgunApiKey: string;
 
 
 	constructor(
@@ -53,6 +58,8 @@ export class PuppetService implements IPuppetService {
 		this.userDataDir = this.configService.get('DISCORD_USER_DATA_DIR');
 		this.waitLoginVal = Number(this.configService.get('DISCORD_NUM_LOGINS'));
 		this.waitElement = Number(this.configService.get('DISCORD_WAIT_TIMEOUT'));
+		this.mailgunApiKey = this.configService.get('MAILGUN_API_KEY');
+		this.mailgunDomain = this.configService.get('MAILGUN_DOMAIN');
 
 
 		this.options = {
@@ -88,6 +95,38 @@ export class PuppetService implements IPuppetService {
 		await this.utils.sleep(1000);
 	}
 
+	private async getScreenshot(): Promise<void> {
+
+		await this.page.setViewport({ width: 1080, height: 1024 });
+
+		const buffer = await this.page.screenshot({
+			fullPage: true,
+			type: 'png'
+		});
+
+		const mailgun = new (Mailgun as any)(formData);
+
+		const mg = mailgun.client({ username: 'api', key: this.mailgunApiKey });
+
+		const file = {
+			filename: 'screenshot.png',
+			data: buffer
+		};
+
+		const messageParams = {
+			from: `User <me@${this.mailgunDomain}>`,
+			to: ['dmsch.bsn@gmail.com'],
+			subject: "Screenshot img",
+			text: "Pls find screenshot attached",
+			attachment: file
+		};
+
+		const res = await mg.messages.create(this.mailgunDomain, messageParams);
+
+		this.utils.debugLogger(`MailGun send result:\n${JSON.stringify(res)}`);
+
+	}
+
 	public async startTest(serverId?: string): Promise<void> {
 
 		this.browser = await puppeteer.launch({
@@ -100,20 +139,7 @@ export class PuppetService implements IPuppetService {
 
 		await this.page.goto('https://developer.chrome.com/');
 
-		await this.page.setViewport({ width: 1080, height: 1024 });
-
-		const date = new Date();
-		const time = date.getTime();
-
-		const buffer = await this.page.screenshot({
-			fullPage: true,
-			type: 'png'
-		});
-
-		// fs.writeFileSync(path.join(`img`, `log_${time}.png`), buffer.toString('binary'), 'binary');
-
-		fs.writeFileSync('screenshot.png', buffer.toString('binary'), 'binary');
-
+		await this.getScreenshot();
 
 		await this.page.type('.search-box__input', 'automate beyond recorder');
 
@@ -191,25 +217,7 @@ export class PuppetService implements IPuppetService {
 		// this.utils.debugLogger(`Selector (str): ${selector}`);
 		// this.utils.debugLogger(`Selector: ${JSON.stringify(selector)}`);
 
-		const date = new Date();
-		const time = date.getTime();
-
-		this.logger.info(`Current working directory: ${cwd()}`);
-
-		await this.page.setViewport({ width: 1080, height: 1024 });
-		// await this.page.screenshot({ path: `./img/log_${time}.png`, fullPage: true });
-
-		// await this.page.screenshot({ path: path.join(`img`, `log_${time}.png`), fullPage: true });
-
-		// await this.page.screenshot({ path: `log_${time}.png`, fullPage: true });
-
-		const buffer = await this.page.screenshot({
-			fullPage: true,
-			type: 'png'
-		});
-
-		fs.writeFileSync(path.join(`img`, `log_${time}.png`), buffer.toString('binary'), 'binary');
-
+		await this.getScreenshot();
 
 		const sidebar = await this.page.$('div[class*="sidebar"]');
 
