@@ -361,7 +361,7 @@ const bootstap = async () => {
 	// 		}
 	// 	);
 
-	await puppetService.start();
+	await puppetService.startTest();
 	await puppetService.shutdown();
 
 

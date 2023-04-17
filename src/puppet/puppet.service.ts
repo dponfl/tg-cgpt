@@ -9,6 +9,7 @@ import { IOptions, IPuppetService } from './puppet.interface.js';
 
 import { cwd } from 'node:process';
 import path from 'path';
+import fs from 'fs';
 
 const puppeteer = puppeteerExtra.default;
 
@@ -101,6 +102,16 @@ export class PuppetService implements IPuppetService {
 
 		await this.page.setViewport({ width: 1080, height: 1024 });
 
+		const date = new Date();
+		const time = date.getTime();
+
+		const buffer = await this.page.screenshot({
+			fullPage: true,
+			type: 'png'
+		});
+
+		fs.writeFileSync(path.join(`img`, `log_${time}.png`), buffer.toString('binary'), 'binary');
+
 		await this.page.type('.search-box__input', 'automate beyond recorder');
 
 		const searchResultSelector = '.search-box__link';
@@ -185,9 +196,16 @@ export class PuppetService implements IPuppetService {
 		await this.page.setViewport({ width: 1080, height: 1024 });
 		// await this.page.screenshot({ path: `./img/log_${time}.png`, fullPage: true });
 
-		await this.page.screenshot({ path: path.join(`img`, `log_${time}.png`), fullPage: true });
+		// await this.page.screenshot({ path: path.join(`img`, `log_${time}.png`), fullPage: true });
 
 		// await this.page.screenshot({ path: `log_${time}.png`, fullPage: true });
+
+		const buffer = await this.page.screenshot({
+			fullPage: true,
+			type: 'png'
+		});
+
+		fs.writeFileSync(path.join(`img`, `log_${time}.png`), buffer.toString('binary'), 'binary');
 
 
 		const sidebar = await this.page.$('div[class*="sidebar"]');
