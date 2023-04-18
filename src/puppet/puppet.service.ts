@@ -130,7 +130,7 @@ export class PuppetService implements IPuppetService {
 		const messageParams = {
 			from: `User <me@${this.mailgunDomain}>`,
 			to: ['dmsch.bsn@gmail.com'],
-			subject: `Screenshot img ${tag}`,
+			subject: `Screenshot img${tag}`,
 			text: "Pls find screenshot attached",
 			attachment: file
 		};
@@ -138,6 +138,35 @@ export class PuppetService implements IPuppetService {
 		const res = await mg.messages.create(this.mailgunDomain, messageParams);
 
 		this.utils.debugLogger(`MailGun send result:\n${JSON.stringify(res)}`);
+
+	}
+
+	private async getPageContent(tag: string = ''): Promise<void> {
+
+		await this.page.setViewport({ width: 1080, height: 1024 });
+
+		const content = await this.page.content();
+
+		const mailgun = new (Mailgun as any)(formData);
+
+		const mg = mailgun.client({ username: 'api', key: this.mailgunApiKey });
+
+		const file = {
+			filename: 'page.html',
+			data: content
+		};
+
+		const messageParams = {
+			from: `User <me@${this.mailgunDomain}>`,
+			to: ['dmsch.bsn@gmail.com'],
+			subject: `Page content${tag}`,
+			text: "Pls find page content attached",
+			attachment: file
+		};
+
+		const res = await mg.messages.create(this.mailgunDomain, messageParams);
+
+		this.utils.debugLogger(`MailGun send page content result:\n${JSON.stringify(res)}`);
 
 	}
 
@@ -284,6 +313,16 @@ export class PuppetService implements IPuppetService {
 		}
 
 		try {
+
+			this.logger.info(`[login]: checking page...`);
+
+			const emailInput = await this.page.$('input[name="email"]');
+
+			if (!emailInput) {
+				this.logger.warn(`[login]: no email input`);
+				this.getPageContent('-captcha');
+				throw new Error('Not a login page');
+			}
 
 			this.logger.info(`[login]: typing...`);
 
