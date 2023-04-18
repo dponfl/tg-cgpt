@@ -95,7 +95,7 @@ export class DiscordService implements IDiscordService {
 		if (captchaIframe) {
 			this.logger.info(`hCaptcha detected...`);
 
-			this.getScreenshot(' - captcha detected');
+			await this.getScreenshot(' - captcha detected');
 
 			let { captchas, filtered, error: errFindCaptcha } = await this.page.findRecaptchas();
 
@@ -113,7 +113,7 @@ export class DiscordService implements IDiscordService {
 			this.logger.warn(`solved:\n${JSON.stringify(solved)}`);
 			this.logger.warn(`errEnterCaptcha:\n${JSON.stringify(errEnterCaptcha)}`);
 
-			this.getScreenshot(' - captcha fixed');
+			await this.getScreenshot(' - captcha fixed');
 
 		}
 
@@ -256,7 +256,7 @@ export class DiscordService implements IDiscordService {
 
 		this.logger.info(`[Main]: done`);
 
-		this.getScreenshot('goToMain');
+		await this.getScreenshot('goToMain');
 	}
 
 	public async gotToChannel(serverId: string, channelId: string) {
@@ -304,7 +304,7 @@ export class DiscordService implements IDiscordService {
 
 	public async waitLogin(): Promise<boolean> {
 
-		this.getScreenshot('waitLogin start');
+		await this.getScreenshot('waitLogin start');
 
 		this.logger.info(`[login]: wait`);
 
@@ -345,7 +345,7 @@ export class DiscordService implements IDiscordService {
 			await this.utils.sleep(1000);
 		}
 
-		this.getScreenshot('waitLogin finishing');
+		await this.getScreenshot('waitLogin finishing');
 
 		return isLoggedIn;
 	}
@@ -361,7 +361,7 @@ export class DiscordService implements IDiscordService {
 
 		try {
 
-			this.getScreenshot('start login');
+			await this.getScreenshot('start login');
 
 			this.logger.info(`[login]: checking page for captcha...`);
 
@@ -373,7 +373,7 @@ export class DiscordService implements IDiscordService {
 
 			await this.page.type('input[name="password"]', this.options.password);
 
-			this.getScreenshot('input login');
+			await this.getScreenshot('input login');
 
 			await this.page.click('button[type="submit"]');
 
