@@ -244,9 +244,15 @@ export class PuppetService implements IPuppetService {
 
 		while (!isLoggedIn && tryCount < this.options.waitLogin) {
 
-			await this.getScreenshot(`-${tryCount}`);
+			// await this.getScreenshot(`-${tryCount}`);
 
-			await this.page.solveRecaptchas();
+			for (const frame of this.page.mainFrame().childFrames()) {
+				// Attempt to solve any potential captchas in those frames
+				await this.getScreenshot(`-${tryCount}`);
+				await frame.solveRecaptchas()
+			}
+
+			// await this.page.solveRecaptchas();
 
 			await this.getScreenshot(`-${tryCount}`);
 
