@@ -7,6 +7,8 @@ import { IUtils } from '../utils/utils.class.js';
 // import UserDir from 'puppeteer-extra-plugin-user-data-dir';
 import { IOptions, IPuppetService } from './puppet.interface.js';
 
+import RecaptchaPlugin from 'puppeteer-extra-plugin-recaptcha';
+
 import { cwd } from 'node:process';
 import path from 'path';
 import fs from 'fs';
@@ -42,6 +44,7 @@ export class PuppetService implements IPuppetService {
 	private readonly waitElement: number;
 	private readonly mailgunDomain: string;
 	private readonly mailgunApiKey: string;
+	private readonly twoCaptchaApiKey: string;
 
 
 	constructor(
@@ -50,8 +53,19 @@ export class PuppetService implements IPuppetService {
 		private readonly utils: IUtils,
 	) {
 
+		this.twoCaptchaApiKey = this.configService.get('2CAPTCHA_API_KEY');
+
 		puppeteer.use(StealthPlugin());
 		// puppeteer.use(require('puppeteer-extra-plugin-user-data-dir')());
+
+		puppeteer.use(
+			(RecaptchaPlugin as any)({
+				provider: {
+					id: '2captcha',
+					token: this.twoCaptchaApiKey
+				}
+			})
+		);
 
 		this.username = this.configService.get('DISCORD_USERNAME');
 		this.password = this.configService.get('DISCORD_PASSWORD');
@@ -95,7 +109,7 @@ export class PuppetService implements IPuppetService {
 		await this.utils.sleep(1000);
 	}
 
-	private async getScreenshot(): Promise<void> {
+	private async getScreenshot(tag: string = ''): Promise<void> {
 
 		await this.page.setViewport({ width: 1080, height: 1024 });
 
@@ -116,7 +130,7 @@ export class PuppetService implements IPuppetService {
 		const messageParams = {
 			from: `User <me@${this.mailgunDomain}>`,
 			to: ['dmsch.bsn@gmail.com'],
-			subject: "Screenshot img",
+			subject: `Screenshot img ${tag}`,
 			text: "Pls find screenshot attached",
 			attachment: file
 		};
@@ -209,15 +223,7 @@ export class PuppetService implements IPuppetService {
 
 	public async isLoggedIn(): Promise<boolean> {
 
-		// const selector = await this.page.waitForSelector('div[class*="sidebar"]', {
-		// 	visible: true,
-		// 	timeout: 3000,
-		// });
-
-		// this.utils.debugLogger(`Selector (str): ${selector}`);
-		// this.utils.debugLogger(`Selector: ${JSON.stringify(selector)}`);
-
-		await this.getScreenshot();
+		// await this.getScreenshot();
 
 		const sidebar = await this.page.$('div[class*="sidebar"]');
 
@@ -237,6 +243,16 @@ export class PuppetService implements IPuppetService {
 		let isLoggedIn = await this.isLoggedIn();
 
 		while (!isLoggedIn && tryCount < this.options.waitLogin) {
+
+			await this.getScreenshot(`-${tryCount}`);
+
+			await this.page.solveRecaptchas();
+
+			await this.getScreenshot(`-${tryCount}`);
+
+			await this.page.waitForNavigation();
+
+			await this.getScreenshot(`-${tryCount}`);
 
 			isLoggedIn = await this.isLoggedIn();
 
