@@ -129,6 +129,8 @@ export class DiscordService implements IDiscordService {
 
 		this.page = await this.browser.newPage();
 
+		// this.page.setDefaultNavigationTimeout(Number(this.waitElement));
+
 		if (serverId) {
 			await this.goToServer(serverId);
 		} else {
@@ -349,15 +351,9 @@ export class DiscordService implements IDiscordService {
 
 		try {
 
-			this.logger.info(`[login]: checking page...`);
+			this.logger.info(`[login]: checking page for captcha...`);
 
-			const emailInput = await this.page.$('input[name="email"]');
-
-			if (!emailInput) {
-				this.logger.warn(`[login]: no email input`);
-				this.getPageContent('-captcha');
-				throw new Error('Not a login page');
-			}
+			await this.fixCaptcha();
 
 			this.logger.info(`[login]: typing...`);
 
