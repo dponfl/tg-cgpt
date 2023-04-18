@@ -142,7 +142,7 @@ export class DiscordService implements IDiscordService {
 		await this.utils.sleep(1000);
 	}
 
-	private async getScreenshot(tag: string = ''): Promise<void> {
+	private async getScreenshot(subject: string | null = null): Promise<void> {
 
 		await this.page.setViewport({ width: 1080, height: 1024 });
 
@@ -160,21 +160,23 @@ export class DiscordService implements IDiscordService {
 			data: buffer
 		};
 
+		const date = new Date();
+
 		const messageParams = {
 			from: `User <me@${this.mailgunDomain}>`,
 			to: ['dmsch.bsn@gmail.com'],
-			subject: `Screenshot img${tag}`,
-			text: "Pls find screenshot attached",
+			subject: subject ? subject : `Screenshot img`,
+			text: `Pls find screenshot attached at ${date}`,
 			attachment: file
 		};
 
 		const res = await mg.messages.create(this.mailgunDomain, messageParams);
 
-		this.utils.debugLogger(`MailGun send result:\n${JSON.stringify(res)}`);
+		// this.utils.debugLogger(`MailGun send result:\n${JSON.stringify(res)}`);
 
 	}
 
-	private async getPageContent(tag: string = ''): Promise<void> {
+	private async getPageContent(subject: string | null = null): Promise<void> {
 
 		await this.page.setViewport({ width: 1080, height: 1024 });
 
@@ -189,11 +191,13 @@ export class DiscordService implements IDiscordService {
 			data: content
 		};
 
+		const date = new Date();
+
 		const messageParams = {
 			from: `User <me@${this.mailgunDomain}>`,
 			to: ['dmsch.bsn@gmail.com'],
-			subject: `Page content${tag}`,
-			text: "Pls find page content attached",
+			subject: subject ? subject : `Page content`,
+			text: `Pls find page content attached at ${date}`,
 			attachment: file
 		};
 
@@ -251,6 +255,8 @@ export class DiscordService implements IDiscordService {
 		await this.utils.sleep(1000);
 
 		this.logger.info(`[Main]: done`);
+
+		this.getScreenshot('goToMain');
 	}
 
 	public async gotToChannel(serverId: string, channelId: string) {
@@ -298,6 +304,8 @@ export class DiscordService implements IDiscordService {
 
 	public async waitLogin(): Promise<boolean> {
 
+		this.getScreenshot('waitLogin start');
+
 		this.logger.info(`[login]: wait`);
 
 		let tryCount = 0;
@@ -310,7 +318,7 @@ export class DiscordService implements IDiscordService {
 
 		while (!isLoggedIn && tryCount < this.options.waitLogin) {
 
-			await this.getScreenshot(`-${tryCount}`);
+			// await this.getScreenshot(`-${tryCount}`);
 
 			// for (const frame of this.page.mainFrame().childFrames()) {
 			// 	// Attempt to solve any potential captchas in those frames
@@ -318,13 +326,13 @@ export class DiscordService implements IDiscordService {
 			// 	await frame.solveRecaptchas()
 			// }
 
-			await this.page.solveRecaptchas();
+			// await this.page.solveRecaptchas();
 
-			await this.getScreenshot(`-${tryCount}`);
+			// await this.getScreenshot(`-${tryCount}`);
 
-			await this.page.waitForNavigation();
+			// await this.page.waitForNavigation();
 
-			await this.getScreenshot(`-${tryCount}`);
+			// await this.getScreenshot(`-${tryCount}`);
 
 			isLoggedIn = await this.isLoggedIn();
 
@@ -336,6 +344,8 @@ export class DiscordService implements IDiscordService {
 
 			await this.utils.sleep(1000);
 		}
+
+		this.getScreenshot('waitLogin finishing');
 
 		return isLoggedIn;
 	}
@@ -351,6 +361,8 @@ export class DiscordService implements IDiscordService {
 
 		try {
 
+			this.getScreenshot('start login');
+
 			this.logger.info(`[login]: checking page for captcha...`);
 
 			await this.fixCaptcha();
@@ -360,6 +372,8 @@ export class DiscordService implements IDiscordService {
 			await this.page.type('input[name="email"]', this.options.username);
 
 			await this.page.type('input[name="password"]', this.options.password);
+
+			this.getScreenshot('input login');
 
 			await this.page.click('button[type="submit"]');
 
