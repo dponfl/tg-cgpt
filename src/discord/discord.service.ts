@@ -5,7 +5,7 @@ import { IConfigService } from '../config/config.interface.js';
 import { ILogger } from '../logger/logger.interface.js';
 import { IUtils } from '../utils/utils.class.js';
 // import UserDir from 'puppeteer-extra-plugin-user-data-dir';
-import { IOptions, IPuppetService } from './puppet.interface.js';
+import { IOptions, IDiscordService } from './discord.interface.js';
 
 import RecaptchaPlugin from 'puppeteer-extra-plugin-recaptcha';
 
@@ -18,7 +18,7 @@ import Mailgun from 'mailgun.js';
 
 const puppeteer = puppeteerExtra.default;
 
-export class PuppetService implements IPuppetService {
+export class DiscordService implements IDiscordService {
 
 	// tslint:disable-next-line: no-any
 	protected browser: Browser | any;
@@ -86,6 +86,37 @@ export class PuppetService implements IPuppetService {
 			waitLogin: this.waitLoginVal,
 			args: this.args,
 		};
+	}
+
+	private async fixCaptcha(): Promise<void> {
+
+		const captchaIframe = await this.page.$('iframe[src*="hcaptcha.com/"]');
+
+		if (captchaIframe) {
+			this.logger.info(`hCaptcha detected...`);
+
+			this.getScreenshot(' - captcha detected');
+
+			let { captchas, filtered, error: errFindCaptcha } = await this.page.findRecaptchas();
+
+			this.logger.warn(`captchas:\n${JSON.stringify(captchas)}`);
+			this.logger.warn(`filtered:\n${JSON.stringify(filtered)}`);
+			this.logger.warn(`errFindCaptcha:\n${JSON.stringify(errFindCaptcha)}`);
+
+			let { solutions, error: errGetCaptcha } = await this.page.getRecaptchaSolutions(captchas);
+
+			this.logger.warn(`solutions:\n${JSON.stringify(solutions)}`);
+			this.logger.warn(`errGetCaptcha:\n${JSON.stringify(errGetCaptcha)}`);
+
+			let { solved, error: errEnterCaptcha } = await this.page.enterRecaptchaSolutions(solutions);
+
+			this.logger.warn(`solved:\n${JSON.stringify(solved)}`);
+			this.logger.warn(`errEnterCaptcha:\n${JSON.stringify(errEnterCaptcha)}`);
+
+			this.getScreenshot(' - captcha fixed');
+
+		}
+
 	}
 
 	public async start(serverId?: string): Promise<void> {
@@ -272,7 +303,7 @@ export class PuppetService implements IPuppetService {
 		let isLoggedIn = await this.isLoggedIn();
 
 		if (!isLoggedIn) {
-			this.getPageContent('-captcha');
+			await this.fixCaptcha();
 		}
 
 		while (!isLoggedIn && tryCount < this.options.waitLogin) {

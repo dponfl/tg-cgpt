@@ -27,7 +27,7 @@ export interface IOptions {
 	args: string[];
 }
 
-export interface IPuppetService {
+export interface IDiscordService {
 	start: (serverId?: string) => Promise<void>;
 	startTest: (serverId?: string) => Promise<void>;
 	shutdown: () => unknown;
