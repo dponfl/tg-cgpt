@@ -48,6 +48,9 @@ export class DiscordService implements IDiscordService {
 	private readonly mg: any;
 	private readonly fixie_ip: string;
 	private readonly fixie_port: string;
+	private readonly fixie_user: string;
+	private readonly fixies_pw: string;
+
 
 
 	constructor(
@@ -79,8 +82,10 @@ export class DiscordService implements IDiscordService {
 		this.mailgunDomain = this.configService.get('MAILGUN_DOMAIN');
 		this.fixie_ip = this.configService.get('FIXIE_IP');
 		this.fixie_port = this.configService.get('FIXIE_PORT');
+		this.fixie_user = this.configService.get('FIXIE_USER');
+		this.fixies_pw = this.configService.get('FIXIE_PW');
 
-		// this.args.push(`--proxy-server=http://${this.fixie_ip}:${this.fixie_port}`);
+		this.args.push(`--proxy-server=http://${this.fixie_ip}:${this.fixie_port}`);
 
 		this.options = {
 			logs: this.logs,
@@ -142,6 +147,9 @@ export class DiscordService implements IDiscordService {
 		this.page = await this.browser.newPage();
 
 		// this.page.setDefaultNavigationTimeout(Number(this.waitElement));
+
+		// authenticate in proxy using basic browser auth
+		await this.page.authenticate({ username: this.fixie_user, password: this.fixies_pw });
 
 		if (serverId) {
 			await this.goToServer(serverId);
