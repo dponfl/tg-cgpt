@@ -80,7 +80,7 @@ export class DiscordService implements IDiscordService {
 		this.fixie_ip = this.configService.get('FIXIE_IP');
 		this.fixie_port = this.configService.get('FIXIE_PORT');
 
-		this.args.push(`--proxy-server=http://${this.fixie_ip}:${this.fixie_port}`);
+		// this.args.push(`--proxy-server=http://${this.fixie_ip}:${this.fixie_port}`);
 
 		this.options = {
 			logs: this.logs,
