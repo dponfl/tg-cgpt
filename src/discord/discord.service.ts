@@ -45,6 +45,7 @@ export class DiscordService implements IDiscordService {
 	private readonly mailgunDomain: string;
 	private readonly mailgunApiKey: string;
 	private readonly twoCaptchaApiKey: string;
+	private readonly mg: any;
 
 
 	constructor(
@@ -86,6 +87,12 @@ export class DiscordService implements IDiscordService {
 			waitLogin: this.waitLoginVal,
 			args: this.args,
 		};
+
+		const mailgun = new (Mailgun as any)(formData);
+
+		this.mg = mailgun.client({ username: 'api', key: this.mailgunApiKey });
+
+
 	}
 
 	private async fixCaptcha(): Promise<void> {
@@ -148,12 +155,9 @@ export class DiscordService implements IDiscordService {
 
 		const buffer = await this.page.screenshot({
 			fullPage: true,
+			fromSurface: false,
 			type: 'png'
 		});
-
-		const mailgun = new (Mailgun as any)(formData);
-
-		const mg = mailgun.client({ username: 'api', key: this.mailgunApiKey });
 
 		const file = {
 			filename: 'screenshot.png',
@@ -170,7 +174,7 @@ export class DiscordService implements IDiscordService {
 			attachment: file
 		};
 
-		const res = await mg.messages.create(this.mailgunDomain, messageParams);
+		const res = await this.mg.messages.create(this.mailgunDomain, messageParams);
 
 		// this.utils.debugLogger(`MailGun send result:\n${JSON.stringify(res)}`);
 
@@ -181,10 +185,6 @@ export class DiscordService implements IDiscordService {
 		await this.page.setViewport({ width: 1080, height: 1024 });
 
 		const content = await this.page.content();
-
-		const mailgun = new (Mailgun as any)(formData);
-
-		const mg = mailgun.client({ username: 'api', key: this.mailgunApiKey });
 
 		const file = {
 			filename: 'page.html',
@@ -201,7 +201,7 @@ export class DiscordService implements IDiscordService {
 			attachment: file
 		};
 
-		const res = await mg.messages.create(this.mailgunDomain, messageParams);
+		const res = await this.mg.messages.create(this.mailgunDomain, messageParams);
 
 		this.utils.debugLogger(`MailGun send page content result:\n${JSON.stringify(res)}`);
 
@@ -361,11 +361,11 @@ export class DiscordService implements IDiscordService {
 
 		try {
 
-			await this.getScreenshot('start login');
+			await this.getScreenshot('login: start');
 
-			this.logger.info(`[login]: checking page for captcha...`);
+			// this.logger.info(`[login]: checking page for captcha...`);
 
-			await this.fixCaptcha();
+			// await this.fixCaptcha();
 
 			this.logger.info(`[login]: typing...`);
 
@@ -373,7 +373,7 @@ export class DiscordService implements IDiscordService {
 
 			await this.page.type('input[name="password"]', this.options.password);
 
-			await this.getScreenshot('input login');
+			await this.getScreenshot('login: input done');
 
 			await this.page.click('button[type="submit"]');
 
@@ -387,7 +387,11 @@ export class DiscordService implements IDiscordService {
 			this.utils.errorLog(this, e, methodName, '[login]: failed');
 		}
 
+		await this.getScreenshot('login: before waitLogin');
+
 		const isLoggedIn = await this.waitLogin();
+
+		await this.getScreenshot('login: after waitLogin');
 
 		if (isLoggedIn) {
 			this.logger.info(`[login] successful!`);
