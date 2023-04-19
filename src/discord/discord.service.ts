@@ -46,6 +46,8 @@ export class DiscordService implements IDiscordService {
 	private readonly mailgunApiKey: string;
 	private readonly twoCaptchaApiKey: string;
 	private readonly mg: any;
+	private readonly fixie_ip: string;
+	private readonly fixie_port: string;
 
 
 	constructor(
@@ -75,7 +77,10 @@ export class DiscordService implements IDiscordService {
 		this.waitElement = Number(this.configService.get('DISCORD_WAIT_TIMEOUT'));
 		this.mailgunApiKey = this.configService.get('MAILGUN_API_KEY');
 		this.mailgunDomain = this.configService.get('MAILGUN_DOMAIN');
+		this.fixie_ip = this.configService.get('FIXIE_IP');
+		this.fixie_port = this.configService.get('FIXIE_PORT');
 
+		this.args.push(`--proxy-server=http://${this.fixie_ip}:${this.fixie_port}`);
 
 		this.options = {
 			logs: this.logs,
@@ -102,7 +107,7 @@ export class DiscordService implements IDiscordService {
 		if (captchaIframe) {
 			this.logger.info(`hCaptcha detected...`);
 
-			await this.getScreenshot(' - captcha detected');
+			await this.getScreenshot('Captcha detected');
 
 			let { captchas, filtered, error: errFindCaptcha } = await this.page.findRecaptchas();
 
@@ -120,7 +125,7 @@ export class DiscordService implements IDiscordService {
 			this.logger.warn(`solved:\n${JSON.stringify(solved)}`);
 			this.logger.warn(`errEnterCaptcha:\n${JSON.stringify(errEnterCaptcha)}`);
 
-			await this.getScreenshot(' - captcha fixed');
+			await this.getScreenshot('Captcha fixed');
 
 		}
 
@@ -207,6 +212,18 @@ export class DiscordService implements IDiscordService {
 
 	}
 
+	private async checkIp(): Promise<void> {
+
+		this.logger.info(`Checking IP...`);
+
+		const pageUrl = 'https://whatismyipaddress.com/';
+
+		await this.page.goto(pageUrl, { waitUntil: 'load' });
+
+		await this.getScreenshot('Checking IP');;
+
+	}
+
 	public async startTest(serverId?: string): Promise<void> {
 
 		this.browser = await puppeteer.launch({
@@ -247,6 +264,8 @@ export class DiscordService implements IDiscordService {
 	}
 
 	public async goToMain() {
+
+		await this.checkIp();
 
 		this.logger.info(`[Main]: go`);
 
@@ -295,7 +314,7 @@ export class DiscordService implements IDiscordService {
 
 		const sidebar = await this.page.$('div[class*="sidebar"]');
 
-		this.utils.debugLogger(`page.$('div[class*="sidebar"]')=${sidebar}`);
+		// this.utils.debugLogger(`page.$('div[class*="sidebar"]')=${sidebar}`);
 
 		this.logger.info(`[login]: is in? ${sidebar !== null ? 'yes' : 'no'}`);
 
@@ -378,6 +397,12 @@ export class DiscordService implements IDiscordService {
 			await this.page.click('button[type="submit"]');
 
 			this.logger.info(`[login]: submited`);
+
+			this.logger.info(`[login]: checking for captcha: started...`);
+
+			await this.fixCaptcha();
+
+			this.logger.info(`[login]: checking for captcha: done...`);
 
 			await this.page.waitForNavigation({ waitUntil: 'load' });
 
