@@ -366,6 +366,11 @@ const bootstap = async () => {
 	await app.initApi();
 
 	await discordService.start();
+
+	await discordService.clickServer('MindMate');
+	await discordService.clickChannel('mindmate');
+	await discordService.sendMessage('Hello World!');
+
 	await discordService.shutdown();
 
 };

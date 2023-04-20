@@ -30,13 +30,14 @@ export interface IOptions {
 export interface IDiscordService {
 	start: (serverId?: string) => Promise<void>;
 	startTest: (serverId?: string) => Promise<void>;
-	shutdown: () => unknown;
-	goToMain: () => unknown;
-	gotToChannel: (serverId: string, channelId: string) => unknown;
-	goToServer: (serverId: string) => unknown;
-	clickChannel?: (channel: string) => unknown;
-	clickServer?: (server: string) => unknown;
-	sendMessage?: (message: string) => unknown;
+	shutdown: () => Promise<void>;
+	closeAllPopups: () => Promise<void>;
+	goToMain: () => Promise<void>;
+	gotToChannel: (serverId: string, channelId: string) => Promise<void>;
+	goToServer: (serverId: string) => Promise<void>;
+	clickChannel: (channel: string) => Promise<void>;
+	clickServer: (server: string) => Promise<void>;
+	sendMessage: (message: string) => Promise<void>;
 	sendCommand?: (command: string, args?: string) => unknown;
 	getLastMsgRaw?: () => unknown;
 	getLastMsg?: () => unknown;

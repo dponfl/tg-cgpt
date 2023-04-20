@@ -180,7 +180,7 @@ export class DiscordService implements IDiscordService {
 		const date = new Date();
 
 		const messageParams = {
-			from: `User <me@${this.mailgunDomain}>`,
+			from: `TG-ChatGPT <me@${this.mailgunDomain}>`,
 			to: ['dmsch.bsn@gmail.com'],
 			subject: subject ? subject : `Screenshot img`,
 			text: `Pls find screenshot attached at ${date}`,
@@ -207,7 +207,7 @@ export class DiscordService implements IDiscordService {
 		const date = new Date();
 
 		const messageParams = {
-			from: `User <me@${this.mailgunDomain}>`,
+			from: `TG-ChatGPT <me@${this.mailgunDomain}>`,
 			to: ['dmsch.bsn@gmail.com'],
 			subject: subject ? subject : `Page content`,
 			text: `Pls find page content attached at ${date}`,
@@ -228,7 +228,18 @@ export class DiscordService implements IDiscordService {
 
 		await this.page.goto(pageUrl, { waitUntil: 'load' });
 
-		await this.getScreenshot('Checking IP');;
+		await this.getScreenshot('Checking IP: started');
+
+		this.logger.info(`[checkIp]: waitForSelector('#qc-cmp2-ui')`);
+		await this.page.waitForSelector('#qc-cmp2-ui');
+
+		this.logger.info('[chckIp]: press "DISAGREE" button & waiting for ip list');
+		await Promise.all([
+			this.page.waitForSelector('div.ip - address - list'),
+			this.page.click('button["DISAGREE"]'),
+		]);
+
+		await this.getScreenshot('Checking IP: done');
 
 	}
 
@@ -265,13 +276,20 @@ export class DiscordService implements IDiscordService {
 
 	}
 
-
-	public async shutdown() {
+	public async shutdown(): Promise<void> {
 		this.logger.info(`Shutdown browser`);
 		await this.browser.close();
 	}
 
-	public async goToMain() {
+	public async closeAllPopups(): Promise<void> {
+		const btns = await this.page.$$('button[aria-label="Close"]')
+		for (const btn of btns) {
+			await btn.click()
+			await this.utils.sleep(1000);
+		}
+	}
+
+	public async goToMain(): Promise<void> {
 
 		await this.checkIp();
 
@@ -286,7 +304,7 @@ export class DiscordService implements IDiscordService {
 		await this.getScreenshot('goToMain');
 	}
 
-	public async gotToChannel(serverId: string, channelId: string) {
+	public async gotToChannel(serverId: string, channelId: string): Promise<void> {
 
 		this.logger.info(`channel[${serverId}, ${channelId}]: go`);
 
@@ -301,7 +319,7 @@ export class DiscordService implements IDiscordService {
 		this.logger.info(`channel[${serverId}, ${channelId}]: done`);
 	}
 
-	public async goToServer(serverId: string) {
+	public async goToServer(serverId: string): Promise<void> {
 
 		this.logger.info(`server[${serverId}]: go`);
 
@@ -314,6 +332,55 @@ export class DiscordService implements IDiscordService {
 		await this.utils.sleep(1000);
 
 		this.logger.info(`server[${serverId}]: done`);
+	}
+
+	public async clickChannel(channel: string): Promise<void> {
+
+		this.logger.info(`channel[${channel}]: click`);
+
+		await this.page.waitForSelector(`a[aria-label*="${channel}"]`, { visible: true });
+
+		await this.page.click(`a[aria-label*="${channel}"]`);
+
+		this.logger.info(`channel[${channel}]: navigation`);
+
+		await this.page.waitForSelector(`ol[data-list-id="chat-messages"]`, { visible: true });
+
+		this.logger.info(`channel[${channel}]: done`);
+
+		await this.getScreenshot('clickChannel');
+	}
+
+	public async clickServer(server: string): Promise<void> {
+
+		this.logger.info(`server[${server}]: click`);
+
+		await this.page.waitForSelector(`div[aria-label="Servers"]`, { visible: true });
+
+		await this.page.waitForSelector(`div[data-dnd-name="${server}"]`, { visible: true });
+
+		await this.page.click(`div[data-dnd-name="${server}"]`);
+
+		this.logger.info(`server[${server}]: navigation`);
+
+		await this.page.waitForSelector(`ul[aria-label="Channels"]`, { visible: true });
+
+		this.logger.info(`server[${server}]: done`);
+
+		await this.getScreenshot('clickServer');
+	}
+
+	public async sendMessage(message: string): Promise<void> {
+
+		this.logger.info(`send message{${message}}`);
+
+		await this.page.click('[data-slate-editor="true"]');
+
+		await this.page.type('[data-slate-editor="true"]', message);
+
+		await this.page.keyboard.press('Enter');
+
+		await this.getScreenshot('sendMessage');
 	}
 
 	public async isLoggedIn(): Promise<boolean> {
@@ -331,7 +398,7 @@ export class DiscordService implements IDiscordService {
 
 	public async waitLogin(): Promise<boolean> {
 
-		await this.getScreenshot('waitLogin start');
+		await this.getScreenshot('waitLogin started');
 
 		this.logger.info(`[login]: wait`);
 
@@ -345,22 +412,6 @@ export class DiscordService implements IDiscordService {
 
 		while (!isLoggedIn && tryCount < this.options.waitLogin) {
 
-			// await this.getScreenshot(`-${tryCount}`);
-
-			// for (const frame of this.page.mainFrame().childFrames()) {
-			// 	// Attempt to solve any potential captchas in those frames
-			// 	await this.getScreenshot(`-${tryCount}`);
-			// 	await frame.solveRecaptchas()
-			// }
-
-			// await this.page.solveRecaptchas();
-
-			// await this.getScreenshot(`-${tryCount}`);
-
-			// await this.page.waitForNavigation();
-
-			// await this.getScreenshot(`-${tryCount}`);
-
 			isLoggedIn = await this.isLoggedIn();
 
 			tryCount++;
@@ -372,7 +423,7 @@ export class DiscordService implements IDiscordService {
 			await this.utils.sleep(1000);
 		}
 
-		await this.getScreenshot('waitLogin finishing');
+		await this.getScreenshot('waitLogin finished');
 
 		return isLoggedIn;
 	}
@@ -390,10 +441,6 @@ export class DiscordService implements IDiscordService {
 
 			await this.getScreenshot('login: start');
 
-			// this.logger.info(`[login]: checking page for captcha...`);
-
-			// await this.fixCaptcha();
-
 			this.logger.info(`[login]: typing...`);
 
 			await this.page.type('input[name="email"]', this.options.username);
@@ -406,6 +453,8 @@ export class DiscordService implements IDiscordService {
 
 			this.logger.info(`[login]: submited`);
 
+			await this.utils.sleep(3000);
+
 			this.logger.info(`[login]: checking for captcha: started...`);
 
 			await this.fixCaptcha();
@@ -417,14 +466,13 @@ export class DiscordService implements IDiscordService {
 			//await (new Promise(r => setTimeout(r, 1000)))
 
 		} catch (e) {
+
+			await this.getScreenshot('login: on error catch');
+
 			this.utils.errorLog(this, e, methodName, '[login]: failed');
 		}
 
-		await this.getScreenshot('login: before waitLogin');
-
 		const isLoggedIn = await this.waitLogin();
-
-		await this.getScreenshot('login: after waitLogin');
 
 		if (isLoggedIn) {
 			this.logger.info(`[login] successful!`);
