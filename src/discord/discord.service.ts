@@ -39,7 +39,7 @@ export class DiscordService implements IDiscordService {
 	];
 	private readonly userDataDir: string;
 	private readonly logs: boolean = true;
-	private readonly headless: boolean = false;
+	private readonly headless: boolean = true;
 	private readonly waitLoginVal: number;
 	private readonly waitElement: number;
 	private readonly mailgunDomain: string;
