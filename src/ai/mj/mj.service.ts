@@ -37,7 +37,7 @@ export class MjService implements IMjService {
 		this.password = this.configService.get('DISCORD_PASSWORD');
 		this.userDataDir = this.configService.get('DISCORD_USER_DATA_DIR');
 		this.waitLogin = Number(this.configService.get('DISCORD_NUM_LOGINS'));
-		this.waitElement = Number(this.configService.get('DISCORD_WAIT_TIMEOUT'));
+		this.waitElement = Number(this.configService.get('DISCORD_WAIT_ELEMENT_ATTEMPTS'));
 
 		this.options = options(
 			this.username,

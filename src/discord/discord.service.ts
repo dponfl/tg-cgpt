@@ -9,10 +9,6 @@ import { IOptions, IDiscordService, IIds, IMessage } from './discord.interface.j
 
 import RecaptchaPlugin from 'puppeteer-extra-plugin-recaptcha';
 
-import { cwd } from 'node:process';
-import path from 'path';
-import fs from 'fs';
-
 import formData from 'form-data';
 import Mailgun from 'mailgun.js';
 
@@ -39,9 +35,9 @@ export class DiscordService implements IDiscordService {
 	];
 	private readonly userDataDir: string;
 	private readonly logs: boolean = true;
-	private readonly headless: boolean = false;
+	private readonly headless: boolean = true;
 	private readonly waitLoginVal: number;
-	private readonly waitElement: number;
+	private readonly waitElementAttempts: number;
 	private readonly mailgunDomain: string;
 	private readonly mailgunApiKey: string;
 	private readonly twoCaptchaApiKey: string;
@@ -77,7 +73,7 @@ export class DiscordService implements IDiscordService {
 		this.password = this.configService.get('DISCORD_PASSWORD');
 		this.userDataDir = this.configService.get('DISCORD_USER_DATA_DIR');
 		this.waitLoginVal = Number(this.configService.get('DISCORD_NUM_LOGINS'));
-		this.waitElement = Number(this.configService.get('DISCORD_WAIT_TIMEOUT'));
+		this.waitElementAttempts = Number(this.configService.get('DISCORD_WAIT_ELEMENT_ATTEMPTS'));
 		this.mailgunApiKey = this.configService.get('MAILGUN_API_KEY');
 		this.mailgunDomain = this.configService.get('MAILGUN_DOMAIN');
 		this.fixie_ip = this.configService.get('FIXIE_IP');
@@ -96,7 +92,7 @@ export class DiscordService implements IDiscordService {
 			username: this.username,
 			password: this.password,
 			userDataDir: this.userDataDir,
-			waitElement: this.waitElement,
+			waitElement: this.waitElementAttempts,
 			waitLogin: this.waitLoginVal,
 			args: this.args,
 		};
@@ -273,7 +269,7 @@ export class DiscordService implements IDiscordService {
 
 		this.page = await this.browser.newPage();
 
-		// this.page.setDefaultNavigationTimeout(Number(this.waitElement));
+		// this.page.setDefaultNavigationTimeout(60000);
 
 		/**
 		 * authenticate in proxy using basic browser auth
@@ -411,7 +407,7 @@ export class DiscordService implements IDiscordService {
 
 	public async sendCommand(command: string, args?: string): Promise<void> {
 
-		this.logger.info(`send command{${command}: ${args}}`);
+		this.logger.info(`send command[${command}: ${args ? args : '[No args]'}]`);
 
 		await this.page.click('[data-slate-editor="true"]');
 
@@ -434,6 +430,8 @@ export class DiscordService implements IDiscordService {
 		await this.page.keyboard.press('Enter');
 
 		await this.utils.sleep(1000);
+
+		await this.getScreenshot('sendCommand');
 	}
 
 	private async getLastMsgRaw(): Promise<ElementHandle> {
@@ -443,7 +441,7 @@ export class DiscordService implements IDiscordService {
 		return await this.page.$('ol[data-list-id="chat-messages"] > li:last-of-type');
 	}
 
-	private async getLastMsg(): Promise<IMessage | undefined> {
+	public async getLastMsg(): Promise<IMessage | undefined> {
 
 		await this.page.waitForSelector('ol[data-list-id="chat-messages"] > li:last-of-type');
 
@@ -476,7 +474,7 @@ export class DiscordService implements IDiscordService {
 		}
 	}
 
-	private async getProperty(elem: ElementHandle | null, property: string): Promise<string | null> {
+	public async getProperty(elem: ElementHandle | null, property: string): Promise<string | null> {
 
 		const jsProperty = await elem?.getProperty(property);
 
@@ -534,14 +532,13 @@ export class DiscordService implements IDiscordService {
 			for (const div of divs) {
 				const textContent = await div.evaluate(el => el.textContent);
 
-				if (!textContent) {
-					throw new Error('textContent is null');
-				}
-
-				if (textContent.startsWith('U') || textContent.startsWith('V')) {
+				if (textContent
+					&& (textContent.startsWith('U') || textContent.startsWith('V'))
+				) {
 					actions[textContent] = div
 				}
 			}
+
 			return {
 				channelId: channelId,
 				messageId: messageId,
@@ -551,6 +548,7 @@ export class DiscordService implements IDiscordService {
 				article: articleContent,
 				actions: actions
 			}
+
 		} catch (error) {
 			this.utils.errorLog(this, error, methodName);
 		}
@@ -599,6 +597,47 @@ export class DiscordService implements IDiscordService {
 		await this.getScreenshot('waitLogin finished');
 
 		return isLoggedIn;
+	}
+
+	public async waitElement(requiredEval: string, validate?: (elem: ElementHandle) => Promise<boolean>): Promise<void> {
+
+		const methodName = 'waitElement';
+
+		try {
+
+			let tryCount = 0;
+
+			while (tryCount < this.options.waitElement) {
+
+				const last: ElementHandle = await this.getLastMsgRaw();
+
+				const found = await last.$(requiredEval);
+
+				let isValid = found != null;
+
+				if (
+					isValid
+					&& validate != null
+					&& found
+				) {
+					isValid = await validate(found);
+				}
+
+				this.logger.info(`[waitElement]: found[${found !== null ? "yes" : "no"}] valid[${isValid ? "yes" : "no"}]`);
+
+				this.getScreenshot('waitElement');
+
+				tryCount++;
+
+				if (isValid || tryCount >= this.options.waitElement) {
+					break;
+				};
+
+				await this.utils.sleep(7000);
+			}
+		} catch (error) {
+			this.utils.errorLog(this, error, methodName);
+		}
 	}
 
 	public async login(): Promise<boolean> {

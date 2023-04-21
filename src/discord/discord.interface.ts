@@ -40,12 +40,13 @@ export interface IDiscordService {
 	sendMessage: (message: string) => Promise<void>;
 	sendCommand: (command: string, args?: string) => Promise<void>;
 	// getLastMsgRaw: () => Promise<ElementHandle>;
-	// getLastMsg?: () => Promise<IMessage | undefined>;
+	getLastMsg: () => Promise<IMessage | undefined>;
 	// getMessage: (messageId: string) => Promise<IMessage | undefined>;
 	// parseMessage: (li: ElementHandle) => Promise<IMessage>;
 	// parseIds: (id: string) => IIds;
-	// getProperty: (elem: ElementHandle | null, property: string) => Promise<string | null>;
+	getProperty: (elem: ElementHandle | null, property: string) => Promise<string | null>;
 	login: () => Promise<boolean>;
 	isLoggedIn: () => Promise<boolean>;
 	waitLogin: () => Promise<boolean>;
+	waitElement: (requiredEval: string, validate?: (elem: ElementHandle) => Promise<boolean>) => Promise<void>;
 }

@@ -32,6 +32,8 @@ import { RequestStorageService } from './storage/request.class.js';
 import { MjService } from './ai/mj/mj.service.js';
 import { IDiscordService } from './discord/discord.interface.js';
 import { DiscordService } from './discord/discord.service.js';
+import { IMidjourneyService } from './midjourney/midjourney.interface.js';
+import { MidjourneyService } from './midjourney/midjourney,service.js';
 
 const bootstap = async () => {
 
@@ -71,6 +73,19 @@ const bootstap = async () => {
 		requestsDbService: new RequestStorageService(dbConnection, logger, utils)
 	};
 
+	const discordService: IDiscordService = new DiscordService(
+		logger,
+		configService,
+		utils
+	);
+
+	const midjourneyService: IMidjourneyService = new MidjourneyService(
+		logger,
+		configService,
+		utils,
+		discordService
+	);
+
 	const chatOpenAiService: IAIText = new OpenAiChatService(
 		logger,
 		configService,
@@ -82,12 +97,6 @@ const bootstap = async () => {
 		logger,
 		configService,
 		dbServices,
-		utils
-	);
-
-	const discordService: IDiscordService = new DiscordService(
-		logger,
-		configService,
 		utils
 	);
 
@@ -370,6 +379,13 @@ const bootstap = async () => {
 	await discordService.clickServer('MindMate');
 	await discordService.clickChannel('mindmate');
 	// await discordService.sendMessage('Hello World!');
+
+	// const infoData = await midjourneyService.info();
+	// logger.info(`Midjourney account info:\n${JSON.stringify(infoData)}`);
+
+	const imgPrompt = 'A cat wearing a top hat and a monocle drinking tea, hyperrealistic --ar 16:9 --q 2 --v 5';
+	const imgObj = await midjourneyService.imagine(imgPrompt);
+	logger.info(`Image:\n${JSON.stringify(imgObj)}`);
 
 	await discordService.shutdown();
 
