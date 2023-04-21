@@ -3,11 +3,11 @@ import { ElementHandle } from 'puppeteer';
 export interface IMessage {
 	channelId: string;
 	messageId: string;
-	messageContent: string;
-	imageUrl?: string;
-	lazyImageUrl?: string;
+	messageContent: string | null;
+	imageUrl?: string | null;
+	lazyImageUrl?: string | null;
 
-	article?: string;
+	article?: string | null;
 	actions: { [key: string]: ElementHandle };
 }
 
@@ -38,12 +38,13 @@ export interface IDiscordService {
 	clickChannel: (channel: string) => Promise<void>;
 	clickServer: (server: string) => Promise<void>;
 	sendMessage: (message: string) => Promise<void>;
-	sendCommand?: (command: string, args?: string) => unknown;
-	getLastMsgRaw?: () => unknown;
-	getLastMsg?: () => unknown;
-	parseMessage?: (li: ElementHandle) => unknown;
-	parseIds?: (id: string) => IIds;
-	getProperty?: (elem: ElementHandle | null, property: string) => Promise<string | null>;
+	sendCommand: (command: string, args?: string) => Promise<void>;
+	// getLastMsgRaw: () => Promise<ElementHandle>;
+	// getLastMsg?: () => Promise<IMessage | undefined>;
+	// getMessage: (messageId: string) => Promise<IMessage | undefined>;
+	// parseMessage: (li: ElementHandle) => Promise<IMessage>;
+	// parseIds: (id: string) => IIds;
+	// getProperty: (elem: ElementHandle | null, property: string) => Promise<string | null>;
 	login: () => Promise<boolean>;
 	isLoggedIn: () => Promise<boolean>;
 	waitLogin: () => Promise<boolean>;

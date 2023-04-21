@@ -1,11 +1,11 @@
-import { Browser, Page } from 'puppeteer';
+import { Browser, Page, ElementHandle } from 'puppeteer';
 import puppeteerExtra from 'puppeteer-extra';
 import StealthPlugin from 'puppeteer-extra-plugin-stealth';
 import { IConfigService } from '../config/config.interface.js';
 import { ILogger } from '../logger/logger.interface.js';
 import { IUtils } from '../utils/utils.class.js';
 // import UserDir from 'puppeteer-extra-plugin-user-data-dir';
-import { IOptions, IDiscordService } from './discord.interface.js';
+import { IOptions, IDiscordService, IIds, IMessage } from './discord.interface.js';
 
 import RecaptchaPlugin from 'puppeteer-extra-plugin-recaptcha';
 
@@ -39,7 +39,7 @@ export class DiscordService implements IDiscordService {
 	];
 	private readonly userDataDir: string;
 	private readonly logs: boolean = true;
-	private readonly headless: boolean = true;
+	private readonly headless: boolean = false;
 	private readonly waitLoginVal: number;
 	private readonly waitElement: number;
 	private readonly mailgunDomain: string;
@@ -85,7 +85,7 @@ export class DiscordService implements IDiscordService {
 		this.fixie_user = this.configService.get('FIXIE_USER');
 		this.fixies_pw = this.configService.get('FIXIE_PW');
 
-		this.args.push(`--proxy-server=http://${this.fixie_ip}:${this.fixie_port}`);
+		// this.args.push(`--proxy-server=http://${this.fixie_ip}:${this.fixie_port}`);
 
 		this.options = {
 			logs: this.logs,
@@ -134,32 +134,6 @@ export class DiscordService implements IDiscordService {
 
 		}
 
-	}
-
-	public async start(serverId?: string): Promise<void> {
-
-		this.browser = await puppeteer.launch({
-			headless: this.options.headless,
-			userDataDir: this.options.userDataDir,
-			args: this.options.args
-		});
-
-		this.page = await this.browser.newPage();
-
-		// this.page.setDefaultNavigationTimeout(Number(this.waitElement));
-
-		// authenticate in proxy using basic browser auth
-		await this.page.authenticate({ username: this.fixie_user, password: this.fixies_pw });
-
-		if (serverId) {
-			await this.goToServer(serverId);
-		} else {
-			await this.goToMain();
-		}
-
-		await this.login();
-
-		await this.utils.sleep(1000);
 	}
 
 	private async getScreenshot(subject: string | null = null): Promise<void> {
@@ -230,14 +204,24 @@ export class DiscordService implements IDiscordService {
 
 		await this.getScreenshot('Checking IP: started');
 
-		this.logger.info(`[checkIp]: waitForSelector('#qc-cmp2-ui')`);
-		await this.page.waitForSelector('#qc-cmp2-ui');
+		await this.utils.sleep(3000);
 
-		this.logger.info('[chckIp]: press "DISAGREE" button & waiting for ip list');
-		await Promise.all([
-			this.page.waitForSelector('div.ip - address - list'),
-			this.page.click('button["DISAGREE"]'),
-		]);
+		// this.logger.info(`[checkIp]: waitForSelector('#qc-cmp2-ui')`);
+		// await this.page.waitForSelector('#qc-cmp2-ui');
+
+		const popup = await this.page.$('#qc-cmp2-ui');
+
+		if (popup) {
+			this.logger.info('[chckIp]: press "DISAGREE" button & waiting for ip list');
+			await Promise.all([
+				this.page.waitForSelector('div.ip-address-list'),
+				this.page.click('div.qc-cmp2-summary-buttons > button:nth-child(2)'),
+			]);
+		}
+
+
+		// //*[@id="qc-cmp2-ui"]/div[2]/div/button[2]
+		// document.querySelector("#qc-cmp2-ui > div.qc-cmp2-footer.qc-cmp2-footer-overlay.qc-cmp2-footer-scrolled > div > button:nth-child(2)")
 
 		await this.getScreenshot('Checking IP: done');
 
@@ -274,6 +258,32 @@ export class DiscordService implements IDiscordService {
 
 		await this.browser.close();
 
+	}
+
+	public async start(serverId?: string): Promise<void> {
+
+		this.browser = await puppeteer.launch({
+			headless: this.options.headless,
+			userDataDir: this.options.userDataDir,
+			args: this.options.args
+		});
+
+		this.page = await this.browser.newPage();
+
+		// this.page.setDefaultNavigationTimeout(Number(this.waitElement));
+
+		// authenticate in proxy using basic browser auth
+		// await this.page.authenticate({ username: this.fixie_user, password: this.fixies_pw });
+
+		if (serverId) {
+			await this.goToServer(serverId);
+		} else {
+			await this.goToMain();
+		}
+
+		await this.login();
+
+		await this.utils.sleep(1000);
 	}
 
 	public async shutdown(): Promise<void> {
@@ -355,11 +365,19 @@ export class DiscordService implements IDiscordService {
 
 		this.logger.info(`server[${server}]: click`);
 
+		await this.utils.sleep(3000);
+
+		await this.closeAllPopups();
+
 		await this.page.waitForSelector(`div[aria-label="Servers"]`, { visible: true });
+
+		// await this.getScreenshot('div[aria-label="Servers"]');
 
 		await this.page.waitForSelector(`div[data-dnd-name="${server}"]`, { visible: true });
 
 		await this.page.click(`div[data-dnd-name="${server}"]`);
+
+		// await this.getScreenshot(`click on div[aria-label="${server}"]`);
 
 		this.logger.info(`server[${server}]: navigation`);
 
@@ -381,6 +399,153 @@ export class DiscordService implements IDiscordService {
 		await this.page.keyboard.press('Enter');
 
 		await this.getScreenshot('sendMessage');
+	}
+
+	public async sendCommand(command: string, args?: string): Promise<void> {
+
+		this.logger.info(`send command{${command}: ${args}}`);
+
+		await this.page.click('[data-slate-editor="true"]');
+
+		await this.page.keyboard.press('/');
+
+		await this.utils.sleep(1000);
+
+		await this.page.type('[data-slate-editor="true"]', `${command}`);
+
+		await this.utils.sleep(2000);
+
+		await this.page.keyboard.press('Enter');
+
+		await this.utils.sleep(1000);
+
+		if (args != null) {
+			await this.page.type('[data-slate-editor="true"]', `${args}`);
+		}
+
+		await this.page.keyboard.press('Enter');
+
+		await this.utils.sleep(1000);
+	}
+
+	private async getLastMsgRaw(): Promise<ElementHandle> {
+
+		await this.page.waitForSelector('ol[data-list-id="chat-messages"] > li:last-of-type');
+
+		return await this.page.$('ol[data-list-id="chat-messages"] > li:last-of-type');
+	}
+
+	private async getLastMsg(): Promise<IMessage | undefined> {
+
+		await this.page.waitForSelector('ol[data-list-id="chat-messages"] > li:last-of-type');
+
+		const li = await this.page.$('ol[data-list-id="chat-messages"] > li:last-of-type');
+
+		return this.parseMessage(li);
+	}
+
+	private async getMessage(messageId: string): Promise<IMessage | undefined> {
+		const methodName = 'getMessage';
+		try {
+			const li = await this.page.$(`li[id="${messageId}"]`);
+
+			if (li == null) {
+				throw new Error(`Message ${messageId} not found`);
+			}
+			return await this.parseMessage(li);
+		} catch (error) {
+			this.utils.errorLog(this, error, methodName);
+		}
+	}
+
+	private parseIds(id: string): IIds {
+
+		const ids = id.split("-");
+
+		return {
+			channelId: ids[2],
+			messageId: ids[3]
+		}
+	}
+
+	private async getProperty(elem: ElementHandle | null, property: string): Promise<string | null> {
+
+		const jsProperty = await elem?.getProperty(property);
+
+		const value = await jsProperty?.jsonValue();
+
+		if (typeof value === 'string') {
+			return value;
+		} else {
+			return null;
+		}
+	}
+
+	private async parseMessage(li: ElementHandle): Promise<IMessage | undefined> {
+		const methodName = 'parseMessage';
+		try {
+
+			const liId = await this.getProperty(li, 'id');
+
+			if (!liId) {
+				throw new Error('liId is null');
+			}
+
+			const { channelId, messageId } = this.parseIds(liId);
+
+			await this.page.waitForSelector(`li[id="${liId}"] div[id="message-content-${messageId}"]`);
+
+			const content = await li.$eval(`div[id="message-content-${messageId}"]`, it => it.textContent);
+
+			const aTag = await li.$('a[data-role="img"]');
+
+			const imgTag = await li.$('img[alt="Image"]');
+
+			const imageUrl = await this.getProperty(aTag, 'href');
+
+			const lazyImageUrl = await this.getProperty(imgTag, 'src');
+
+			const article = await li.$('div[class*="embedDescription"]');
+
+			let articleContent = null;
+
+			if (article != null) {
+				articleContent = await li.$eval('div[class*="embedDescription"]', it => it.textContent);
+			}
+
+			const accessories = await li.$('div[id*="message-accessories"]');
+
+			if (!accessories) {
+				throw new Error('accessories is null');
+			}
+
+			const divs = await accessories.$$('button');
+
+			const actions = Object();
+
+			for (const div of divs) {
+				const textContent = await div.evaluate(el => el.textContent);
+
+				if (!textContent) {
+					throw new Error('textContent is null');
+				}
+
+				if (textContent.startsWith('U') || textContent.startsWith('V')) {
+					actions[textContent] = div
+				}
+			}
+			return {
+				channelId: channelId,
+				messageId: messageId,
+				messageContent: content,
+				imageUrl: imageUrl,
+				lazyImageUrl: lazyImageUrl,
+				article: articleContent,
+				actions: actions
+			}
+		} catch (error) {
+			this.utils.errorLog(this, error, methodName);
+		}
 	}
 
 	public async isLoggedIn(): Promise<boolean> {

@@ -4,7 +4,6 @@ import { IBotContext } from '../bot/bot.interface.js';
 import { ILogger } from '../logger/logger.interface.js';
 import { IDatabase } from '../storage/mysql.interface.js';
 import wordCounter from '@homegrown/word-counter';
-import { Sticker } from 'telegraf/types';
 
 type GetChatIdObjResult = {
 	fromId: number | undefined,
