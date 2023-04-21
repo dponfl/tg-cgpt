@@ -85,7 +85,7 @@ export class DiscordService implements IDiscordService {
 		this.fixie_user = this.configService.get('FIXIE_USER');
 		this.fixies_pw = this.configService.get('FIXIE_PW');
 
-		// this.args.push(`--proxy-server=http://${this.fixie_ip}:${this.fixie_port}`);
+		this.args.push(`--proxy-server=http://${this.fixie_ip}:${this.fixie_port}`);
 
 		this.options = {
 			logs: this.logs,
@@ -272,8 +272,11 @@ export class DiscordService implements IDiscordService {
 
 		// this.page.setDefaultNavigationTimeout(Number(this.waitElement));
 
-		// authenticate in proxy using basic browser auth
-		// await this.page.authenticate({ username: this.fixie_user, password: this.fixies_pw });
+		/**
+		 * authenticate in proxy using basic browser auth
+		 */
+
+		await this.page.authenticate({ username: this.fixie_user, password: this.fixies_pw });
 
 		if (serverId) {
 			await this.goToServer(serverId);
