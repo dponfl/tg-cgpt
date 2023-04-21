@@ -369,7 +369,7 @@ const bootstap = async () => {
 
 	await discordService.clickServer('MindMate');
 	await discordService.clickChannel('mindmate');
-	await discordService.sendMessage('Hello World!');
+	// await discordService.sendMessage('Hello World!');
 
 	await discordService.shutdown();
 

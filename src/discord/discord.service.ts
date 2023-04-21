@@ -39,7 +39,7 @@ export class DiscordService implements IDiscordService {
 	];
 	private readonly userDataDir: string;
 	private readonly logs: boolean = true;
-	private readonly headless: boolean = true;
+	private readonly headless: boolean = false;
 	private readonly waitLoginVal: number;
 	private readonly waitElement: number;
 	private readonly mailgunDomain: string;
@@ -85,7 +85,10 @@ export class DiscordService implements IDiscordService {
 		this.fixie_user = this.configService.get('FIXIE_USER');
 		this.fixies_pw = this.configService.get('FIXIE_PW');
 
-		this.args.push(`--proxy-server=http://${this.fixie_ip}:${this.fixie_port}`);
+		if (process.env.NODE_ENV === 'production') {
+			this.headless = true;
+			this.args.push(`--proxy-server=http://${this.fixie_ip}:${this.fixie_port}`);
+		}
 
 		this.options = {
 			logs: this.logs,
@@ -276,7 +279,9 @@ export class DiscordService implements IDiscordService {
 		 * authenticate in proxy using basic browser auth
 		 */
 
-		await this.page.authenticate({ username: this.fixie_user, password: this.fixies_pw });
+		if (process.env.NODE_ENV === 'production') {
+			await this.page.authenticate({ username: this.fixie_user, password: this.fixies_pw });
+		}
 
 		if (serverId) {
 			await this.goToServer(serverId);
