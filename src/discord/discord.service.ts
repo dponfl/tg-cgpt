@@ -629,7 +629,9 @@ export class DiscordService implements IDiscordService {
 
 			this.logger.info(`[login]: checking for captcha: done...`);
 
-			await this.page.waitForNavigation({ waitUntil: 'load' });
+			await this.utils.sleep(3000);
+
+			// await this.page.waitForNavigation({ waitUntil: 'load' });
 
 			//await (new Promise(r => setTimeout(r, 1000)))
 
