@@ -3,7 +3,7 @@ import { IConfigService } from '../config/config.interface.js';
 import { IDiscordService, IMessage } from '../discord/discord.interface.js';
 import { ILogger } from '../logger/logger.interface.js';
 import { IUtils } from '../utils/utils.class.js';
-import { IMidjourneyService } from './midjourney.interface.js';
+import { EnlargeType, IMidjourneyService, VariationType } from './midjourney.interface.js';
 
 export class MidjourneyService implements IMidjourneyService {
 
@@ -27,17 +27,11 @@ export class MidjourneyService implements IMidjourneyService {
 		return this.discordService.getLastMsg();
 	}
 
-	/**
-	 * Request the generation of an image on Midjourney using your prompt
-	 * @param prompt a list of words or the description of the image you want
-	 * @param loading you will be notified each time the image loading reach a new step
-	 */
-
 	private loading(url: string): void {
 		this.logger.warn(`[imagine]: Loading => ${url}`);
 	}
 
-	private async validateImagine(elem: ElementHandle): Promise<boolean> {
+	private async validateImg(elem: ElementHandle): Promise<boolean> {
 
 		const it = await this.discordService.getProperty(elem, 'href');
 
@@ -48,19 +42,103 @@ export class MidjourneyService implements IMidjourneyService {
 		return it != null && it.endsWith(".png");
 	}
 
+	/**
+	 * Request the generation of an image on Midjourney using your prompt
+	 * @param prompt a list of words or the description of the image you want
+	 * @param loading you will be notified each time the image loading reach a new step
+	 */
+
 	public async imagine(prompt: string): Promise<IMessage | undefined> {
 
 		this.logger.info(`[imagine]: started`);
 
 		await this.discordService.sendCommand("imagine", `${prompt}`);
 
-		await this.discordService.waitElement('a[data-role="img"]', this.validateImagine.bind(this));
+		await this.discordService.waitElement('a[data-role="img"]', this.validateImg.bind(this));
 
 		await this.utils.sleep(1000);
 
 		this.logger.info(`[imagine]: done`);
 
 		return this.discordService.getLastMsg();
+	}
+
+
+	/**
+	 * Execute a given Image action (U1<>U4, V1<>V4) and wait for the image to be loaded
+	 * @param action Based on the resp.actions[] from imagine()
+	 * @param loading you will be notified each time the image loading reach a new step
+	 */
+
+	public async executeImageAction(action: ElementHandle): Promise<IMessage | undefined> {
+
+		this.logger.info(`[executeImageAction]: started`);
+
+		await action.click();
+
+		await this.utils.sleep(3000);
+
+		await this.discordService.waitElement('a[data-role="img"]', this.validateImg.bind(this));
+
+		this.logger.info(`[executeImageAction]: done`);
+
+		return this.discordService.getLastMsg();
+	}
+
+	/**
+	 * Request an enlarge of the given image ID
+	 * @param messageId from imagine() response
+	 * @param option midjourney will create 4 images, you can enlarge any of those
+	 * @param loading you will be notified each time the image loading reach a new step
+	 */
+
+	public async imageEnlarge(messageId: string, option: EnlargeType): Promise<IMessage | undefined> {
+
+		const methodName = 'imageEnlarge';
+
+		try {
+
+			const message = await this.discordService.getMessage(messageId);
+
+			if (message && message.actions[option] == null) {
+				throw new Error(`Option ${option} not found`)
+			}
+
+			if (message) {
+				return this.executeImageAction(message.actions[option]);
+			}
+
+		} catch (error) {
+			this.utils.errorLog(this, error, methodName);
+		}
+	}
+
+	/**
+	 * Request a variation on the given image ID
+	 * @param messageId from imagine() response
+	 * @param option midjourney will create 4 images, you can get a variation any of those
+	 * @param loading you will be notified each time the image loading reach a new step
+	 */
+
+	public async imageVariation(messageId: string, option: VariationType): Promise<IMessage | undefined> {
+
+		const methodName = 'imageVariation';
+
+		try {
+
+			const message = await this.discordService.getMessage(messageId);
+			;
+			if (message && message.actions[option] == null) {
+				throw new Error(`Option ${option} not found`)
+			}
+
+			if (message) {
+				return this.executeImageAction(message.actions[option]);
+			}
+
+		} catch (error) {
+			this.utils.errorLog(this, error, methodName);
+		}
 	}
 
 }

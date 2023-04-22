@@ -378,13 +378,16 @@ const bootstap = async () => {
 
 	await discordService.clickServer('MindMate');
 	await discordService.clickChannel('mindmate');
+
 	// await discordService.sendMessage('Hello World!');
 
 	// const infoData = await midjourneyService.info();
 	// logger.info(`Midjourney account info:\n${JSON.stringify(infoData)}`);
 
-	const imgPrompt = 'A cat wearing a top hat and a monocle drinking tea, hyperrealistic --ar 16:9 --q 2 --v 5';
+	const imgPrompt = 'style portrait of female elf, intricate, elegant, highly detailed, digital painting, artstation, concept art, smooth, sharp focus, illustration, art by artgerm and greg rutkowski and alphonse mucha, 8k --v 5';
+
 	const imgObj = await midjourneyService.imagine(imgPrompt);
+
 	logger.info(`Image:\n${JSON.stringify(imgObj)}`);
 
 	await discordService.shutdown();

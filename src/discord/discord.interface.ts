@@ -41,7 +41,7 @@ export interface IDiscordService {
 	sendCommand: (command: string, args?: string) => Promise<void>;
 	// getLastMsgRaw: () => Promise<ElementHandle>;
 	getLastMsg: () => Promise<IMessage | undefined>;
-	// getMessage: (messageId: string) => Promise<IMessage | undefined>;
+	getMessage: (messageId: string) => Promise<IMessage | undefined>;
 	// parseMessage: (li: ElementHandle) => Promise<IMessage>;
 	// parseIds: (id: string) => IIds;
 	getProperty: (elem: ElementHandle | null, property: string) => Promise<string | null>;

@@ -450,7 +450,7 @@ export class DiscordService implements IDiscordService {
 		return this.parseMessage(li);
 	}
 
-	private async getMessage(messageId: string): Promise<IMessage | undefined> {
+	public async getMessage(messageId: string): Promise<IMessage | undefined> {
 		const methodName = 'getMessage';
 		try {
 			const li = await this.page.$(`li[id="${messageId}"]`);
