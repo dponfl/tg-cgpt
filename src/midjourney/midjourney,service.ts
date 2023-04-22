@@ -28,7 +28,7 @@ export class MidjourneyService implements IMidjourneyService {
 	}
 
 	private loading(url: string): void {
-		this.logger.warn(`[imagine]: Loading => ${url}`);
+		this.logger.warn(`Loading => ${url}`);
 	}
 
 	private async validateImg(elem: ElementHandle): Promise<boolean> {
@@ -98,6 +98,8 @@ export class MidjourneyService implements IMidjourneyService {
 
 		try {
 
+			this.logger.info(`[imageEnlarge]: started`);
+
 			const message = await this.discordService.getMessage(messageId);
 
 			if (message && message.actions[option] == null) {
@@ -125,6 +127,8 @@ export class MidjourneyService implements IMidjourneyService {
 		const methodName = 'imageVariation';
 
 		try {
+
+			this.logger.info(`[imageVariation]: started`);
 
 			const message = await this.discordService.getMessage(messageId);
 			;

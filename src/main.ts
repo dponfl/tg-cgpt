@@ -32,7 +32,7 @@ import { RequestStorageService } from './storage/request.class.js';
 import { MjService } from './ai/mj/mj.service.js';
 import { IDiscordService } from './discord/discord.interface.js';
 import { DiscordService } from './discord/discord.service.js';
-import { IMidjourneyService } from './midjourney/midjourney.interface.js';
+import { EnlargeType, IMidjourneyService, VariationType } from './midjourney/midjourney.interface.js';
 import { MidjourneyService } from './midjourney/midjourney,service.js';
 
 const bootstap = async () => {
@@ -384,9 +384,15 @@ const bootstap = async () => {
 	// const infoData = await midjourneyService.info();
 	// logger.info(`Midjourney account info:\n${JSON.stringify(infoData)}`);
 
-	const imgPrompt = 'style portrait of female elf, intricate, elegant, highly detailed, digital painting, artstation, concept art, smooth, sharp focus, illustration, art by artgerm and greg rutkowski and alphonse mucha, 8k --v 5';
+	// const imgPrompt = 'style portrait of female elf, intricate, elegant, highly detailed, digital painting, artstation, concept art, smooth, sharp focus, illustration, art by artgerm and greg rutkowski and alphonse mucha, 8k --v 5';
 
-	const imgObj = await midjourneyService.imagine(imgPrompt);
+	// const imgObj = await midjourneyService.imagine(imgPrompt);
+
+	// const variation = VariationType.V4;
+	// const imgObj = await midjourneyService.imageVariation('1099032040650846208', variation);
+
+	const enlarge = EnlargeType.U3;
+	const imgObj = await midjourneyService.imageEnlarge('1099300022916485130', enlarge);
 
 	logger.info(`Image:\n${JSON.stringify(imgObj)}`);
 

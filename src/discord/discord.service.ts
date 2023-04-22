@@ -453,7 +453,7 @@ export class DiscordService implements IDiscordService {
 	public async getMessage(messageId: string): Promise<IMessage | undefined> {
 		const methodName = 'getMessage';
 		try {
-			const li = await this.page.$(`li[id="${messageId}"]`);
+			const li = await this.page.$(`li[id*="${messageId}"]`);
 
 			if (li == null) {
 				throw new Error(`Message ${messageId} not found`);
