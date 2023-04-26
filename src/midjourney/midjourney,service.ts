@@ -27,16 +27,16 @@ export class MidjourneyService implements IMidjourneyService {
 		return this.discordService.getLastMsg();
 	}
 
-	private loading(url: string): void {
-		this.logger.warn(`Loading => ${url}`);
-	}
+	// private loading(url: string): void {
+	// 	this.logger.warn(`Loading => ${url}`);
+	// }
 
-	private async validateImg(elem: ElementHandle): Promise<boolean> {
+	private async validateImg(loading: any, elem: ElementHandle): Promise<boolean> {
 
 		const it = await this.discordService.getProperty(elem, 'href');
 
 		if (it) {
-			this.loading(it);
+			loading(it);
 		}
 
 		return it != null && it.endsWith(".png");
@@ -48,13 +48,13 @@ export class MidjourneyService implements IMidjourneyService {
 	 * @param loading you will be notified each time the image loading reach a new step
 	 */
 
-	public async imagine(prompt: string): Promise<IMessage | undefined> {
+	public async imagine(prompt: string, loading: any): Promise<IMessage | undefined> {
 
 		this.logger.info(`[imagine]: started`);
 
 		await this.discordService.sendCommand("imagine", `${prompt}`);
 
-		await this.discordService.waitElement('a[data-role="img"]', this.validateImg.bind(this));
+		await this.discordService.waitElement('a[data-role="img"]', this.validateImg.bind(this, loading));
 
 		await this.utils.sleep(1000);
 
@@ -70,7 +70,7 @@ export class MidjourneyService implements IMidjourneyService {
 	 * @param loading you will be notified each time the image loading reach a new step
 	 */
 
-	public async executeImageAction(action: ElementHandle): Promise<IMessage | undefined> {
+	public async executeImageAction(loading: any, action: ElementHandle): Promise<IMessage | undefined> {
 
 		this.logger.info(`[executeImageAction]: started`);
 
@@ -78,7 +78,7 @@ export class MidjourneyService implements IMidjourneyService {
 
 		await this.utils.sleep(3000);
 
-		await this.discordService.waitElement('a[data-role="img"]', this.validateImg.bind(this));
+		await this.discordService.waitElement('a[data-role="img"]', this.validateImg.bind(this, loading));
 
 		this.logger.info(`[executeImageAction]: done`);
 
@@ -92,7 +92,7 @@ export class MidjourneyService implements IMidjourneyService {
 	 * @param loading you will be notified each time the image loading reach a new step
 	 */
 
-	public async imageEnlarge(messageId: string, option: EnlargeType): Promise<IMessage | undefined> {
+	public async imageEnlarge(loading: any, messageId: string, option: EnlargeType): Promise<IMessage | undefined> {
 
 		const methodName = 'imageEnlarge';
 
@@ -107,7 +107,7 @@ export class MidjourneyService implements IMidjourneyService {
 			}
 
 			if (message) {
-				return this.executeImageAction(message.actions[option]);
+				return this.executeImageAction(loading, message.actions[option]);
 			}
 
 		} catch (error) {
@@ -122,7 +122,7 @@ export class MidjourneyService implements IMidjourneyService {
 	 * @param loading you will be notified each time the image loading reach a new step
 	 */
 
-	public async imageVariation(messageId: string, option: VariationType): Promise<IMessage | undefined> {
+	public async imageVariation(loading: any, messageId: string, option: VariationType): Promise<IMessage | undefined> {
 
 		const methodName = 'imageVariation';
 
@@ -137,7 +137,7 @@ export class MidjourneyService implements IMidjourneyService {
 			}
 
 			if (message) {
-				return this.executeImageAction(message.actions[option]);
+				return this.executeImageAction(loading, message.actions[option]);
 			}
 
 		} catch (error) {

@@ -374,29 +374,33 @@ const bootstap = async () => {
 	await app.initBot();
 	await app.initApi();
 
-	await discordService.start();
+	// const loadingFn = (param: string, url: string) => {
+	// 	logger.warn(`Loading [${param}] => ${url}`);
+	// }
 
-	await discordService.clickServer('MindMate');
-	await discordService.clickChannel('mindmate');
+	// await discordService.start();
+
+	// await discordService.clickServer('MindMate');
+	// await discordService.clickChannel('mindmate');
 
 	// await discordService.sendMessage('Hello World!');
 
 	// const infoData = await midjourneyService.info();
 	// logger.info(`Midjourney account info:\n${JSON.stringify(infoData)}`);
 
-	// const imgPrompt = 'style portrait of female elf, intricate, elegant, highly detailed, digital painting, artstation, concept art, smooth, sharp focus, illustration, art by artgerm and greg rutkowski and alphonse mucha, 8k --v 5';
+	// const imgPrompt = 'A cat wearing a top hat and a monocle drinking tea, hyperrealistic --ar 16:9 --q 2 --v 5';
 
-	// const imgObj = await midjourneyService.imagine(imgPrompt);
+	// const imgObj = await midjourneyService.imagine(imgPrompt, loadingFn.bind(this, 'Some param...'));
 
 	// const variation = VariationType.V4;
 	// const imgObj = await midjourneyService.imageVariation('1099032040650846208', variation);
 
-	const enlarge = EnlargeType.U3;
-	const imgObj = await midjourneyService.imageEnlarge('1099300022916485130', enlarge);
+	// const enlarge = EnlargeType.U3;
+	// const imgObj = await midjourneyService.imageEnlarge('1099300022916485130', enlarge);
 
-	logger.info(`Image:\n${JSON.stringify(imgObj)}`);
+	// logger.info(`Image:\n${JSON.stringify(imgObj)}`);
 
-	await discordService.shutdown();
+	// await discordService.shutdown();
 
 };
 

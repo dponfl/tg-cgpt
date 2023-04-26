@@ -25,7 +25,7 @@ export class MainController implements IMainController {
 	}
 
 	// tslint:disable-next-line: max-line-length
-	public async orchestrator<T>(userGuid: string, chatId: number, fromId: number, prompt: string, requestCategory: RequestCategory, updateUserRights: boolean): Promise<T> {
+	public async orchestrator<T>(userGuid: string, chatId: number, fromId: number, prompt: string, requestCategory: RequestCategory, updateUserRights: boolean, workerFunc?: unknown): Promise<T> {
 
 		const methodName = 'orchestrator';
 
@@ -35,10 +35,10 @@ export class MainController implements IMainController {
 		switch (requestCategory) {
 			case RequestCategory.chatText:
 
-				const checkUserRightsResult = await this.checkUserRights(userGuid, AiServices.GTP);
+				const checkUserRightsChatGptResult = await this.checkUserRights(userGuid, AiServices.GTP);
 
 
-				if (!checkUserRightsResult) {
+				if (!checkUserRightsChatGptResult) {
 
 					result = {
 						status: ControllerStatus.ACTION_PAYMENT,
@@ -73,6 +73,32 @@ export class MainController implements IMainController {
 
 				break;
 
+			case RequestCategory.mjImagine:
+
+				const checkUserRightsMjResult = await this.checkUserRights(userGuid, AiServices.MJ);
+
+				if (!checkUserRightsMjResult) {
+					result = {
+						status: ControllerStatus.ACTION_PAYMENT,
+						payload: null,
+					};
+				} else {
+
+					payload = await this.imgRequest(userGuid, chatId, fromId, prompt, workerFunc);
+
+					result = {
+						status: ControllerStatus.SUCCESS,
+						payload,
+					};
+
+					if (updateUserRights) {
+						await this.updateUserRightsOnSuccessfulResponse(userGuid, AiServices.MJ);
+					}
+
+				}
+
+				break;
+
 			default:
 				const error = new Error(`Unknown requestCategory: ${requestCategory}`);
 				this.utils.errorLog(this, error, methodName);
@@ -90,12 +116,14 @@ export class MainController implements IMainController {
 
 		const methodName = 'checkUserRights';
 
+		let serviceUsageRecRaw;
+
 		try {
 
 			switch (serviceCategory) {
 				case AiServices.GTP:
 
-					const serviceUsageRecRaw = await this.dbConnection
+					serviceUsageRecRaw = await this.dbConnection
 						.selectFrom('serviceUsage')
 						.selectAll()
 						.where('userGuid', '=', userGuid)
@@ -118,9 +146,33 @@ export class MainController implements IMainController {
 					}
 
 					break;
+
 				case AiServices.MJ:
-					throw new Error(`MJ service not implemented yet (checkUserRights)`);
+
+					serviceUsageRecRaw = await this.dbConnection
+						.selectFrom('serviceUsage')
+						.selectAll()
+						.where('userGuid', '=', userGuid)
+						.execute();
+
+					if (
+						!serviceUsageRecRaw
+						|| !Array.isArray(serviceUsageRecRaw)
+						|| serviceUsageRecRaw.length !== 1
+					) {
+						throw new Error(`Wrong serviceUsage record:\n${serviceUsageRecRaw}`);
+					}
+
+					const { mjFreeLeft, mjLeft } = serviceUsageRecRaw[0];
+
+					const availableMjRequests = mjFreeLeft + mjLeft;
+
+					if (availableMjRequests > 0) {
+						return true;
+					}
+
 					break;
+
 				default:
 					const error = new Error(`Unknown serviceCategory: ${serviceCategory}`);
 					this.utils.errorLog(this, error, methodName);
@@ -139,12 +191,14 @@ export class MainController implements IMainController {
 
 		const methodName = 'updateUserRightsOnSuccessfulResponse';
 
+		let serviceUsageRecRaw;
+
 		try {
 
 			switch (serviceCategory) {
 				case AiServices.GTP:
 
-					const serviceUsageRecRaw = await this.dbConnection
+					serviceUsageRecRaw = await this.dbConnection
 						.selectFrom('serviceUsage')
 						.selectAll()
 						.where('userGuid', '=', userGuid)
@@ -184,7 +238,45 @@ export class MainController implements IMainController {
 
 					break;
 				case AiServices.MJ:
-					throw new Error(`MJ service not implemented yet (checkUserRights)`);
+
+					serviceUsageRecRaw = await this.dbConnection
+						.selectFrom('serviceUsage')
+						.selectAll()
+						.where('userGuid', '=', userGuid)
+						.execute();
+
+					if (
+						!serviceUsageRecRaw
+						|| !Array.isArray(serviceUsageRecRaw)
+						|| serviceUsageRecRaw.length !== 1
+					) {
+						throw new Error(`Wrong serviceUsage record:\n${serviceUsageRecRaw}`);
+					}
+
+					const { guid: serviceGuid, mjFreeLeft, mjFreeUsed, mjUsed, mjLeft } = serviceUsageRecRaw[0];
+
+					if (mjFreeLeft > 0) {
+						await this.dbConnection
+							.updateTable('serviceUsage')
+							.set({
+								gptFreeLeft: mjFreeLeft - 1,
+								gptFreeUsed: mjFreeUsed + 1
+							})
+							.where('guid', '=', serviceGuid)
+							.execute();
+					} else if (mjLeft > 0) {
+						await this.dbConnection
+							.updateTable('serviceUsage')
+							.set({
+								gptLeft: mjLeft - 1,
+								gptUsed: mjUsed + 1
+							})
+							.where('guid', '=', serviceGuid)
+							.execute();
+					} else {
+						throw new Error(`Both mjFreeLeft and mjLeft less or equal 0, rec:\n${JSON.stringify(serviceUsageRecRaw[0])}`);
+					}
+
 					break;
 				default:
 					const error = new Error(`Unknown serviceCategory: ${serviceCategory}`);
@@ -359,16 +451,19 @@ export class MainController implements IMainController {
 		}
 	}
 
-	public async imgRequest(userGuid: string, prompt: string): Promise<AiImgResponsePayload> {
-		// const resRaw: AiTextResponse = await this.mjService.imgRequest(user, prompt);
+	public async imgRequest(userGuid: string, chatId: number, fromId: number, prompt: string, wokerFn: any): Promise<AiImgResponsePayload> {
 
-		// if (resRaw.status !== AiResponseStatus.SUCCESS) {
-		// 	throw new Error('MidJourney error response');
-		// } else {
-		// 	return resRaw.payload;
-		// }
+		await wokerFn();
 
-		return [];
+		return {
+			channelId: 'string',
+			messageId: 'string',
+			messageContent: 'string',
+			imageUrl: 'string',
+			lazyImageUrl: 'string',
+			article: null,
+			actions: {}
+		}
 	}
 
 

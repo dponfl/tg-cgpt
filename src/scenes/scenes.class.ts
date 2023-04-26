@@ -11,7 +11,7 @@ import { PaymentCommand } from '../commands/base_scenes/payment.command.js';
 import { StartCommand } from '../commands/base_scenes/start.command.js';
 import { InfoCommand } from '../commands/base_scenes/info.command.js';
 import { IConfigService } from '../config/config.interface.js';
-import { AiTextResponsePayload, ControllerStatus, IMainController, OpenAiChatFinishReason, RequestCategory } from '../controller/controller.interface.js';
+import { AiImgResponsePayload, AiTextResponsePayload, ControllerStatus, IMainController, ImageGenerationStage, OpenAiChatFinishReason, RequestCategory } from '../controller/controller.interface.js';
 import { ILogger } from '../logger/logger.interface.js';
 import { IGetPaymentLinkParams, IGetPaymentLinkResponse, IPaymentService } from '../payments/payments.interface.js';
 import { GroupTransactionCurrency, GroupTransactionServiceName, IDatabase } from '../storage/mysql.interface.js';
@@ -29,6 +29,12 @@ export class ScenesGenerator implements ISceneGenerator {
 	private readonly textOnMessage =
 		`
 Работаю над вашим вопросом, это может занять некоторое время ⏳
+
+`;
+
+	private readonly textOnMjMessage =
+		`
+Выполняю генерацию изображения, это может занять некоторое время ⏳
 
 `;
 
@@ -103,7 +109,7 @@ export class ScenesGenerator implements ISceneGenerator {
 			new MenuCommand(scene, this.logger),
 			new PaymentCommand(scene, this.logger),
 			new GptCommand(scene, this.logger),
-			// new MjCommand(scene, this.logger),
+			new MjCommand(scene, this.logger),
 			new InfoCommand(scene, this.logger),
 			new HelpCommand(scene, this.logger),
 			new DropContextCommand(scene, this.logger, this.utils),
@@ -231,6 +237,8 @@ export class ScenesGenerator implements ISceneGenerator {
 <a href='https://telegra.ph/Sekrety-AI-03-23'>Секреты GPT</a>
 
 <i>Все ваши обращения которые вы напишете</i> — <b>будут отправлены мне</b>. 
+
+<i>Чтобы отправить запрос в Midjourney</i> — введите команду /img
 
 `;
 
@@ -373,53 +381,7 @@ export class ScenesGenerator implements ISceneGenerator {
 
 		// tslint:disable-next-line: no-any
 		mainMJScene.on('message', async (ctx: any) => {
-
-			if (ctx.session.botUserSession.pendingMjRequest) {
-
-				// tslint:disable-next-line: no-shadowed-variable
-				const { message_id } = await ctx.replyWithHTML(this.secondRequestText);
-				setTimeout(() => {
-					ctx.deleteMessage(message_id);
-				}, 5000);
-
-			} else {
-
-				const { message_id } = await ctx.replyWithHTML(this.textOnMessage);
-
-				const text = ctx.message.text;
-
-				ctx.session.botUserSession.pendingMjRequest = true;
-
-				this.sessionService.updateSession(ctx);
-
-				// tslint:disable-next-line: max-line-length
-				const userGuid = ctx.session.botUserSession.userGuid ? ctx.session.botUserSession.userGuid : this.utils.getChatIdStr(ctx);
-
-				this.mainController.imgRequest(userGuid, text)
-					.then(
-						async (result) => {
-							ctx.session.botUserSession.pendingMjRequest = false;
-							this.sessionService.updateSession(ctx);
-							const resText = result?.join('\n\n');
-							await ctx.deleteMessage(message_id);
-							await ctx.replyWithHTML(resText,
-								{ reply_to_message_id: ctx.update.message.message_id });
-						},
-						async (error) => {
-
-							this.logger.error(`Error response from mjImgRequest: ${error}`);
-
-							ctx.session.botUserSession.pendingMjRequest = false;
-
-							this.sessionService.updateSession(ctx);
-
-							await ctx.deleteMessage(message_id);
-							await ctx.replyWithHTML(this.errorResponseText,
-								{ reply_to_message_id: ctx.update.message.message_id });
-						}
-					);
-
-			}
+			await this.mjOnMessage(ctx, mainMJScene);
 		});
 
 		// tslint:disable-next-line: no-any
@@ -463,53 +425,6 @@ export class ScenesGenerator implements ISceneGenerator {
 
 		// tslint:disable-next-line: no-any
 		afterPaymentMJScene.on('message', async (ctx: any) => {
-
-			if (ctx.session.botUserSession.pendingMjRequest) {
-
-				// tslint:disable-next-line: no-shadowed-variable
-				const { message_id } = await ctx.replyWithHTML(this.secondRequestText);
-				setTimeout(() => {
-					ctx.deleteMessage(message_id);
-				}, 5000);
-
-			} else {
-
-				const { message_id } = await ctx.replyWithHTML(this.textOnMessage);
-
-				const text = ctx.message.text;
-
-				ctx.session.botUserSession.pendingMjRequest = true;
-
-				this.sessionService.updateSession(ctx);
-
-				// tslint:disable-next-line: max-line-length
-				const userGuid = ctx.session.botUserSession.userGuid ? ctx.session.botUserSession.userGuid : this.utils.getChatIdStr(ctx);
-
-				this.mainController.imgRequest(userGuid, text)
-					.then(
-						async (result) => {
-							ctx.session.botUserSession.pendingMjRequest = false;
-							this.sessionService.updateSession(ctx);
-							const resText = result?.join('\n\n');
-							await ctx.deleteMessage(message_id);
-							await ctx.replyWithHTML(resText,
-								{ reply_to_message_id: ctx.update.message.message_id });
-						},
-						async (error) => {
-
-							this.logger.error(`Error response from mjImgRequest: ${error}`);
-
-							ctx.session.botUserSession.pendingMjRequest = false;
-
-							this.sessionService.updateSession(ctx);
-
-							await ctx.deleteMessage(message_id);
-							await ctx.replyWithHTML(this.errorResponseText,
-								{ reply_to_message_id: ctx.update.message.message_id });
-						}
-					);
-
-			}
 		});
 
 		// tslint:disable-next-line: no-any
@@ -970,7 +885,7 @@ export class ScenesGenerator implements ISceneGenerator {
 	}
 
 	// tslint:disable-next-line: no-any
-	private async gptOnMessage(ctx: any, scene: Scenes.BaseScene<Context<Update>>) {
+	private async gptOnMessage(ctx: any, scene: Scenes.BaseScene<Context<Update>>): Promise<void> {
 
 		if (ctx.session.botUserSession.pendingChatGptRequest) {
 
@@ -1350,6 +1265,111 @@ export class ScenesGenerator implements ISceneGenerator {
 
 	}
 
+	private async mjOnMessage(ctx: any, scene: Scenes.BaseScene<Context<Update>>): Promise<void> {
+
+		if (ctx.session.botUserSession.pendingMidjourneyRequest) {
+
+			// tslint:disable-next-line: no-shadowed-variable
+			const { message_id } = await ctx.replyWithHTML(this.secondRequestText);
+			setTimeout(() => {
+				ctx.deleteMessage(message_id);
+			}, 5000);
+
+		} else {
+
+			const { message_id } = await ctx.replyWithHTML(this.textOnMjMessage);
+
+			const text = ctx.message.text;
+
+			this.setImgSessionData(ctx, ctx.message.text, ctx.message.message_id);
+
+			const { userGuid, chatId, fromId } = await this.getUserData(ctx);
+
+			// await ctx.reply('Text message example',
+			// 	{ reply_to_message_id: ctx.update.message.message_id });
+
+			let imgMsgId;
+
+			if (ctx.session.botUserSession.imgRequestMessageId) {
+				const { message_id: msgId } = await ctx.replyWithPhoto(
+					'https://cdn.document360.io/logo/3040c2b6-fead-4744-a3a9-d56d621c6c7e/778d06e9a335497ba965629e3b83a31f-MJ_Boat.png',
+					{
+						caption: 'Идёт генерация изображения...',
+						reply_to_message_id: ctx.session.botUserSession.imgRequestMessageId,
+						parse_mode: 'HTML',
+						reply_markup: {
+							inline_keyboard: [
+								// [
+								// 	Markup.button.callback('Выбрать пакет ✅', 'make_payment')
+								// ],
+								// [
+								// 	Markup.button.callback('Информация ℹ️', 'info')
+								// ],
+							]
+						},
+					}
+				);
+
+				imgMsgId = msgId;
+
+
+
+			} else {
+				this.logger.error(`missing ctx.session.botUserSession.imgRequestMessageId`);
+			}
+
+
+			// tslint:disable-next-line: max-line-length
+			this.mainController.orchestrator<AiImgResponsePayload>(userGuid, chatId, fromId, text, RequestCategory.mjImagine, true, this.imagineWorker.bind(this, ctx, imgMsgId))
+				.then(
+					async (result) => {
+						this.logger.info(`Success: ${RequestCategory.mjImagine}`);
+					},
+					async (error) => {
+						this.logger.error(`Error: ${RequestCategory.mjImagine} Error details:\n${JSON.stringify(error)}`);
+					}
+				)
+
+			this.clearImgSessionData(ctx);
+
+		}
+
+	}
+
+	public async imagineWorker(ctx: IBotContext, imgMessageId: number): Promise<void> {
+
+		/**
+		 * Worker for Midjourney image generation
+		 * It shows progress of image generation 
+		 * followed by final image and action buttons
+		 */
+
+		const testImgArr = [
+			'https://cdn.discordapp.com/attachments/1090245554568708206/1099419675118534686/DP_A_cat_wearing_a_top_hat_and_a_monocle_drinking_tea_hyperreal_885ec8fb-3dc4-4f75-92fa-b835fb759150.png',
+			'https://cdn.discordapp.com/attachments/1090245554568708206/1099421207503327353/DP_style_portrait_of_female_elf_intricate_elegant_highly_detail_5ce44233-d87b-4010-8756-7ca6873621a3.png',
+			'https://cdn.discordapp.com/attachments/1090245554568708206/1100805863750504519/DP_A_cat_wearing_a_top_hat_and_a_monocle_drinking_tea_hyperreal_3c8c3130-f9bf-4514-9423-16c88e8ddae9.png',
+			'https://cdn.discordapp.com/attachments/1090245554568708206/1100805829906669748/grid_0.webp',
+			'https://cdn.discordapp.com/attachments/1090245554568708206/1099032039941996544/DP_A_cat_wearing_a_top_hat_and_a_monocle_drinking_tea_hyperreal_4524b6b6-6cc2-4d7c-bcdd-3f674b47b1b4.png'
+		];
+
+		for (const img of testImgArr) {
+			await ctx.telegram.editMessageMedia(
+				ctx.chat?.id,
+				imgMessageId,
+				undefined,
+				{
+					type: 'photo',
+					media: img,
+					parse_mode: 'HTML',
+					caption: 'Продолжается генерация изображения...'
+				},
+			);
+
+			await this.utils.sleep(3000);
+		}
+
+	}
+
 	private setTextSessionData(ctx: IBotContext, text: string, messageId: number): void {
 		ctx.session.botUserSession.pendingChatGptRequest = true;
 		ctx.session.botUserSession.textRequest = text;
@@ -1357,10 +1377,24 @@ export class ScenesGenerator implements ISceneGenerator {
 		this.sessionService.updateSession(ctx);
 	}
 
+	private setImgSessionData(ctx: IBotContext, prompt: string, messageId: number): void {
+		ctx.session.botUserSession.pendingMidjourneyRequest = true;
+		ctx.session.botUserSession.imgRequest = prompt;
+		ctx.session.botUserSession.imgRequestMessageId = messageId;
+		this.sessionService.updateSession(ctx);
+	}
+
 	private clearTextSessionData(ctx: IBotContext): void {
 		ctx.session.botUserSession.pendingChatGptRequest = false;
 		ctx.session.botUserSession.textRequest = '';
 		ctx.session.botUserSession.textRequestMessageId = 0;
+		this.sessionService.updateSession(ctx);
+	}
+
+	private clearImgSessionData(ctx: IBotContext): void {
+		ctx.session.botUserSession.pendingMidjourneyRequest = false;
+		ctx.session.botUserSession.imgRequest = '';
+		ctx.session.botUserSession.imgRequestMessageId = 0;
 		this.sessionService.updateSession(ctx);
 	}
 

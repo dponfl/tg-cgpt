@@ -18,7 +18,7 @@ export enum VariationType {
 export interface IMidjourneyService {
 	info: () => Promise<IMessage | undefined>;
 	imagine: (prompt: string, loading?: (str: string) => void) => Promise<IMessage | undefined>;
-	executeImageAction: (action: ElementHandle) => Promise<IMessage | undefined>;
-	imageEnlarge: (messageId: string, option: EnlargeType) => Promise<IMessage | undefined>;
-	imageVariation: (messageId: string, option: VariationType) => Promise<IMessage | undefined>;
+	executeImageAction: (loading: any, action: ElementHandle) => Promise<IMessage | undefined>;
+	imageEnlarge: (loading: any, messageId: string, option: EnlargeType) => Promise<IMessage | undefined>;
+	imageVariation: (loading: any, messageId: string, option: VariationType) => Promise<IMessage | undefined>;
 }
