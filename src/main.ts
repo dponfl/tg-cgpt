@@ -371,6 +371,37 @@ const bootstap = async () => {
 	// 	);
 
 
+	/**
+	 * Задача с собеса
+	 */
+	// const resArr = [];
+	// const arr = [3, -1, -2, 5, -3, 3];
+
+	// let highest = arr[0];
+	// let highestInd = 0;
+	// let done = false;
+
+	// while (!done) {
+	// 	for (let i = 1; i < arr.length; i++) {
+	// 		if (highest < arr[i]) {
+	// 			highest = arr[i];
+	// 			highestInd = i;
+	// 		}
+	// 	}
+	// 	resArr.push(highest);
+	// 	arr.splice(highestInd, 1);
+	// 	if (arr.length == 0) {
+	// 		done = true;
+	// 	} else {
+	// 		highest = arr[0];
+	// 		highestInd = 0;
+	// 	}
+	// }
+
+	// logger.info(resArr);
+
+
+
 	await app.initBot();
 	await app.initApi();
 

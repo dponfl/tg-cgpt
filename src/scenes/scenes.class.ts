@@ -21,6 +21,7 @@ import { IUtils } from '../utils/utils.class.js';
 import { ISceneGenerator } from './scenes.interface.js';
 import { Update } from 'telegraf/types';
 import { DropContextCommand } from '../commands/base_scenes/dropcontext.command.js';
+import { FmtString } from 'telegraf/format';
 
 export class ScenesGenerator implements ISceneGenerator {
 
@@ -1348,24 +1349,26 @@ export class ScenesGenerator implements ISceneGenerator {
 			'https://cdn.discordapp.com/attachments/1090245554568708206/1099419675118534686/DP_A_cat_wearing_a_top_hat_and_a_monocle_drinking_tea_hyperreal_885ec8fb-3dc4-4f75-92fa-b835fb759150.png',
 			'https://cdn.discordapp.com/attachments/1090245554568708206/1099421207503327353/DP_style_portrait_of_female_elf_intricate_elegant_highly_detail_5ce44233-d87b-4010-8756-7ca6873621a3.png',
 			'https://cdn.discordapp.com/attachments/1090245554568708206/1100805863750504519/DP_A_cat_wearing_a_top_hat_and_a_monocle_drinking_tea_hyperreal_3c8c3130-f9bf-4514-9423-16c88e8ddae9.png',
-			'https://cdn.discordapp.com/attachments/1090245554568708206/1100805829906669748/grid_0.webp',
 			'https://cdn.discordapp.com/attachments/1090245554568708206/1099032039941996544/DP_A_cat_wearing_a_top_hat_and_a_monocle_drinking_tea_hyperreal_4524b6b6-6cc2-4d7c-bcdd-3f674b47b1b4.png'
 		];
 
 		for (const img of testImgArr) {
-			await ctx.telegram.editMessageMedia(
-				ctx.chat?.id,
-				imgMessageId,
-				undefined,
-				{
-					type: 'photo',
-					media: img,
-					parse_mode: 'HTML',
-					caption: 'Продолжается генерация изображения...'
-				},
-			);
 
-			await this.utils.sleep(3000);
+			// await ctx.replyWithPhoto(
+			// 	img,
+			// 	{
+			// 		parse_mode: 'HTML',
+			// 		caption: '12345'
+			// 	}
+			// );
+
+			await ctx.replyWithHTML(`Some text with href: <a href="${img}">Link</a>`, {
+				parse_mode: 'HTML',
+				disable_web_page_preview: false,
+				reply_to_message_id: imgMessageId
+			})
+
+			await this.utils.sleep(5000);
 		}
 
 	}
